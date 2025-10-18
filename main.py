@@ -372,7 +372,7 @@ class BotManager:
                         video=message.video.file_id,
                         caption=message.caption
                     )
-                    db.add_chat_message(user.id, message.message_id, message.message_id, 
+                    db.add_chat_message(user_id, message.message_id, message.message_id, 
                                       "video", "Video", False)
                 
                 elif message.voice:
