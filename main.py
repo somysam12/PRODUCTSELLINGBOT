@@ -565,7 +565,7 @@ def main():
         bot_manager.handle_user_message
     ))
     application.add_handler(MessageHandler(
-        (filters.PHOTO | filters.VIDEO | filters.VOICE | filters.DOCUMENT) & ~filters.User(ADMIN_IDS),
+        (filters.PHOTO | filters.VIDEO | filters.VOICE | filters.Document.ALL) & ~filters.User(ADMIN_IDS),
         bot_manager.handle_user_message
     ))
     
@@ -575,7 +575,7 @@ def main():
         bot_manager.process_admin_message
     ))
     application.add_handler(MessageHandler(
-        (filters.PHOTO | filters.VIDEO | filters.VOICE | filters.DOCUMENT) & filters.User(ADMIN_IDS),
+        (filters.PHOTO | filters.VIDEO | filters.VOICE | filters.Document.ALL) & filters.User(ADMIN_IDS),
         bot_manager.process_admin_message
     ))
     application.add_handler(MessageHandler(
