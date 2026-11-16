@@ -6,32 +6,32 @@
 <nav class="mob-bottom-nav" id="mobBottomNav">
   <div class="mob-bottom-nav-inner">
     <a href="/dashboard.php" class="mbn-item <?= ($activeNav==='dashboard')?'on':'' ?>">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <?= ico('dashboard') ?>
       <span class="mbn-label">Home</span>
     </a>
     <a href="/keys.php" class="mbn-item <?= ($activeNav==='allkeys')?'on':'' ?>">
-      <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15 3l3 3"/></svg>
+      <?= ico('keys') ?>
       <span class="mbn-label">Keys</span>
     </a>
     <a href="/generate.php" class="mbn-item <?= ($activeNav==='generate')?'on':'' ?>">
-      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <?= ico('generate') ?>
       <span class="mbn-label">Generate</span>
     </a>
     <?php if(($ulevel??3)<=2): ?>
     <a href="/users.php" class="mbn-item <?= ($activeNav==='users')?'on':'' ?>">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <?= ico('users') ?>
       <span class="mbn-label">Users</span>
     </a>
     <?php endif; ?>
     <button class="mbn-item mbn-more-btn" onclick="toggleSidebar()" aria-label="More">
-      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       <span class="mbn-label">More</span>
     </button>
   </div>
 </nav>
 
 <div id="toasts" class="toasts"></div>
-<script src="/assets/js/panel.js?v=9"></script>
+<script src="/assets/js/panel.js?v=10"></script>
 <?php if(isset($extraJs)) echo $extraJs; ?>
 <script>
 // Auto check for updates (only if update server configured)

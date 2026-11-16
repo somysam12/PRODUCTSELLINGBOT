@@ -72,6 +72,35 @@ document.addEventListener('click', e => {
   setTimeout(() => s.remove(), 600);
 });
 
+// ── DARK MODE (eclipse / "grehan" transition) ──
+function toggleTheme(btn) {
+  const root = document.documentElement;
+  const goingDark = root.getAttribute('data-theme') !== 'dark';
+  const apply = () => {
+    root.setAttribute('data-theme', goingDark ? 'dark' : 'light');
+    try { localStorage.setItem('hb_theme', goingDark ? 'dark' : 'light'); } catch (e) {}
+  };
+
+  if (prefersReducedMotion()) { apply(); return; }
+
+  // Origin = the toggle button (the eclipse grows from there)
+  let ox = '50%', oy = '50%';
+  if (btn && btn.getBoundingClientRect) {
+    const r = btn.getBoundingClientRect();
+    ox = (r.left + r.width / 2) + 'px';
+    oy = (r.top + r.height / 2) + 'px';
+  }
+  let ecl = document.getElementById('eclipse');
+  if (!ecl) { ecl = document.createElement('div'); ecl.id = 'eclipse'; document.body.appendChild(ecl); }
+  ecl.style.left = ox; ecl.style.top = oy;
+  ecl.classList.remove('go'); void ecl.offsetWidth; ecl.classList.add('go');
+
+  // Slow, whole-page colour cross-fade (~2.2s) + flip theme as the shadow lands
+  root.classList.add('theme-anim');
+  setTimeout(apply, 160);
+  setTimeout(() => root.classList.remove('theme-anim'), 2500);
+}
+
 // ── NUMBER COUNT-UP (dashboard stats / KPI values) ──
 function animateCounts() {
   if (prefersReducedMotion()) return;

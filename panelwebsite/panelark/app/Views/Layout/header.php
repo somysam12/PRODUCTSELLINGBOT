@@ -83,7 +83,8 @@ $navItems = [
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/panel.css?v=14">
+<link rel="stylesheet" href="/assets/css/panel.css?v=15">
+<script>(function(){try{if(localStorage.getItem('hb_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 </head>
 <body>
 <div id="mobOverlay" class="mob-overlay"></div>
@@ -179,6 +180,10 @@ $navItems = [
       <div class="pg-title"><?= htmlspecialchars($pageTitle) ?><small><?= strtoupper($levelLabel) ?></small></div>
     </div>
     <div class="topbar-r">
+      <button class="theme-tog" id="themeTog" onclick="toggleTheme(this)" aria-label="Toggle dark mode" title="Dark mode">
+        <svg class="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
       <?php
         // Session logout countdown — remaining seconds until idle timeout
         // Remaining = time left until the FIXED 30-min session expires (from login).
