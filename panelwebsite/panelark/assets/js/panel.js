@@ -52,6 +52,47 @@ document.addEventListener('click', e => {
 // ── CONFIRM ────────────────────────────────────
 function confirmDo(msg, cb) { if (confirm(msg)) cb(); }
 
+// ── REDUCED MOTION ─────────────────────────────
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+// ── BUTTON RIPPLE ──────────────────────────────
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn');
+  if (!btn || prefersReducedMotion()) return;
+  const r = btn.getBoundingClientRect();
+  const d = Math.max(r.width, r.height);
+  const s = document.createElement('span');
+  s.className = 'rpl';
+  s.style.width = s.style.height = d + 'px';
+  s.style.left = (e.clientX - r.left - d / 2) + 'px';
+  s.style.top  = (e.clientY - r.top  - d / 2) + 'px';
+  btn.appendChild(s);
+  setTimeout(() => s.remove(), 600);
+});
+
+// ── NUMBER COUNT-UP (dashboard stats / KPI values) ──
+function animateCounts() {
+  if (prefersReducedMotion()) return;
+  document.querySelectorAll('.hero-v, .b-v, .kpi-val').forEach(el => {
+    const raw = el.textContent.trim();
+    if (!/^[\d,]+$/.test(raw)) return;                 // only plain numbers
+    const target = parseInt(raw.replace(/,/g, ''), 10);
+    if (!isFinite(target) || target <= 0) return;
+    const dur = 900, t0 = performance.now();
+    const fmt = n => n.toLocaleString('en-US');
+    el.textContent = '0';
+    (function step(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = fmt(target);
+    })(t0);
+  });
+}
+
 // ── MOBILE SIDEBAR ─────────────────────────────
 function toggleSidebar() {
   const sb = document.querySelector('.sidebar');
@@ -265,6 +306,7 @@ function spawnParticles(containerId, count = 22) {
 // ── INIT ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initLogoUpload();
+  animateCounts();
   if (document.getElementById('statKeys')) startStatsRefresh();
 
   // Keys page search — server-side with debounce

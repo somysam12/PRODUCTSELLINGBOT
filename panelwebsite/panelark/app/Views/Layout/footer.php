@@ -31,7 +31,7 @@
 </nav>
 
 <div id="toasts" class="toasts"></div>
-<script src="/assets/js/panel.js?v=8"></script>
+<script src="/assets/js/panel.js?v=9"></script>
 <?php if(isset($extraJs)) echo $extraJs; ?>
 <script>
 // Auto check for updates (only if update server configured)
