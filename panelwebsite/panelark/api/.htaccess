@@ -1,0 +1,4 @@
+# Bot include files must not be fetched directly — only bot.php includes them
+<FilesMatch "^(bot_lib|bot_handlers|bot_actions)\.php$">
+  Require all denied
+</FilesMatch>
