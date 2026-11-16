@@ -2,6 +2,20 @@ Options -Indexes
 DirectoryIndex index.php index.html
 AddDefaultCharset UTF-8
 
+# Custom error page
+ErrorDocument 404 /404.php
+
+# Block direct access to sensitive file types (DB dumps, docs, configs, backups)
+<FilesMatch "\.(sql|md|log|ini|sh|bak|old|bok|swp|dist|lock)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
 # Block sensitive folders
 <IfModule mod_rewrite.c>
   RewriteEngine On

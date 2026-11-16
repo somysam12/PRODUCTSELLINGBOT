@@ -11,6 +11,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'&&verifyCsrf($_POST['csrf']??'')){
     $chatId=trim($_POST['tg_chat_id']??'');
     $enabled=isset($_POST['tg_enabled'])?'1':'0';
     $prevToken = getSetting('tg_bot_token','');
+    // Never wipe a saved bot token when the field is submitted blank (e.g. saving
+    // other settings, or a browser that didn't repopulate it) — keep the old one.
+    if ($token === '') $token = $prevToken;
     setSetting('tg_bot_token',$token);
     setSetting('tg_chat_id',$chatId);
     setSetting('tg_alerts_enabled',$enabled);

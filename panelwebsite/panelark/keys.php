@@ -129,7 +129,7 @@ $s='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" 
 <div class="card">
   <div class="card-h">
     <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15 3l3 3"/></svg>
+      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L21 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>
       All Keys <span style="color:var(--muted);font-size:11px;font-weight:400;text-transform:none">(<?=$total?>)</span>
     </span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end">
@@ -149,13 +149,13 @@ $s='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" 
       <?php if($ulevel===1): ?>
       <div style="position:relative" id="actWrap">
         <button class="btn btn-acc btn-sm" onclick="toggleAct()" id="actBtn" style="background:var(--acc);color:#000;font-weight:800">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
           Actions
           <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" id="actChev"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div id="actMenu" style="display:none;position:fixed;right:16px;top:auto;background:var(--s3);border:1px solid var(--line2);border-radius:var(--r2);padding:6px;min-width:228px;z-index:9999;box-shadow:0 20px 50px rgba(0,0,0,.6)">
           <a href="/generate.php" class="act-item">
-            <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15 3l3 3"/></svg>
+            <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L21 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>
             Generate Keys
           </a>
           <div class="act-item-sep"></div>

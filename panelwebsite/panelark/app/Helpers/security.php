@@ -105,6 +105,15 @@ function attemptLogin(string $username, string $pass): array {
         $m = ceil((strtotime($u->locked_until)-time())/60);
         return ['ok'=>false,'msg'=>"Account locked. Retry in {$m} min."];
     }
+    // If we got past the check above while locked_until is still set, the lockout
+    // window has EXPIRED — clear it and reset the attempt counter so the user gets
+    // a fresh set of 5 attempts and can never be permanently stuck. (We only reset
+    // on an expired lock, so normal failed attempts still accumulate toward a lock.)
+    if ($u->locked_until) {
+        db()->q("UPDATE users SET login_attempts=0, locked_until=NULL WHERE id=?", [$u->id]);
+        $u->login_attempts = 0;
+        $u->locked_until   = null;
+    }
     if ($u->status == 0) return ['ok'=>false,'msg'=>'Account banned. Contact admin.'];
 
     if (!password_verify($pass, $u->password)) {
