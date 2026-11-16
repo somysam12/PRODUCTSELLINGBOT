@@ -67,43 +67,65 @@ $greet = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good ev
 </div>
 
 <!-- ── Bento stats: one hero + supporting tiles ── -->
+<?php
+// shared icon-tile svg attrs
+$svgA = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+?>
 <div class="bento">
   <div class="b-hero">
-    <div class="b-l"><span class="d" style="background:var(--acc)"></span>Total keys</div>
+    <div class="bh-top">
+      <span class="bh-ic"><svg <?= $svgA ?>><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L21 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg></span>
+      <span class="bh-lbl">Total keys</span>
+    </div>
     <div class="hero-v" id="statKeys"><?= number_format($totalKeys) ?></div>
-    <div style="font-size:13.5px;color:var(--ink-mut)"><b style="color:#6ee7b7"><?= number_format($activeKeys) ?> active</b> · <?= $activeRate ?>% active rate</div>
+    <div class="bh-sub"><b><?= number_format($activeKeys) ?> active</b> · <?= $activeRate ?>% active rate</div>
     <div class="hero-bar"><i style="width:<?= $activeRate ?>%"></i></div>
-    <div class="b-f"><?= $todayKeys ?> <?= $todayKeys===1?'key':'keys' ?> created today</div>
+    <div class="bh-f"><?= $todayKeys ?> <?= $todayKeys===1?'key':'keys' ?> created today</div>
   </div>
 
   <div class="b">
-    <div class="b-l"><span class="d" style="background:var(--cyan)"></span>Total users</div>
+    <div class="b-top">
+      <span class="b-ic" style="--c:var(--lilac);--cb:var(--violet-bg)"><svg <?= $svgA ?>><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="b-lbl">Total users</span>
+    </div>
     <div class="b-v" id="statUsers"><?= number_format($totalUsers) ?></div>
     <div class="b-f"><?php if($ulevel===1): ?><?= $ownerCount ?> owner · <?= $adminCount ?> admin · <?= $resellerCount ?> reseller<?php else: ?>Registered accounts<?php endif; ?></div>
   </div>
 
   <div class="b">
-    <div class="b-l"><span class="d" style="background:var(--lilac)"></span>Referral codes</div>
+    <div class="b-top">
+      <span class="b-ic" style="--c:var(--cyan);--cb:var(--sky-bg)"><svg <?= $svgA ?>><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span>
+      <span class="b-lbl">Referral codes</span>
+    </div>
     <div class="b-v" id="statRefs"><?= number_format($totalRefs) ?></div>
     <div class="b-f"><?= $usedRefs ?> used · <?= $totalRefs-$usedRefs ?> available</div>
   </div>
 
   <?php if ($ulevel===1): ?>
   <div class="b">
-    <div class="b-l"><span class="d" style="background:var(--gold)"></span>Total balance</div>
-    <div class="b-v" id="statBal" style="font-size:23px"><?= number_format($totalBal, 0) ?></div>
+    <div class="b-top">
+      <span class="b-ic" style="--c:var(--gold);--cb:var(--amber-bg)"><svg <?= $svgA ?>><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 1 1 1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></span>
+      <span class="b-lbl">Total balance</span>
+    </div>
+    <div class="b-v" id="statBal"><?= number_format($totalBal, 0) ?></div>
     <div class="b-f">Across all accounts</div>
   </div>
   <?php else: ?>
   <div class="b">
-    <div class="b-l"><span class="d" style="background:var(--gold)"></span>Blocked IPs</div>
+    <div class="b-top">
+      <span class="b-ic" style="--c:var(--gold);--cb:var(--amber-bg)"><svg <?= $svgA ?>><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
+      <span class="b-lbl">Blocked IPs</span>
+    </div>
     <div class="b-v"><?= number_format($blockedIPs) ?></div>
     <div class="b-f">Automatic protection</div>
   </div>
   <?php endif; ?>
 
   <div class="b">
-    <div class="b-l"><span class="d" style="background:var(--coral)"></span>Expiring soon</div>
+    <div class="b-top">
+      <span class="b-ic" style="--c:var(--coral);--cb:var(--rose-bg)"><svg <?= $svgA ?>><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg></span>
+      <span class="b-lbl">Expiring soon</span>
+    </div>
     <div class="b-v"><?= number_format($expiringSoon) ?></div>
     <div class="b-f">Within the next 3 days</div>
   </div>
@@ -114,6 +136,7 @@ $greet = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good ev
   display:grid;grid-template-columns:1.35fr 1fr 1fr;
   grid-template-rows:auto auto;gap:16px;margin-bottom:24px;
 }
+/* hero */
 .b-hero{
   grid-row:span 2;padding:26px;border-radius:var(--r);
   background:linear-gradient(165deg,var(--ink2),var(--ink));
@@ -122,21 +145,32 @@ $greet = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good ev
 }
 .b-hero::after{content:'';position:absolute;bottom:-45px;right:-35px;width:190px;height:190px;border-radius:50%;
   background:radial-gradient(circle,rgba(52,211,153,.22),transparent 70%);pointer-events:none}
-.b{
-  background:var(--card-bg);border:1px solid var(--line);border-radius:var(--r);
-  padding:20px 22px;box-shadow:var(--raise);transition:transform .2s,box-shadow .2s;
-}
-.b:hover{transform:translateY(-3px);box-shadow:var(--pop)}
-.b-l{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:12px;font-weight:600;position:relative;z-index:1}
-.b-hero .b-l{color:var(--ink-mut)}
-.b-l .d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.b-v{font-size:28px;font-weight:800;letter-spacing:-.9px;line-height:1;font-variant-numeric:tabular-nums;color:var(--text);
-     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hero-v{font-size:54px;font-weight:800;letter-spacing:-2.4px;line-height:1;margin:16px 0 8px;font-variant-numeric:tabular-nums;color:#fff;position:relative;z-index:1}
+.bh-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.bh-ic{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.bh-ic svg{width:22px;height:22px;stroke:#34d399;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bh-lbl{font-size:14px;color:var(--ink-mut);font-weight:600}
+.hero-v{font-size:52px;font-weight:800;letter-spacing:-2.4px;line-height:1;margin:20px 0 8px;font-variant-numeric:tabular-nums;color:#fff;position:relative;z-index:1}
+.bh-sub{font-size:13px;color:var(--ink-mut);position:relative;z-index:1}
+.bh-sub b{color:#6ee7b7;font-weight:700}
 .hero-bar{height:9px;border-radius:40px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.35);overflow:hidden;margin:22px 0 0;position:relative;z-index:1}
 .hero-bar i{display:block;height:100%;border-radius:40px;background:linear-gradient(90deg,#34d399,#10b981);box-shadow:0 0 10px rgba(52,211,153,.5)}
-.b-f{font-size:12px;color:var(--muted);margin-top:9px;font-weight:500;position:relative;z-index:1}
-.b-hero .b-f{color:var(--ink-mut)}
+.bh-f{font-size:12.5px;color:var(--ink-mut);margin-top:12px;position:relative;z-index:1}
+/* stat card */
+.b{
+  background:var(--card-bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px;box-shadow:var(--raise);transition:transform .2s,box-shadow .2s;
+  display:flex;flex-direction:column;
+}
+.b:hover{transform:translateY(-3px);box-shadow:var(--pop)}
+.b-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.b-ic{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:var(--cb);color:var(--c);box-shadow:var(--raise-sm)}
+.b-ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.b-lbl{font-size:13px;color:var(--muted);font-weight:600}
+.b-v{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;color:var(--text);
+     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-f{font-size:12.5px;color:var(--muted);margin-top:auto;padding-top:12px;font-weight:500}
 @media(max-width:900px){
   .bento{grid-template-columns:1fr 1fr}
   .b-hero{grid-row:auto;grid-column:span 2}
