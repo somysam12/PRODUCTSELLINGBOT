@@ -82,7 +82,7 @@ $navItems = [
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/panel.css?v=12">
+<link rel="stylesheet" href="/assets/css/panel.css?v=13">
 </head>
 <body>
 <div id="mobOverlay" class="mob-overlay"></div>

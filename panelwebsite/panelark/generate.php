@@ -84,7 +84,7 @@ $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY cre
     <button class="btn btn-acc btn-sm" onclick="copyAllKeys()">Copy All</button>
   </div>
   <div class="card-b" style="padding:12px">
-    <div id="generatedKeys" style="background:#0e1820;border:1px solid rgba(45,212,191,.15);border-radius:var(--r);padding:12px;font-size:12px;color:var(--acc);line-height:2;word-break:break-all">
+    <div id="generatedKeys" style="background:var(--ink);border:none;box-shadow:var(--ink-sh);border-radius:var(--r2);padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:#8fe9c4;line-height:2;word-break:break-all">
       <?= implode("\n",array_map('htmlspecialchars',$success)) ?>
     </div>
     <div style="display:flex;gap:8px;margin-top:10px">

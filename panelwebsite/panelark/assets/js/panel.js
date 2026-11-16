@@ -7,10 +7,10 @@ function toast(msg, type='s', dur=3200) {
   const c = document.getElementById('toasts');
   if (!c) return;
   const cfg = {
-    s: { color:'#2dd4bf', bg:'rgba(45,212,191,.14)',  icon:'✓' },
-    e: { color:'#fb7185', bg:'rgba(251,113,133,.14)', icon:'✕' },
-    w: { color:'#fcd34d', bg:'rgba(252,211,77,.14)',  icon:'!' },
-    i: { color:'#6291f5', bg:'rgba(98,145,245,.14)',  icon:'i' }
+    s: { color:'#059669', bg:'rgba(16,185,129,.16)',  icon:'✓' },
+    e: { color:'#b4263a', bg:'rgba(224,65,79,.16)',   icon:'✕' },
+    w: { color:'#8a5e12', bg:'rgba(198,135,26,.18)',  icon:'!' },
+    i: { color:'#2d5fb0', bg:'rgba(59,118,214,.16)',  icon:'i' }
   };
   const { color, bg, icon } = cfg[type] || cfg.i;
   const t = document.createElement('div');
@@ -19,7 +19,7 @@ function toast(msg, type='s', dur=3200) {
   t.innerHTML = `
     <span style="width:22px;height:22px;border-radius:50%;background:${bg};color:${color};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon}</span>
     <span style="flex:1;min-width:0;font-size:13.5px">${msg}</span>
-    <span style="color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;line-height:1;flex-shrink:0" onclick="this.closest('.toast').remove()">×</span>
+    <span style="color:rgba(40,33,24,.35);font-size:16px;cursor:pointer;line-height:1;flex-shrink:0" onclick="this.closest('.toast').remove()">×</span>
   `;
   c.appendChild(t);
   const remove = () => {
@@ -250,7 +250,7 @@ function spawnParticles(containerId, count = 22) {
     p.className = 'pt';
     const s = Math.random() * 2.5 + 1;
     // soft round motes drifting up, tinted across the palette
-    const tint = ['45,212,191', '56,189,248', '98,145,245', '192,132,252'][Math.floor(Math.random() * 4)];
+    const tint = ['16,185,129', '198,135,26', '20,184,166', '132,87,224'][Math.floor(Math.random() * 4)];
     p.style.cssText = `
       left:${Math.random()*100}%;
       width:${s}px;height:${s}px;

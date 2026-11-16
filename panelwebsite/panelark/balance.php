@@ -113,7 +113,7 @@ $s='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" 
         <label class="fl">Username</label>
         <div style="position:relative">
           <input class="fi" id="targetUser" placeholder="Type to search users..." oninput="searchUsers(this.value)" onfocus="searchUsers(this.value)" autocomplete="off">
-          <div id="userDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#13212b;border:1px solid rgba(45,212,191,.2);border-radius:var(--r);z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.8);margin-top:4px"></div>
+          <div id="userDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card-bg);border:1px solid var(--line2);border-radius:var(--r2);z-index:100;max-height:200px;overflow-y:auto;box-shadow:var(--pop);margin-top:6px"></div>
         </div>
       </div>
       <div class="fg">

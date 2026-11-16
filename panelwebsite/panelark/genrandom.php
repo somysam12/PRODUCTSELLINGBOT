@@ -56,7 +56,7 @@ $prices=db()->all("SELECT * FROM prices ORDER BY hours ASC");
 <div class="card" style="margin-bottom:16px;border-color:rgba(45,212,191,.35);box-shadow:0 0 30px rgba(45,212,191,.12)">
   <div class="card-h" style="background:rgba(45,212,191,.06)"><span class="ct" style="color:var(--acc)"><?= count($genKeys) ?> Key<?= count($genKeys)>1?'s':'' ?> Generated!</span><button class="btn btn-acc btn-sm" onclick="copyText(document.getElementById('keyBatch').textContent.trim(),'All keys')">Copy All</button></div>
   <div class="card-b" style="padding:14px">
-    <div style="background:#0e1820;border:1px solid rgba(45,212,191,.15);border-radius:var(--r);padding:14px;font-size:13px;color:var(--acc);line-height:2;max-height:240px;overflow:auto;word-break:break-all" id="keyBatch"><?= implode("\n",array_map('htmlspecialchars',$genKeys)) ?></div>
+    <div style="background:var(--ink);border:none;box-shadow:var(--ink-sh);border-radius:var(--r2);padding:16px;font-family:var(--mono);font-size:13px;color:#8fe9c4;line-height:2;max-height:240px;overflow:auto;word-break:break-all" id="keyBatch"><?= implode("\n",array_map('htmlspecialchars',$genKeys)) ?></div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn btn-acc" style="flex:1" onclick="copyText(document.getElementById('keyBatch').textContent.trim(),'All keys')">Copy All</button>
       <button class="btn btn-ghost" style="flex:1" onclick="downloadBatch()">Download .txt</button>

@@ -84,7 +84,7 @@ $selPrice = $priceMap[$sel]??0;
       </div>
 
       <button onclick="savePrice()" id="saveBtn"
-        style="width:100%;padding:14px;background:linear-gradient(135deg,#00c88a,#2dd4bf);border:none;border-radius:var(--r);color:#000;font-weight:900;font-size:15px;cursor:pointer;letter-spacing:.5px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px">
+        style="width:100%;padding:14px;background:linear-gradient(165deg,#34d399,#059669);border:none;border-radius:var(--r2);color:#fff;font-weight:800;font-size:15px;cursor:pointer;letter-spacing:.5px;transition:.2s;box-shadow:var(--acc-sh);display:flex;align-items:center;justify-content:center;gap:8px">
         <span id="saveBtnTxt">SAVE PRICE</span>
         <span id="saveBtnLoad" style="display:none">Saving...</span>
       </button>

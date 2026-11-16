@@ -238,7 +238,7 @@ function row(string $label,string $url):string{
     <div class="card">
       <div class="card-h"><span class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Hash Mismatch Action</span></div>
       <div class="card-b">
-        <div style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:var(--r);padding:10px 14px;font-size:12px;color:#fdba74;margin-bottom:14px">
+        <div style="background:var(--amber-bg);border:1px solid rgba(198,135,26,.2);border-radius:var(--r2);padding:12px 14px;font-size:12px;color:#8a5e12;margin-bottom:14px;box-shadow:var(--raise-sm)">
           What should the APK do when it detects a lib hash mismatch (tampered/modded device)?
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">

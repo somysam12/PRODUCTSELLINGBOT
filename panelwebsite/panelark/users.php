@@ -516,7 +516,7 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
           <svg viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
         </div>
         <div style="font-size:15px;font-weight:700;color:var(--danger);margin-bottom:6px">This cannot be undone</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.6">All <strong style="color:#e2e8f0">Admins and Resellers</strong> will be permanently deleted.<br>Owner accounts will be kept.</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">All <strong style="color:var(--text)">Admins and Resellers</strong> will be permanently deleted.<br>Owner accounts will be kept.</div>
       </div>
       <div style="background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:var(--r);padding:12px 14px;font-size:11px;color:var(--muted2)">
         <strong style="color:var(--danger)">⚠ Warning:</strong> Type <code style="color:var(--danger);background:rgba(255,77,109,.1);padding:1px 5px;border-radius:var(--r2)">DELETE</code> below to confirm.
