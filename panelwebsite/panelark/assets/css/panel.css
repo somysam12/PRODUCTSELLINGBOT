@@ -1218,3 +1218,36 @@ html[data-theme="dark"] .af-inp, html[data-theme="dark"] .login-inp-wrap { box-s
 .fld-eye svg.ph { width: 19px; height: 19px; }
 .fld-code { font-family: var(--mono); font-size: 16px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
 .fld .fi-hint { margin-top: 6px; }
+
+/* ═══════════════════════════════════════════════════════════
+   v16 — AUTH two-tone: emerald hero band (logo+brand+title) + glass form body
+═══════════════════════════════════════════════════════════ */
+.auth-card { padding: 0; }
+.auth-hero {
+  position: relative; overflow: hidden; text-align: center; padding: 34px 26px 28px;
+  background: linear-gradient(155deg, #15936c 0%, #0b4d39 55%, #07281e 100%);
+  color: #fff;
+}
+.auth-hero-mesh {
+  position: absolute; inset: -35%; z-index: 0; pointer-events: none; opacity: .7;
+  background:
+    radial-gradient(40% 50% at 20% 20%, rgba(52,211,153,.55), transparent 60%),
+    radial-gradient(45% 55% at 85% 28%, rgba(132,87,224,.45), transparent 60%),
+    radial-gradient(50% 60% at 60% 100%, rgba(56,189,248,.4), transparent 60%);
+  filter: blur(26px); animation: authSpin 14s linear infinite;
+}
+.auth-hero > *:not(.auth-hero-mesh) { position: relative; z-index: 1; }
+.auth-hero .auth-badge {
+  margin: 0 auto 14px; color: #fff;
+  background: rgba(255,255,255,.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.28);
+  box-shadow: 0 10px 26px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.auth-hero .auth-badge.has-logo { background: #fff; border-color: rgba(255,255,255,.6); }
+.auth-hero .auth-brand { color: rgba(255,255,255,.72); }
+.auth-hero .auth-h { color: #fff; margin-top: 4px; }
+.auth-body { padding: 24px 26px 26px; background: color-mix(in srgb, var(--card-bg) 84%, transparent); }
+.auth-body .auth-sub { text-align: center; margin: 0 0 22px; color: var(--muted); }
+/* keep inputs readable on the solid body */
+.auth-body .fld-in { background: color-mix(in srgb, var(--card-bg) 78%, transparent); }
+@media (max-width: 440px) { .auth-hero { padding: 28px 18px 24px; } .auth-body { padding: 20px 18px 22px; } }

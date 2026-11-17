@@ -1,3 +1,4 @@
+    </div><!-- /auth-body -->
   </div><!-- /auth-card -->
 </div><!-- /auth -->
 <div id="toasts" class="toasts"></div>

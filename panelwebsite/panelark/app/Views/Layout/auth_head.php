@@ -33,13 +33,14 @@ $authTries    = defined('MAX_LOGIN_ATTEMPTS') ? MAX_LOGIN_ATTEMPTS : 5;
 </button>
 <div class="auth">
   <div class="auth-card">
-    <div class="auth-card-glow" aria-hidden="true"></div>
-    <div class="auth-badge-wrap">
+    <div class="auth-hero">
+      <div class="auth-hero-mesh" aria-hidden="true"></div>
       <span class="auth-badge <?= $panelLogo ? 'has-logo' : '' ?>">
         <?php if ($panelLogo): ?><img src="<?= htmlspecialchars($panelLogo) ?>" alt="">
         <?php else: ?><?= phIcon('key') ?><?php endif; ?>
       </span>
+      <div class="auth-brand"><?= htmlspecialchars($panelName) ?></div>
+      <h2 class="auth-h"><?= htmlspecialchars($authHeading) ?></h2>
     </div>
-    <div class="auth-brand"><?= htmlspecialchars($panelName) ?></div>
-    <h2 class="auth-h"><?= htmlspecialchars($authHeading) ?></h2>
+    <div class="auth-body">
     <p class="auth-sub"><?= htmlspecialchars($authSub) ?></p>

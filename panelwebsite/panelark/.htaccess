@@ -21,6 +21,8 @@ ErrorDocument 404 /404.php
   RewriteEngine On
   RewriteRule ^app/ - [F,L]
   RewriteRule ^writable/ - [F,L]
+  # /favicon.ico → serve the owner's uploaded brand logo (falls back to default)
+  RewriteRule ^favicon\.ico$ favicon.php [L]
   # Extensionless key-verification endpoint: /validbool → validbool.php
   RewriteRule ^validbool/?$ validbool.php [L,QSA]
   # Extensionless secure endpoints — NEW app links (serve server/libs/)
