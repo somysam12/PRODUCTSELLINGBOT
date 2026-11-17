@@ -413,8 +413,8 @@ $apkKillUrl   = $panelBase.'/server/apk_kill.php';
 $modKillUrl   = $panelBase.'/server/modlib_version.php';
 $libVerTxtUrl = $panelBase.'/server/libs/version.txt';
 $apkVerTxtUrl = $panelBase.'/server/apks/version.txt';
-$secLibUrl    = $panelBase.'/secure/lib';
-$secUnlockUrl = $panelBase.'/secure/unlock';
+$secLibUrl    = $panelBase.'/secure/pack';   // NEW app → lib download
+$secUnlockUrl = $panelBase.'/secure/auth';   // NEW app → lib unlock
 
 // ── 6-slot BGMI/Global lib system ────────────────────────
 $libDirR  = __DIR__.'/server/libs/';

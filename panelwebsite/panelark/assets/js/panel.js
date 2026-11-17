@@ -72,7 +72,7 @@ document.addEventListener('click', e => {
   setTimeout(() => s.remove(), 600);
 });
 
-// ── DARK MODE (eclipse / "grehan" transition) ──
+// ── DARK MODE — GPU circular reveal (View Transitions API: smooth, never stuck) ──
 function toggleTheme(btn) {
   const root = document.documentElement;
   const goingDark = root.getAttribute('data-theme') !== 'dark';
@@ -81,25 +81,25 @@ function toggleTheme(btn) {
     try { localStorage.setItem('hb_theme', goingDark ? 'dark' : 'light'); } catch (e) {}
   };
 
-  if (prefersReducedMotion()) { apply(); return; }
+  // No View Transitions support (Firefox/old) or reduced motion → instant flip.
+  if (prefersReducedMotion() || typeof document.startViewTransition !== 'function') { apply(); return; }
 
-  // Origin = the toggle button (the eclipse grows from there)
-  let ox = '50%', oy = '50%';
+  // Reveal origin = centre of the toggle button.
+  let x = window.innerWidth - 44, y = 46;
   if (btn && btn.getBoundingClientRect) {
     const r = btn.getBoundingClientRect();
-    ox = (r.left + r.width / 2) + 'px';
-    oy = (r.top + r.height / 2) + 'px';
+    x = r.left + r.width / 2;
+    y = r.top + r.height / 2;
   }
-  let ecl = document.getElementById('eclipse');
-  if (!ecl) { ecl = document.createElement('div'); ecl.id = 'eclipse'; document.body.appendChild(ecl); }
-  ecl.style.left = ox; ecl.style.top = oy;
-  ecl.classList.toggle('dawn', !goingDark);
-  ecl.classList.remove('go'); void ecl.offsetWidth; ecl.classList.add('go');
+  const end = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
 
-  // Slow, whole-page colour cross-fade (~2.2s) + flip theme as the shadow lands
-  root.classList.add('theme-anim');
-  setTimeout(apply, 160);
-  setTimeout(() => root.classList.remove('theme-anim'), 2500);
+  const vt = document.startViewTransition(apply);
+  vt.ready.then(() => {
+    document.documentElement.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${end}px at ${x}px ${y}px)`] },
+      { duration: 520, easing: 'cubic-bezier(.4,0,.2,1)', pseudoElement: '::view-transition-new(root)' }
+    );
+  }).catch(() => {});
 }
 
 // ── UI ENHANCERS ───────────────────────────────

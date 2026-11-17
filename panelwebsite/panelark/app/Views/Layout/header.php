@@ -169,7 +169,7 @@ $navItems = [
       <button class="theme-tog" id="themeTog" onclick="toggleTheme(this)" aria-label="Toggle dark mode" title="Dark mode">
         <span class="ic-sun"><?= phIcon('sun') ?></span><span class="ic-moon"><?= phIcon('moon') ?></span>
       </button>
-      <a href="/generate.php" class="btn btn-solid btn-sm tb-gen"><?= phIcon('sparkle') ?><span>Generate</span></a>
+      <a href="/logout.php" class="theme-tog tb-logout" aria-label="Log out" title="Log out"><?= phIcon('sign-out') ?></a>
     </div>
   </header>
 

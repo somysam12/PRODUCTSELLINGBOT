@@ -108,14 +108,14 @@ $s = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round
     <h3>Maintenance mode</h3>
     <span id="maintBadge" class="<?=$maintMode?'pill p-warn':'pill p-on'?>"><span class="dot"></span><?=$maintMode?'ON':'OFF'?></span>
   </div>
-  <div class="work" style="grid-template-columns:minmax(0,1fr) 260px;gap:14px">
+  <div style="display:grid;gap:14px">
     <div>
       <label class="glabel" for="maintMsg">Message shown to devices</label>
-      <textarea class="fi" id="maintMsg" rows="3" style="min-height:0"><?=htmlspecialchars($maintMsg)?></textarea>
+      <textarea class="fi" id="maintMsg" rows="3" style="width:100%;min-height:84px;resize:vertical"><?=htmlspecialchars($maintMsg)?></textarea>
     </div>
-    <div style="display:grid;gap:10px;align-content:end">
-      <button class="btn btn-warn" onclick="saveMaint(1)"><?= phIcon('power') ?> Turn on</button>
-      <button class="btn btn-solid" onclick="saveMaint(0)"><?= phIcon('check-circle') ?> Turn off</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-warn" style="flex:1;min-width:140px" onclick="saveMaint(1)"><?= phIcon('power') ?> Turn on</button>
+      <button class="btn btn-solid" style="flex:1;min-width:140px" onclick="saveMaint(0)"><?= phIcon('check-circle') ?> Turn off</button>
     </div>
   </div>
 </section>

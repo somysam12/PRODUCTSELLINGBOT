@@ -53,12 +53,15 @@ function hbSessionGc(string $dir): void {
     foreach ($files as $f) {
         $m = @filemtime($f);
         if ($m === false) continue;
+        // Empty/abandoned session files (0 bytes, e.g. a bot/probe that got a
+        // cookie but never logged in) are swept after 30 min so they can't amass.
+        if (($now - $m) > 1800 && @filesize($f) === 0) { @unlink($f); continue; }
         if (($now - $m) > $ttl) { @unlink($f); }   // dead session → remove
         else { $alive[$f] = $m; }
     }
 
-    // Hard cap — keep only the 1000 most recent live sessions.
-    $cap = 1000;
+    // Hard cap — keep only the 600 most recent live sessions.
+    $cap = 600;
     if (count($alive) > $cap) {
         asort($alive);                             // oldest first
         $excess = count($alive) - $cap;
@@ -127,8 +130,12 @@ if ($hbMachine) {
     session_start();
 
     // Sweep stale/overflowing session files so the folder can never fill up and
-    // block logins. Throttled internally to once per 5 min, so it's near-free.
-    if ($sessCustom) hbSessionGc($sessDir);
+    // block logins. We sweep the ACTUAL save path in use — our own folder when it
+    // is writable, otherwise whatever the host gave us (often the docroot on cheap
+    // cPanel hosts) — so files can never pile up no matter where PHP writes them.
+    $effSessDir = $sessCustom ? $sessDir : (string)@session_save_path();
+    if ($effSessDir === '') $effSessDir = (string)sys_get_temp_dir();
+    hbSessionGc($effSessDir);
 
     // Slide the cookie expiry forward on every request so an ACTIVE user never
     // gets logged out mid-use; the hard idle check in requireLogin() still fires

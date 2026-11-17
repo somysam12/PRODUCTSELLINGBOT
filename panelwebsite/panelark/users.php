@@ -146,6 +146,18 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['action'])) {
             logAct($_SESSION['uid'],$uname,'SET_USER_PASSWORD',"Changed password for {$tgt->username}");
             echo json_encode(['ok'=>true,'msg'=>'Password changed for '.$tgt->username]);
             exit;
+        case 'add_balance':
+            if ((int)($_SESSION['ulevel']??99)!==1) { echo json_encode(['ok'=>false,'msg'=>'Owner only.']); exit; }
+            $amt = (float)($_POST['amount']??0);
+            if ($amt == 0.0) { echo json_encode(['ok'=>false,'msg'=>'Enter an amount (negative to deduct).']); exit; }
+            $tgt = db()->one("SELECT username, level FROM users WHERE id=?",[$uid2]);
+            if (!$tgt) { echo json_encode(['ok'=>false,'msg'=>'User not found']); exit; }
+            if ((int)$tgt->level === 1) { echo json_encode(['ok'=>false,'msg'=>'Owners already have unlimited balance.']); exit; }
+            db()->q("UPDATE users SET balance = GREATEST(0, balance + ?) WHERE id=?",[$amt,$uid2]);
+            $nb = db()->one("SELECT balance FROM users WHERE id=?",[$uid2]);
+            logAct($_SESSION['uid'],$uname,'ADD_BALANCE',"{$tgt->username} ".($amt>0?'+':'').$amt);
+            echo json_encode(['ok'=>true,'msg'=>($amt>0?'Added':'Deducted').' balance for '.$tgt->username.'. New balance: '.number_format((float)($nb->balance??0),0)]);
+            exit;
         case 'delete_all':
             if ((int)($_SESSION['ulevel']??99)!==1) { echo json_encode(['ok'=>false,'msg'=>'Owner only.']); exit; }
             $br = currentBranch();
@@ -322,6 +334,7 @@ foreach ($users as $cu) { $cnt[(int)$cu->level] = ($cnt[(int)$cu->level] ?? 0) +
               <?php endif; ?>
             <?php endif; ?>
             <?php if ($ulevel===1): ?>
+            <button class="btn btn-acc icon-btn" title="Add balance" aria-label="Add balance" onclick="openBalModal(<?=$u->id?>,'<?=$un?>',<?= (float)$u->balance ?>)"><?= phIcon('wallet') ?></button>
             <button class="btn icon-btn" title="Change password" aria-label="Change password" onclick="openPassModal(<?=$u->id?>,'<?=$un?>')"><?= phIcon('password') ?></button>
             <?php endif; ?>
             <button class="btn icon-btn" title="Extend validity" aria-label="Extend validity" onclick="openExtendModal(<?=$u->id?>,'<?=$un?>','<?=$u->expiration_date?date('d M Y',strtotime($u->expiration_date)):'Never'?>')"><?= phIcon('clock-clockwise') ?></button>
@@ -382,6 +395,30 @@ foreach ($users as $cu) { $cnt[(int)$cu->level] = ($cnt[(int)$cu->level] ?? 0) +
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('passModal')">Cancel</button>
       <button class="btn btn-acc" onclick="savePass()">Change password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BALANCE MODAL -->
+<div class="modal-bg" id="balModal">
+  <div class="mbox mbox-sm">
+    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--acc)"></span> Add balance</div><button class="mcls" onclick="closeModal('balModal')" aria-label="Close">×</button></div>
+    <div class="mbody">
+      <div class="g2" style="gap:12px">
+        <div class="fg"><label class="fl">User</label><input class="fi fi-mono" id="blm-user" readonly></div>
+        <div class="fg"><label class="fl">Current balance</label><input class="fi fi-mono" id="blm-cur" readonly></div>
+      </div>
+      <div class="fg"><label class="fl" for="blm-amt">Amount to add (negative to deduct)</label><input class="fi fi-mono" id="blm-amt" type="number" value="100"></div>
+      <div class="chips">
+        <button type="button" class="chip" onclick="document.getElementById('blm-amt').value=100">+100</button>
+        <button type="button" class="chip" onclick="document.getElementById('blm-amt').value=500">+500</button>
+        <button type="button" class="chip" onclick="document.getElementById('blm-amt').value=1000">+1000</button>
+        <button type="button" class="chip" onclick="document.getElementById('blm-amt').value=5000">+5000</button>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" onclick="closeModal('balModal')">Cancel</button>
+      <button class="btn btn-acc" onclick="saveBal()">Save balance</button>
     </div>
   </div>
 </div>
@@ -526,6 +563,20 @@ function doBan(){
     if(r.ok){toast(r.msg,'s');closeModal('banModal');setTimeout(()=>location.reload(),700);}
     else toast(r.msg,'e');
   });
+}
+let balUid=0;
+function openBalModal(uid,uname,cur){
+  balUid=uid;
+  document.getElementById('blm-user').value=uname;
+  document.getElementById('blm-cur').value=Number(cur||0).toLocaleString('en-US');
+  document.getElementById('blm-amt').value=100;
+  openModal('balModal');
+}
+async function saveBal(){
+  const amt=parseFloat(document.getElementById('blm-amt').value||'0');
+  if(!amt){toast('Enter an amount','e');return;}
+  const r=await formPost('/users.php',{action:'add_balance',uid2:balUid,amount:amt,csrf});
+  if(r.ok){toast(r.msg,'s');closeModal('balModal');setTimeout(()=>location.reload(),900);}else toast(r.msg,'e');
 }
 let passUid=0;
 function openPassModal(uid,uname){
