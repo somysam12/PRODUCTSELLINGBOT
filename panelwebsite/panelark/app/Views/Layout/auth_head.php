@@ -31,16 +31,14 @@ $authTries    = defined('MAX_LOGIN_ATTEMPTS') ? MAX_LOGIN_ATTEMPTS : 5;
   <span class="ic-sun"><?= phIcon('sun') ?></span><span class="ic-moon"><?= phIcon('moon') ?></span>
 </button>
 <div class="auth">
-  <div class="auth-shell">
-    <aside class="auth-art">
-      <div class="auth-logo">
+  <div class="auth-card">
+    <div class="auth-card-glow" aria-hidden="true"></div>
+    <div class="auth-badge-wrap">
+      <span class="auth-badge <?= $panelLogo ? 'has-logo' : '' ?>">
         <?php if ($panelLogo): ?><img src="<?= htmlspecialchars($panelLogo) ?>" alt="">
         <?php else: ?><?= phIcon('key') ?><?php endif; ?>
-      </div>
-      <h1><?= htmlspecialchars($panelName) ?></h1>
-      <p><?= htmlspecialchars($panelTagline) ?></p>
-      <div class="auth-ver">v<?= htmlspecialchars($panelVer) ?></div>
-    </aside>
-    <main class="auth-main">
-      <h2><?= htmlspecialchars($authHeading) ?></h2>
-      <p class="auth-sub"><?= htmlspecialchars($authSub) ?></p>
+      </span>
+    </div>
+    <div class="auth-brand"><?= htmlspecialchars($panelName) ?></div>
+    <h2 class="auth-h"><?= htmlspecialchars($authHeading) ?></h2>
+    <p class="auth-sub"><?= htmlspecialchars($authSub) ?></p>

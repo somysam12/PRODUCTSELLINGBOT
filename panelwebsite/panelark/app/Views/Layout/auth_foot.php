@@ -1,6 +1,5 @@
-    </main>
-  </div>
-</div>
+  </div><!-- /auth-card -->
+</div><!-- /auth -->
 <div id="toasts" class="toasts"></div>
 <script src="<?= asset('/assets/js/panel.js') ?>"></script>
 <script>
