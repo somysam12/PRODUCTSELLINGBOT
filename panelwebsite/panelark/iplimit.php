@@ -16,7 +16,7 @@ $pageTitle='IP Management'; $activeNav='iplimit';
 require_once __DIR__.'/app/Views/Layout/header.php';
 $blocked=db()->all("SELECT * FROM blocked_ips ORDER BY created_at DESC LIMIT 100");
 ?>
-<div class="card"><div class="card-h"><span class="ct">Blocked IPs <span style="color:var(--muted);font-size:11px;font-weight:400;text-transform:none">(<?=count($blocked)?>)</span></span>
+<div class="card"><div class="card-h"><span class="ct"><?= phIcon('shield-check') ?> Blocked IPs <span style="color:var(--muted);font-size:11px;font-weight:400;text-transform:none">(<?=count($blocked)?>)</span></span>
 <div style="display:flex;gap:8px">
 <form id="mBF" onsubmit="manualBlock(event)"><input class="fi fi-mono" name="mip" placeholder="IP to block..." style="width:170px;padding:7px 10px;font-size:11px"><button class="btn btn-red btn-sm">Block</button></form>
 <button class="btn btn-acc btn-sm" onclick="confirmDo('Unblock ALL IPs?',unblockAll)">Unblock All</button>

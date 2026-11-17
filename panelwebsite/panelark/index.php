@@ -29,127 +29,47 @@ $panelName    = getSetting('panel_name','HB Panel');
 $panelLogo    = getSetting('panel_logo','');
 $panelTagline = getSetting('panel_tagline','Secure Admin Panel');
 $panelVer     = getSetting('panel_version','3.0.0');
+$authTitle = 'Sign in'; $authHeading = 'Sign in'; $authSub = 'Enter your panel username and password.';
+require __DIR__.'/app/Views/Layout/auth_head.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title><?= htmlspecialchars($panelName) ?></title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/panel.css?v=12">
-</head>
-<body>
-<div class="login-scene">
-  <div class="orb1"></div>
-  <div class="orb2"></div>
-  <div class="orb3"></div>
-  <div class="pts" id="pts"></div>
+      <?php if ($timeout): ?>
+      <div class="alert a-warn"><?= phIcon('timer') ?> Your session ended. Sign in again to continue.</div>
+      <?php endif; ?>
+      <?php if ($error): ?>
+      <div class="alert a-err"><?= phIcon('prohibit') ?> <?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
 
-  <div class="login-wrap">
-    <div class="login-card anim-in">
-
-      <!-- Top brand -->
-      <div class="login-top">
-        <div class="brand-logo">
-          <?php if ($panelLogo): ?>
-            <img src="<?= htmlspecialchars($panelLogo) ?>" alt="Logo">
-          <?php endif; ?>
-        </div>
-        <div class="brand-name"><?= htmlspecialchars($panelName) ?></div>
-        <div class="brand-sub">Sign in to your account</div>
-      </div>
-
-      <!-- Form body -->
-      <div class="login-body">
-        <?php if ($timeout): ?>
-        <div class="alert a-warn" style="margin-bottom:16px">
-          <?= svgIcon('alert',14) ?> Session expired. Please sign in again.
-        </div>
-        <?php endif; ?>
-        <?php if ($error): ?>
-        <div class="alert a-err" style="margin-bottom:16px">
-          <?= svgIcon('ban',14) ?> <?= htmlspecialchars($error) ?>
-        </div>
-        <?php endif; ?>
-
-        <form method="POST" id="loginForm">
-          <?= csrfField() ?>
-
-          <!-- Username -->
-          <div class="login-field">
-            <label class="login-label" for="usernameInp">Username</label>
-            <div class="login-inp-wrap">
-              <input class="login-input" type="text" id="usernameInp" name="username"
-                     placeholder="Enter your username" required autocomplete="username">
-            </div>
+      <form method="POST" id="loginForm">
+        <?= csrfField() ?>
+        <div class="af">
+          <label for="usernameInp">Username</label>
+          <div class="af-inp"><?= phIcon('user') ?>
+            <input type="text" id="usernameInp" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
           </div>
-
-          <!-- Password -->
-          <div class="login-field">
-            <label class="login-label" for="passInp">Password</label>
-            <div class="login-inp-wrap">
-              <input class="login-input" type="password" id="passInp" name="password"
-                     placeholder="Enter your password" required autocomplete="current-password"
-                     style="padding-right:44px">
-              <button type="button" class="login-input-icon-right" id="eyeBtn"
-                      onclick="togglePassV()" title="Toggle password">
-                <span id="eyeIco"><?= svgIcon('eye',16) ?></span>
-              </button>
-            </div>
+        </div>
+        <div class="af">
+          <label for="passInp">Password</label>
+          <div class="af-inp"><?= phIcon('lock-key') ?>
+            <input type="password" id="passInp" name="password" required autocomplete="current-password">
+            <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
           </div>
+        </div>
+        <div class="af-opts">
+          <span class="stay-lbl"><?= phIcon('timer') ?> Signed out automatically after <?= (int)round(SESSION_LIFETIME/60) ?> min</span>
+          <a href="/forgot.php" class="auth-link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn-login" id="loginBtn"><span id="loginTxt">Sign in</span><?= phIcon('arrow-right') ?></button>
+      </form>
 
-          <!-- Options -->
-          <div class="login-opts">
-            <label class="stay-lbl">
-              <label class="tog" style="margin:0">
-                <input type="checkbox" name="remember_me" value="1">
-                <span class="togsl"></span>
-              </label>
-              Remember me
-            </label>
-            <a href="/forgot.php" class="forgot-link">Forgot password?</a>
-          </div>
-
-          <button type="submit" class="btn-login" id="loginBtn">
-            <span id="loginTxt">Sign in</span>
-            <span id="loginSpin" style="display:none">Signing in&hellip;</span>
-          </button>
-        </form>
+      <div class="auth-foot">
+        <span>No account? <a href="/register.php">Register with a referral code</a></span>
+        <a href="/reset-device.php" class="btn btn-sm"><?= phIcon('device-mobile') ?> Reset login device</a>
       </div>
-
-      <!-- Footer -->
-      <div class="login-foot">
-        <p>No account? <a href="/register.php">Register with referral code</a></p>
-        <a href="/reset-device.php" class="reset-link">
-          <?= svgIcon('phone',13) ?> Reset Login Device
-        </a>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<div id="toasts" class="toasts"></div>
-<script src="/assets/js/panel.js?v=7"></script>
 <script>
-spawnParticles('pts', 18);
-
-let passVisible = false;
-function togglePassV() {
-  passVisible = !passVisible;
-  document.getElementById('passInp').type = passVisible ? 'text' : 'password';
-  document.getElementById('eyeIco').innerHTML = passVisible
-    ? `<?= svgIcon('eye-off',16) ?>`
-    : `<?= svgIcon('eye',16) ?>`;
-}
-
-document.getElementById('loginForm').addEventListener('submit', () => {
-  document.getElementById('loginTxt').style.display = 'none';
-  document.getElementById('loginSpin').style.display = 'flex';
-  document.getElementById('loginBtn').disabled = true;
+document.getElementById('loginForm').addEventListener('submit', function(){
+  var b = document.getElementById('loginBtn');
+  document.getElementById('loginTxt').textContent = 'Signing in…';
+  setTimeout(function(){ b.disabled = true; }, 0);
 });
 </script>
-</body>
-</html>
+<?php require __DIR__.'/app/Views/Layout/auth_foot.php'; ?>

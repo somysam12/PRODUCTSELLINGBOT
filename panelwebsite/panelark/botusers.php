@@ -44,7 +44,7 @@ $botOn = getSetting('tg_bot_enabled','0')==='1';
 </div>
 
 <div class="card">
-  <div class="card-h"><span class="ct">🔗 Connected Accounts (<?= count($linked) ?>)</span></div>
+  <div class="card-h"><span class="ct"><?= phIcon('link') ?> Connected Accounts (<?= count($linked) ?>)</span></div>
   <div class="card-b" style="padding:0">
     <?php if (!$linked): ?>
       <div style="padding:32px;text-align:center;color:var(--muted)">No Telegram accounts linked yet.</div>

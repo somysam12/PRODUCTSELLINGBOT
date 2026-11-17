@@ -125,7 +125,7 @@ if ($tgToken !== '') {
       <span class="owner-only"><?=svgIcon('shield',12)?> Owner Only</span>
     </div>
     <div class="card-b">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:rgba(0,148,255,.06);border:1px solid rgba(0,148,255,.15);border-radius:var(--r);margin-bottom:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--blue-bg);border:1px solid rgba(53,103,196,.3);border-radius:var(--r);margin-bottom:18px">
         <div>
           <div style="font-weight:700;font-size:13px">Telegram Alerts</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">Send alerts to your Telegram bot</div>
@@ -139,7 +139,7 @@ if ($tgToken !== '') {
 
         <div class="fg">
           <label class="fl"><?=svgIcon('key',12)?> Bot Token</label>
-          <div style="display:flex;align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+          <div style="display:flex;align-items:center;background:var(--sunk);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
             <span style="padding:0 12px;color:var(--muted);flex-shrink:0"><?=svgIcon('key',15)?></span>
             <input class="fi fi-mono" type="text" name="tg_bot_token" value="<?=htmlspecialchars($tgToken)?>" placeholder="1234567890:AAF..." style="border:none;border-radius:0;padding-left:0">
           </div>
@@ -148,7 +148,7 @@ if ($tgToken !== '') {
 
         <div class="fg">
           <label class="fl"><?=svgIcon('mail',12)?> Chat ID</label>
-          <div style="display:flex;align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+          <div style="display:flex;align-items:center;background:var(--sunk);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
             <span style="padding:0 12px;color:var(--muted);flex-shrink:0"><?=svgIcon('mail',15)?></span>
             <input class="fi fi-mono" type="text" name="tg_chat_id" value="<?=htmlspecialchars($tgChatId)?>" placeholder="7182189844" style="border:none;border-radius:0;padding-left:0">
           </div>
@@ -208,7 +208,7 @@ if ($tgToken !== '') {
 
       <div class="sep" style="margin:16px 0"></div>
 
-      <div style="background:rgba(0,148,255,.05);border:1px solid rgba(0,148,255,.12);border-radius:var(--r);padding:14px;font-size:11px;color:var(--muted2);line-height:1.8">
+      <div style="background:var(--blue-bg);border:1px solid rgba(53,103,196,.3);border-radius:var(--r);padding:14px;font-size:11px;color:var(--muted2);line-height:1.8">
         <?=svgIcon('info',12)?> <strong style="color:var(--acc2)">How to setup:</strong><br>
         1. Create bot via <strong>@BotFather</strong><br>
         2. Copy the <strong>Bot Token</strong><br>
@@ -217,7 +217,7 @@ if ($tgToken !== '') {
         5. Click <strong>Test Alert</strong> to verify
       </div>
 
-      <div style="margin-top:14px;padding:12px;background:rgba(45,212,191,.05);border:1px solid rgba(45,212,191,.12);border-radius:var(--r)">
+      <div style="margin-top:14px;padding:12px;background:var(--acc-bg);border:1px solid var(--acc-20);border-radius:var(--r)">
         <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Alert Status</div>
         <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:<?=$tgEnabled?'var(--acc)':'var(--danger)'?>">
           <span style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block"></span>

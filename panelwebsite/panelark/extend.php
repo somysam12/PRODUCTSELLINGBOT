@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && verifyCsrf($_POST['csrf']??'')) {
 ?>
 <?php if($msg): ?><div class="alert a-<?= $msgType ?>"><?= $msgType==='ok'?'':'' ?> <?= htmlspecialchars($msg) ?></div><?php endif; ?>
 <div class="g2">
-  <div class="card"><div class="card-h"><span class="ct"><?= $scopeNames===null ? 'Extend ALL Keys' : 'Extend My Keys' ?></span></div><div class="card-b">
+  <div class="card"><div class="card-h"><span class="ct"><?= phIcon('clock-clockwise') ?> <?= $scopeNames===null ? 'Extend ALL Keys' : 'Extend My Keys' ?></span></div><div class="card-b">
     <div class="alert a-warn"><?= $scopeNames===null
         ? 'This extends the duration of ALL keys in the system!'
         : 'This extends all your keys and your resellers\' keys.' ?></div>
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && verifyCsrf($_POST['csrf']??'')) {
       <button type="submit" class="btn btn-warn btn-full"><?= $scopeNames===null ? 'EXTEND ALL KEYS' : 'EXTEND MY KEYS' ?></button>
     </form>
   </div></div>
-  <div class="card"><div class="card-h"><span class="ct">Extend Single Key</span></div><div class="card-b">
+  <div class="card"><div class="card-h"><span class="ct"><?= phIcon('key') ?> Extend Single Key</span></div><div class="card-b">
     <form method="POST"><?= csrfField() ?><input type="hidden" name="section" value="single">
       <div class="fg"><label class="fl">License Key</label><input class="fi fi-mono" name="user_key" placeholder="HB-XXXX-XXXX-XXXX-XXXX" required></div>
       <div class="fg"><label class="fl">Duration to Add</label><input class="fi fi-mono" name="duration" placeholder="7D or 24H" required></div>

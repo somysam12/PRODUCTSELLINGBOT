@@ -71,138 +71,98 @@ $myBal     = (float)(db()->one("SELECT balance FROM users WHERE id=?",[$_SESSION
 $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY created_at DESC LIMIT 8",[$uname]);
 ?>
 
-<?php if($error): ?><div class="alert a-err"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+<?php if($error): ?><div class="alert a-err"><?= phIcon('prohibit') ?> <?= htmlspecialchars($error) ?></div><?php endif; ?>
 
 <?php if(!empty($success)): ?>
-<!-- Generated Keys Result — shown at the very top -->
-<div class="card" style="margin-bottom:16px;border-color:rgba(45,212,191,.35);box-shadow:0 0 30px rgba(45,212,191,.12)">
-  <div class="card-h" style="background:rgba(45,212,191,.06)">
-    <span class="ct" style="color:var(--acc)">
-      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-      <?= count($success) ?> Key<?= count($success)>1?'s':'' ?> Generated!
-    </span>
-    <button class="btn btn-acc btn-sm" onclick="copyAllKeys()">Copy All</button>
+<section class="gsec" style="border-color:var(--acc-20)">
+  <div class="gsec-h">
+    <span class="gnum"><?= phIcon('check') ?></span>
+    <h3><?= count($success) ?> key<?= count($success)>1?'s':'' ?> ready</h3>
+    <button class="btn btn-sm" onclick="downloadKeys()"><?= phIcon('download-simple') ?> Download</button>
+    <button class="btn btn-solid btn-sm" onclick="copyAllKeys()"><?= phIcon('copy') ?> Copy all</button>
   </div>
-  <div class="card-b" style="padding:12px">
-    <div id="generatedKeys" style="background:var(--ink);border:none;box-shadow:var(--ink-sh);border-radius:var(--r2);padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:#8fe9c4;line-height:2;word-break:break-all">
-      <?= implode("\n",array_map('htmlspecialchars',$success)) ?>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn btn-acc" style="flex:1" onclick="copyAllKeys()">
-        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Copy All
-      </button>
-      <button class="btn btn-ghost" style="flex:1" onclick="downloadKeys()">
-        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download
-      </button>
-    </div>
-  </div>
-</div>
+  <div id="generatedKeys" class="code-box" style="white-space:pre-line;font-size:13px"><?= implode("\n",array_map('htmlspecialchars',$success)) ?></div>
+</section>
 <?php endif; ?>
 
-<div class="g-left">
-  <div class="card">
-    <div class="card-h">
-      <span class="ct">
-        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
-        Create License Key
-      </span>
-      <a href="/keys.php" class="btn btn-ghost btn-sm">View All Keys</a>
+<div class="work">
+  <form method="POST" id="genForm" class="work-main">
+    <?= csrfField() ?>
+
+    <section class="gsec">
+      <div class="gsec-h"><span class="gnum">1</span><h3>Duration</h3></div>
+      <select name="duration" id="durationSel" data-ui="tiles" onchange="updateEst()">
+        <?php foreach($prices as $pr): ?>
+        <option value="<?= htmlspecialchars($pr->duration) ?>" data-price="<?= $pr->price ?>" data-t="<?= htmlspecialchars($pr->duration) ?>" data-s="$<?= $pr->price ?> / device"><?= htmlspecialchars($pr->duration) ?> — $<?= $pr->price ?>/device</option>
+        <?php endforeach; ?>
+      </select>
+    </section>
+
+    <section class="gsec">
+      <div class="gsec-h"><span class="gnum">2</span><h3>Devices<?= $ulevel<=2 ? ' &amp; quantity' : '' ?></h3><?php if($oneDevMode): ?><span class="bx b-exp">One-device mode</span><?php endif; ?></div>
+      <div class="gpair">
+        <div>
+          <label class="glabel" for="maxDevices">Devices per key<?= $oneDevMode ? '' : ' (max '.$maxCap.')' ?></label>
+          <input type="number" name="max_devices" id="maxDevices" data-ui="stepper" value="1" min="1" max="<?= $oneDevMode?'1':$maxCap ?>" <?= $oneDevMode?'readonly':'' ?> oninput="updateEst()">
+        </div>
+        <?php if($ulevel<=2): ?>
+        <div>
+          <label class="glabel" for="qtyInp">Number of keys (max 10)</label>
+          <input type="number" name="qty" id="qtyInp" data-ui="stepper" value="1" min="1" max="10" oninput="updateEst()">
+        </div>
+        <?php else: ?>
+        <input type="hidden" name="qty" id="qtyInp" value="1">
+        <?php endif; ?>
+      </div>
+    </section>
+
+    <section class="gsec">
+      <div class="gsec-h">
+        <span class="gnum">3</span><h3>Custom key</h3><small>single key only</small>
+        <label class="tog"><input type="checkbox" id="custTog" name="is_custom" value="1" onchange="toggleCustom()"><span class="togsl"></span></label>
+      </div>
+      <div id="custWrap" style="display:none">
+        <input class="fi fi-mono" type="text" name="custom_key" aria-label="Custom key" autocomplete="off" spellcheck="false">
+      </div>
+    </section>
+  </form>
+
+  <aside class="work-side">
+    <div class="receipt">
+      <div class="rc-t">Summary</div>
+      <div class="rc-row"><span>Duration</span><b id="rcDur">—</b></div>
+      <div class="rc-row"><span>Devices per key</span><b id="rcDev">1</b></div>
+      <div class="rc-row"><span>Keys</span><b id="rcQty">1</b></div>
+      <div class="rc-total"><span>Total</span><b id="rcTotal">$0.00</b></div>
+      <input type="hidden" id="estimation">
+      <button type="submit" form="genForm" class="btn btn-solid btn-full"><?= phIcon('sparkle') ?> Generate <span id="rcBtnN">key</span></button>
+      <?php if($ulevel>1): ?><div class="rc-note"><span>Your balance</span><b>$<?= number_format($myBal,2) ?></b></div><?php endif; ?>
     </div>
-    <div class="card-b">
-      <?php if($oneDevMode): ?><div class="alert a-warn" style="margin-bottom:14px">One Device Mode ON — Keys limited to 1 device</div><?php endif; ?>
-      <form method="POST" id="genForm">
-        <?= csrfField() ?>
 
-        <div class="g2" style="gap:12px">
-          <div class="fg" style="margin:0 0 14px">
-            <label class="fl">Max Devices <?= $oneDevMode?'<span style="color:var(--warn)">(Locked: 1)</span>':'' ?></label>
-            <input class="fi" type="number" name="max_devices" id="maxDevices" value="1" min="1" max="<?= $oneDevMode?'1':$maxCap ?>" <?= $oneDevMode?'readonly style="opacity:.5"':'' ?> oninput="updateEst()">
+    <div class="card" style="margin:0">
+      <div class="card-h">
+        <span class="ct"><?= phIcon('clock') ?> Recent</span>
+        <a href="/keys.php" class="btn btn-sm">All keys <?= phIcon('arrow-right') ?></a>
+      </div>
+      <?php if(empty($genHistory)): ?>
+        <div class="empty">No keys generated yet.</div>
+      <?php else: foreach($genHistory as $h):
+        $exp = $h->expired_date && strtotime($h->expired_date) < time();
+        $hh  = (int)$h->duration;
+        if(!$h->status) { $st='Blocked'; $sc='b-ban'; } elseif($exp) { $st='Expired'; $sc='b-exp'; }
+        elseif(!$h->device_count) { $st='Unused'; $sc='b-unused'; } else { $st='Active'; $sc='b-active'; }
+      ?>
+        <div class="li">
+          <button type="button" class="btn icon-btn" onclick="copyText('<?= htmlspecialchars($h->user_key, ENT_QUOTES) ?>','Key')" title="Copy key" aria-label="Copy key"><?= phIcon('copy') ?></button>
+          <div class="li-x">
+            <b class="mono"><?= htmlspecialchars($h->user_key) ?></b>
+            <span><?= $hh<24 ? "{$hh}H" : round($hh/24)."D" ?> · <?= (int)$h->device_count ?>/<?= (int)$h->max_devices ?> devices</span>
           </div>
-          <?php if($ulevel <= 2): // Only owner+admin can bulk generate ?>
-          <?php if($ulevel<=2): ?>
-          <div class="fg" style="margin:0 0 14px">
-            <label class="fl">Quantity <span style="color:var(--muted);font-weight:400">(Max 10)</span></label>
-            <input class="fi" type="number" name="qty" id="qtyInp" value="1" min="1" max="10" oninput="updateEst()">
-          </div>
-          <?php else: ?>
-          <input type="hidden" name="qty" value="1">
-          <?php endif; ?>
-          <?php else: ?>
-          <input type="hidden" name="qty" id="qtyInp" value="1">
-          <?php endif; ?>
+          <span class="bx <?= $sc ?>"><?= $st ?></span>
         </div>
-
-        <div class="fg">
-          <label class="fl">Duration</label>
-          <select class="fi" name="duration" id="durationSel" onchange="updateEst()">
-            <?php foreach($prices as $pr): ?>
-            <option value="<?= htmlspecialchars($pr->duration) ?>" data-price="<?= $pr->price ?>"><?= htmlspecialchars($pr->duration) ?> — $<?= $pr->price ?>/device</option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <div style="padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:10px">
-            <label class="tog"><input type="checkbox" id="custTog" name="is_custom" value="1" onchange="toggleCustom()"><span class="togsl"></span></label>
-            <span style="font-size:12px;font-weight:600">Custom Key String <span style="color:var(--muted);font-size:10px">(only for qty=1)</span></span>
-          </div>
-        </div>
-        <div id="custWrap" style="display:none" class="fg">
-          <label class="fl">Custom Key</label>
-          <input class="fi fi-mono" type="text" name="custom_key" placeholder="Enter custom key...">
-        </div>
-
-        <div class="fg">
-          <label class="fl">Estimated Cost</label>
-          <input class="fi fi-mono" id="estimation" readonly style="color:var(--acc);font-weight:800;font-size:16px">
-          <?php if($ulevel>1): ?><div class="fi-hint">Your balance: <strong style="color:var(--acc)">$<?= number_format($myBal,2) ?></strong></div><?php endif; ?>
-        </div>
-
-        <button type="submit" class="btn btn-acc btn-full">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
-          GENERATE KEY(S)
-        </button>
-      </form>
+      <?php endforeach; endif; ?>
     </div>
-  </div>
-
-  <div>
-
-    <!-- Recent History -->
-    <div class="card">
-      <div class="card-h"><span class="ct">Recent Generated</span></div>
-      <div class="tw"><table>
-        <thead><tr><th>Key</th><th>Dur</th><th>Status</th></tr></thead>
-        <tbody>
-          <?php if(empty($genHistory)): ?>
-          <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">No history</td></tr>
-          <?php else: foreach($genHistory as $h):
-            $exp=$h->expired_date && strtotime($h->expired_date)<time();
-          ?>
-          <tr>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px">
-                <code style="font-size:10px"><?= substr(htmlspecialchars($h->user_key),0,14) ?>...</code>
-                <button class="btn btn-ghost btn-xs" onclick="copyText('<?= htmlspecialchars($h->user_key) ?>','Key')" title="Copy">
-                  <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                </button>
-              </div>
-            </td>
-            <td style=""><?php $hh=(int)$h->duration; echo $hh<24?"{$hh}H":round($hh/24)."D"; ?></td>
-            <td><?php
-              if(!$h->status) echo '<span class="bx b-ban">Blocked</span>';
-              elseif($exp) echo '<span class="bx b-exp">Expired</span>';
-              elseif(!$h->device_count) echo '<span class="bx b-unused">Unused</span>';
-              else echo '<span class="bx b-active">Active</span>';
-            ?></td>
-          </tr>
-          <?php endforeach; endif; ?>
-        </tbody>
-      </table></div>
-    </div>
-  </div>
+  </aside>
 </div>
 
 <script>
@@ -212,13 +172,20 @@ function updateEst(){
   const qty = parseInt(document.getElementById('qtyInp').value)||1;
   const dur = document.getElementById('durationSel').value;
   const unit= parseFloat(priceMap[dur]||0);
-  document.getElementById('estimation').value = '$ '+(dev*qty*unit).toFixed(2)+(qty>1?' ('+qty+' keys)':'');
+  const total = (dev*qty*unit).toFixed(2);
+  document.getElementById('estimation').value = '$ '+total;
+  document.getElementById('rcDur').textContent = dur;
+  document.getElementById('rcDev').textContent = dev;
+  document.getElementById('rcQty').textContent = qty;
+  document.getElementById('rcTotal').textContent = '$'+total;
+  document.getElementById('rcBtnN').textContent = qty>1 ? qty+' keys' : 'key';
 }
 updateEst();
 function toggleCustom(){
   const on=document.getElementById('custTog').checked;
   document.getElementById('custWrap').style.display=on?'block':'none';
   if(on) document.getElementById('qtyInp').value=1;
+  updateEst();
 }
 function copyAllKeys(){
   const el=document.getElementById('generatedKeys');

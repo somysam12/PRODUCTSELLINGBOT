@@ -71,7 +71,17 @@ function hbSessionGc(string $dir): void {
 }
 
 // ─── SESSION ────────────────────────────────────
-if (session_status() === PHP_SESSION_NONE) {
+// Machine endpoints (the APK/loader, heartbeats, the Telegram webhook) never send
+// a session cookie, so starting a session for them created a brand-new session
+// file on EVERY request — thousands per hour — which is what filled
+// writable/sessions and locked everyone out. They get no session at all now.
+$hbScript  = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+$hbUriPath = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '');
+$hbMachRe  = '#/(server|secure)/[^/]+(\.php)?/?$|/p/(?!upload_log)[^/]+(\.php)?/?$|/validbool(\.php)?/?$|/api/bot\.php$#';
+$hbMachine = (bool)(preg_match($hbMachRe, $hbScript) || preg_match($hbMachRe, $hbUriPath));
+if ($hbMachine) {
+    if (!isset($_SESSION)) $_SESSION = [];   // helpers read $_SESSION['branch'] ?? … safely
+} elseif (session_status() === PHP_SESSION_NONE) {
     // Keep sessions in our OWN folder so the host's /tmp cleanup cron can't
     // delete them early (a common cause of "logged out after 1-2 minutes" on
     // shared hosting). Falls back to the default path if the dir isn't writable.

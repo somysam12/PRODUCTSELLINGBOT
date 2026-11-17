@@ -49,82 +49,47 @@ if (isset($_GET['done']) && !empty($_SESSION['reg_success'])) { $success=true; u
 if (!empty($_SESSION['reg_errors'])) { $errors=$_SESSION['reg_errors']; unset($_SESSION['reg_errors']); }
 $panelName=getSetting('panel_name','HB Panel');
 $panelLogo=getSetting('panel_logo','');
+$authTitle = 'Register'; $authHeading = 'Create account'; $authSub = 'You need a referral code from your admin or owner.';
+require __DIR__.'/app/Views/Layout/auth_head.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Register — <?=htmlspecialchars($panelName)?></title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/panel.css?v=12">
-<style>
-.ref-wrap{background:var(--acc-08);border:1px solid var(--acc-20);border-radius:var(--r2);padding:16px;margin-bottom:16px}
-.ref-inp{width:100%;background:var(--s3);border:1px solid var(--line2);border-radius:var(--r3);color:var(--acc);padding:12px 14px;font-size:18px;font-weight:600;letter-spacing:3px;text-transform:uppercase;outline:none;transition:border-color .16s,box-shadow .16s}
-.ref-inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-13)}
-.ref-inp::placeholder{color:var(--muted);font-size:12.5px;font-weight:400;letter-spacing:.3px;text-transform:none}
-</style>
-</head>
-<body>
-<div class="login-scene">
-  <div class="orb1"></div><div class="orb2"></div>
-  <div class="pts" id="pts"></div>
-  <div class="login-wrap" style="max-width:410px">
-    <div class="login-card anim-in">
-      <div class="login-top">
-        <div class="brand-logo">
-          <?php if($panelLogo): ?><img src="<?=htmlspecialchars($panelLogo)?>" alt=""><?php endif; ?>
+      <?php if($success): ?>
+      <div class="alert a-ok"><?= phIcon('check-circle') ?> Account created. You can sign in now.</div>
+      <a href="/" class="btn btn-solid btn-full"><?= phIcon('sign-in') ?> Go to sign in</a>
+      <?php endif; ?>
+      <?php if($errors): ?>
+      <div class="alert a-err" style="flex-direction:column;align-items:flex-start;gap:5px">
+        <?php foreach($errors as $e): ?><div style="display:flex;align-items:center;gap:8px"><?= phIcon('prohibit') ?> <?=htmlspecialchars($e)?></div><?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+      <?php if(!$success): ?>
+      <form method="POST">
+        <?=csrfField()?>
+        <div class="af">
+          <label for="regUser">Username</label>
+          <div class="af-inp"><?= phIcon('user') ?>
+            <input type="text" id="regUser" name="username" required minlength="4" autocomplete="username" autocapitalize="none" spellcheck="false" value="<?=htmlspecialchars($_POST['username']??'')?>">
+          </div>
+          <div class="fi-hint">At least 4 characters — letters, numbers and underscore.</div>
         </div>
-        <div class="brand-name">Create account</div>
-        <div class="brand-sub">A referral code is required to register</div>
-      </div>
-      <div class="login-body">
-        <?php if($success): ?>
-        <div class="alert a-ok" style="margin-bottom:16px"><?=svgIcon('check',14)?> Account created! <a href="/" style="color:var(--acc);font-weight:700">Login now</a></div>
-        <?php endif; ?>
-        <?php if($errors): ?>
-        <div class="alert a-err" style="margin-bottom:16px;flex-direction:column;align-items:flex-start;gap:4px">
-          <?php foreach($errors as $e): ?><div style="display:flex;align-items:center;gap:6px"><?=svgIcon('ban',12)?> <?=htmlspecialchars($e)?></div><?php endforeach; ?>
+        <div class="af">
+          <label for="regPass">Password</label>
+          <div class="af-inp"><?= phIcon('lock-key') ?>
+            <input type="password" id="regPass" name="password" required minlength="6" autocomplete="new-password">
+            <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
+          </div>
+          <div class="fi-hint">At least 6 characters.</div>
         </div>
-        <?php endif; ?>
-        <?php if(!$success): ?>
-        <form method="POST">
-          <?=csrfField()?>
-          <div class="login-field">
-            <label class="login-label" for="regUser">Username</label>
-            <input class="login-input" type="text" id="regUser" name="username" placeholder="Min 4 chars, a-z 0-9 _" required minlength="4" autocomplete="username" value="<?=htmlspecialchars($_POST['username']??'')?>">
-            <div class="fi-hint" style="margin-top:6px">Letters, numbers, underscore only</div>
+        <div class="af">
+          <label for="regRef">Referral code</label>
+          <div class="af-inp"><?= phIcon('ticket') ?>
+            <input type="text" id="regRef" name="referral" required maxlength="6" minlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                   style="font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:4px;text-transform:uppercase"
+                   oninput="this.value=this.value.toUpperCase()" value="<?=htmlspecialchars($_POST['referral']??'')?>">
           </div>
-          <div class="login-field">
-            <label class="login-label" for="regPass">Password</label>
-            <div class="login-inp-wrap">
-              <input class="login-input" type="password" id="regPass" name="password" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password" style="padding-right:44px">
-              <button type="button" class="login-input-icon-right" onclick="togglePass()">
-                <span id="eyeIco2"><?=svgIcon('eye',16)?></span>
-              </button>
-            </div>
-          </div>
-          <div class="ref-wrap">
-            <div style="font-size:12.5px;font-weight:500;color:var(--acc);margin-bottom:9px">Referral code <span style="color:var(--muted)">&mdash; required</span></div>
-            <input class="ref-inp" type="text" name="referral" placeholder="6-character code, e.g. AB12CD" required maxlength="6" minlength="6" oninput="this.value=this.value.toUpperCase()" value="<?=htmlspecialchars($_POST['referral']??'')?>">
-            <div style="font-size:12px;color:var(--muted);margin-top:9px">Ask your admin or owner for a valid referral code.</div>
-          </div>
-          <button type="submit" class="btn-login">Create account</button>
-        </form>
-        <?php endif; ?>
-      </div>
-      <div class="login-foot">
-        <p>Have an account? <a href="/">Login here</a></p>
-      </div>
-    </div>
-  </div>
-</div>
-<div id="toasts" class="toasts"></div>
-<script src="/assets/js/panel.js?v=7"></script>
-<script>
-spawnParticles('pts',16);
-let pv=false;
-function togglePass(){pv=!pv;document.getElementById('regPass').type=pv?'text':'password';document.getElementById('eyeIco2').innerHTML=pv?`<?=svgIcon('eye-off',16)?>`:`<?=svgIcon('eye',16)?>}`;}
-</script>
-</body>
-</html>
+          <div class="fi-hint">6 characters, for example AB12CD.</div>
+        </div>
+        <button type="submit" class="btn-login" style="margin-top:6px"><?= phIcon('user-plus') ?> Create account</button>
+      </form>
+      <?php endif; ?>
+      <div class="auth-foot"><span>Already registered? <a href="/">Sign in</a></span></div>
+<?php require __DIR__.'/app/Views/Layout/auth_foot.php'; ?>

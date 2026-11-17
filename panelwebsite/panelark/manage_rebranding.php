@@ -461,8 +461,8 @@ function renderSlotCard(int $n, array $s, string $libVerNext, string $sv): strin
     $border = $s['exists'] ? 'rgba(45,212,80,.3)' : 'var(--border)';
     $bg     = $s['exists'] ? 'rgba(45,212,80,.04)' : 'var(--bg2)';
     $badge  = $s['exists']
-        ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:rgba(45,212,80,.12);border:1px solid rgba(45,212,80,.3);font-size:9px;font-weight:700;color:#2dd450;font-family:var(--mono);text-transform:uppercase"><span style="width:5px;height:5px;border-radius:50%;background:#2dd450;display:inline-block"></span>LOADED</span>'
-        : '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.25);font-size:9px;font-weight:700;color:#ff4d6d;font-family:var(--mono);text-transform:uppercase"><span style="width:5px;height:5px;border-radius:50%;background:#ff4d6d;display:inline-block"></span>EMPTY</span>';
+        ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;background:var(--acc-bg);border:1px solid var(--acc-20);font-size:9px;font-weight:700;color:var(--acc-tx);font-family:var(--mono);text-transform:uppercase">LOADED</span>'
+        : '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;background:var(--rose-bg);border:1px solid rgba(207,51,70,.3);font-size:9px;font-weight:700;color:var(--rose-tx);font-family:var(--mono);text-transform:uppercase">EMPTY</span>';
     $szLine = $s['exists'] ? '&nbsp;·&nbsp;'.round($s['size']/1024).'KB&nbsp;·&nbsp;'.date('d M H:i',(int)$s['time']) : '';
     $delBtn = $s['exists'] ? "<button class=\"btn btn-red btn-xs\" style=\"margin-top:6px;width:100%\" onclick=\"rbDelLib('{$file}')\">Delete Slot {$n}</button>" : '';
     $vn = htmlspecialchars($libVerNext);
@@ -518,46 +518,36 @@ function urlRow(string $label, string $url, string $sv): string {
 
 <!-- ── Styles ─────────────────────────────────────────── -->
 <style>
-.rb-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:20px;padding:4px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border)}
-.rb-tab{flex:1 1 auto;min-width:0;padding:9px 8px;border:none;background:transparent;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:var(--r);cursor:pointer;transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rb-tab:hover{background:var(--bg3);color:var(--text)}
-.rb-tab.active{background:var(--acc);color:#000}
-.rb-tab.active.danger{background:#ff4d6d;color:#fff}
-.rb-pane{display:none}
-.rb-pane.active{display:block}
-.kill-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.kill-on{background:rgba(255,77,109,.12);border:1px solid rgba(255,77,109,.3);color:#ff4d6d}
-.kill-off{background:rgba(45,212,80,.08);border:1px solid rgba(45,212,80,.2);color:#2dd450}
-.kill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.code-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 70px 12px 14px;font-size:11px;color:var(--acc);word-break:break-all;position:relative}
-.code-box .cb-copy{position:absolute;top:8px;right:8px;padding:3px 8px;font-size:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);cursor:pointer;color:var(--muted);}
-.code-box .cb-copy:hover{color:var(--text)}
-.ver-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--acc);border-radius:var(--r);padding:4px 12px;font-size:13px;font-weight:700;color:var(--acc)}
-.warn-box{background:rgba(255,184,0,.05);border:1px solid rgba(255,184,0,.2);border-radius:var(--r);padding:12px 14px;font-size:12px;color:var(--warn);line-height:1.6}
-.info-box{background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.2);border-radius:var(--r);padding:12px 14px;font-size:12px;color:#a5b4fc;line-height:1.6}
-.step-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--acc);color:#000;font-size:10px;font-weight:900;flex-shrink:0}
-/* Kill toggle switch */
-.kill-switch{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)}
-.kill-switch.on{border-color:rgba(255,77,109,.4);background:rgba(255,77,109,.06)}
-.ks-track{position:relative;width:56px;height:30px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex-shrink:0;transition:all .25s}
-.ks-track.on{background:#ff4d6d;border-color:#ff4d6d;box-shadow:0 0 16px rgba(255,77,109,.4)}
-.ks-knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:all .25s;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.ks-track.on .ks-knob{left:27px}
-.ks-label{font-size:13px;font-weight:800;letter-spacing:.5px}
-.ks-label .st-on{color:#ff4d6d}.ks-label .st-off{color:var(--muted)}
-
-/* ── 3-slot lib uploader (clean, no overlap) ── */
-.lib-slot-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.rb-tab{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.rb-tab.active.danger{color:#fff;border-color:transparent;background:linear-gradient(180deg,#f2687a,#d33a4c);box-shadow:0 2px 0 #a8273a,0 6px 14px rgba(217,67,90,.3),inset 0 1px 0 rgba(255,255,255,.3)}
+.kill-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.kill-on{background:var(--rose-bg);border:1px solid rgba(207,51,70,.3);color:var(--rose-tx)}
+.kill-off{background:var(--acc-bg);border:1px solid var(--acc-20);color:var(--acc-tx)}
+.kill-dot{display:none}
+.code-box{position:relative;padding-right:74px;font-size:11.5px}
+.code-box .cb-copy{position:absolute;top:8px;right:8px;padding:4px 9px;font-size:10.5px;font-weight:700;border-radius:8px;cursor:pointer;color:var(--ink-tx);background:rgba(255,255,255,.1);border:1px solid var(--ink-line)}
+.code-box .cb-copy:hover{background:rgba(255,255,255,.18)}
+.ver-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;background:var(--acc-bg);border:1px solid var(--acc-20);font-size:12px;font-weight:800;color:var(--acc-tx)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:var(--ink);color:#6ee7b7;font-size:10.5px;font-weight:800;flex-shrink:0}
+.kill-switch{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r2)}
+.kill-switch.on{border-color:rgba(207,51,70,.3);background:var(--rose-bg)}
+.ks-track{position:relative;width:56px;height:30px;border-radius:30px;background:var(--sunk);border:1px solid var(--line2);box-shadow:var(--well);cursor:pointer;flex-shrink:0;transition:all .25s}
+.ks-track.on{background:linear-gradient(180deg,#d33a4c,#f2687a);border-color:#a8273a;box-shadow:inset 0 2px 4px rgba(120,20,30,.4)}
+.ks-knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:linear-gradient(180deg,#fff,#ece6da);transition:all .25s cubic-bezier(.34,1.4,.64,1);box-shadow:0 1px 2px rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.2)}
+.ks-track.on .ks-knob{left:29px}
+.ks-label{font-size:13px;font-weight:800;letter-spacing:.3px}
+.ks-label .st-on{color:var(--rose-tx)}.ks-label .st-off{color:var(--muted)}
+.lib-slot-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r2);padding:14px;margin-bottom:12px}
 .lib-slot-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;min-width:0}
-.lib-slot-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;background:var(--acc-08);border:1px solid var(--acc-20);color:var(--acc);font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
+.lib-slot-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:7px;background:var(--ink);color:#6ee7b7;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
 .lib-slot-status{font-size:11px;font-weight:700;min-width:0;overflow-wrap:anywhere}
-.lib-slot-status.on{color:#2dd450}
+.lib-slot-status.on{color:var(--acc-tx)}
 .lib-slot-status.off{color:var(--muted)}
 .lib-slot-file{font-size:11px;color:var(--muted2);margin-bottom:4px;overflow-wrap:anywhere;word-break:break-word}
-.lib-slot-orig{font-family:monospace}
+.lib-slot-orig{font-family:var(--mono)}
 .lib-slot-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
-.lib-slot-pick{flex:1 1 160px;min-width:0;display:flex;align-items:center;padding:9px 12px;background:var(--s3);border:1px dashed var(--acc-20);border-radius:var(--r2);cursor:pointer;transition:.15s}
-.lib-slot-pick:hover{border-color:var(--acc);background:var(--acc-08)}
+.lib-slot-pick{flex:1 1 160px;min-width:0;display:flex;align-items:center;padding:9px 12px;background:var(--sunk);border:1px dashed var(--line3);border-radius:12px;box-shadow:var(--well);cursor:pointer;transition:.15s}
+.lib-slot-pick:hover{border-color:var(--acc)}
 .lib-slot-pickname{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lib-slot-ver{flex:0 0 130px;min-width:100px}
 .lib-slot-btn{flex:0 0 auto;white-space:nowrap}
@@ -581,9 +571,9 @@ function urlRow(string $label, string $url, string $sv): string {
   </div>
   <div style="flex:1"></div>
   <div style="font-size:11px;">
-    Lib&nbsp;<?=$limitOkLib?'<span style="color:#2dd450">OK</span>':'<span style="color:#ff4d6d">LOW</span>'?>
+    Lib&nbsp;<?=$limitOkLib?'<span style="color:var(--acc-tx)">OK</span>':'<span style="color:var(--rose-tx)">LOW</span>'?>
     &nbsp;·&nbsp;
-    APK&nbsp;<?=$limitOkApk?'<span style="color:#2dd450">OK</span>':'<span style="color:#ff4d6d">LOW</span>'?>
+    APK&nbsp;<?=$limitOkApk?'<span style="color:var(--acc-tx)">OK</span>':'<span style="color:var(--rose-tx)">LOW</span>'?>
   </div>
 </div>
 <?php if (!$limitOkLib): ?>
@@ -596,11 +586,11 @@ function urlRow(string $label, string $url, string $sv): string {
 <?php endif; ?>
 
 <!-- ── Page intro ─────────────────────────────────────── -->
-<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:16px 18px;border-radius:var(--r);background:linear-gradient(135deg,rgba(45,212,191,.07),rgba(0,148,255,.04));border:1px solid rgba(45,212,191,.15)">
-  <div style="width:42px;height:42px;border-radius:var(--r);background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-    <svg viewBox="0 0 24 24" <?=$sv?> width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+<div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:16px;padding:16px 18px;border-radius:var(--r);background:var(--acc-bg);border:1px solid var(--acc-20)">
+  <div style="width:42px;height:42px;border-radius:var(--r);background:var(--acc-bg);border:1px solid var(--acc-20);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+    <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
   </div>
-  <div style="flex:1;min-width:0">
+  <div style="flex:1 1 200px;min-width:0">
     <div style="font-weight:800;font-size:15px;color:var(--text)">Rebranding Control Center</div>
     <div style="font-size:12px;color:var(--muted)">Upload &amp; version your lib and APK · arm the kill-switches · set a redirect on kill.</div>
   </div>
@@ -612,7 +602,7 @@ function urlRow(string $label, string $url, string $sv): string {
 
 <!-- ── Base domain (drives every link below) ──────────── -->
 <div class="card" style="margin-bottom:16px">
-  <div class="card-h"><span class="ct"><svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Base Domain</span></div>
+  <div class="card-h"><span class="ct"><svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M480-71.87q-83.67 0-158.11-32.22-74.43-32.21-130.01-87.79-55.58-55.58-87.79-130.01Q71.87-396.33 71.87-480q0-84.43 32.22-158.49 32.21-74.05 87.79-129.63 55.58-55.58 130.01-87.79 74.44-32.22 158.11-32.22 84.43 0 158.49 32.22 74.05 32.21 129.63 87.79 55.58 55.58 87.79 129.63 32.22 74.06 32.22 158.49 0 83.67-32.22 158.11-32.21 74.43-87.79 130.01-55.58 55.58-129.63 87.79Q564.43-71.87 480-71.87Zm-.48-92.76q25.05-35.52 44.05-74.4 19-38.88 31-82.4H405.2q12 43.52 30.64 82.4t43.68 74.4Zm-102.8-16q-18.48-32.52-31.5-68.02-13.02-35.5-22.02-72.78H206.63q28.28 49.52 71.42 86.28 43.15 36.76 98.67 54.52Zm205.85 0q55.52-17.76 98.9-54.52 43.38-36.76 71.66-86.28H636.57q-9 37.28-22.27 72.78-13.26 35.5-31.73 68.02Zm-409.7-220.09H307.2q-3-20-4.5-39.26-1.5-19.26-1.5-40.02 0-21 1.5-40.14t4.5-39.14H172.87q-5 19.76-7.5 39.02t-2.5 40.26q0 20.76 2.5 40.14t7.5 39.14Zm214.33 0h185.37q3-20 4.26-39.26 1.26-19.26 1.26-40.02 0-21-1.26-40.14t-4.26-39.14H387.2q-3 20-4.5 39.14T381.2-480q0 20.76 1.5 40.02t4.5 39.26Zm265.37 0h134.08q5-19.76 7.5-39.14t2.5-40.14q0-21-2.5-40.26-2.5-19.26-7.5-39.02H652.57q2.76 20 4.14 39.14t1.38 40.14q0 20.76-1.38 40.02t-4.14 39.26Zm-16-238.08h116.56q-28.28-49.53-71.66-86.17-43.38-36.64-98.9-54.4 18.47 32.52 31.73 67.9 13.27 35.38 22.27 72.67Zm-231.37 0h149.37q-11.77-43.53-30.77-82.29-19-38.76-44.28-74.28-25.04 35.52-43.68 74.28T405.2-638.8Zm-198.57 0H323.2q9-37.29 22.02-72.67t31.5-67.9q-55.52 17.76-98.67 54.4-43.14 36.64-71.42 86.17Z"/></svg> Base Domain</span></div>
   <div class="card-b">
     <div class="info-box" style="margin-bottom:12px">
       Set this if you deploy the panel on a different domain/subdomain. Every link on this page and the
@@ -649,7 +639,7 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card">
       <div class="card-h">
         <span class="ct">
-          <svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
           Upload Library
         </span>
         <div style="display:flex;align-items:center;gap:10px">
@@ -668,7 +658,7 @@ function urlRow(string $label, string $url, string $sv): string {
         <!-- BGMI / GLOBAL tab toggle -->
         <div style="display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
           <button id="slotTabBgmi" onclick="switchSlotTab('bgmi')"
-            style="flex:1;padding:10px;font-size:12px;font-weight:800;letter-spacing:.06em;background:#4DDD6A22;color:#4DDD6A;border:none;cursor:pointer;transition:all .2s">BGMI (Slots 1–3)</button>
+            style="flex:1;padding:10px;font-size:12px;font-weight:800;letter-spacing:.06em;background:var(--acc-bg);color:var(--acc-tx);border:none;cursor:pointer;transition:all .2s">BGMI (Slots 1–3)</button>
           <button id="slotTabGlobal" onclick="switchSlotTab('global')"
             style="flex:1;padding:10px;font-size:12px;font-weight:800;letter-spacing:.06em;background:var(--bg2);color:var(--muted);border:none;cursor:pointer;transition:all .2s">GLOBAL / TW / KR (Slots 4–6)</button>
         </div>
@@ -697,7 +687,7 @@ function urlRow(string $label, string $url, string $sv): string {
 
     <!-- Endpoints & Links -->
     <div class="card">
-      <div class="card-h"><span class="ct">Lib Endpoints &amp; Links</span></div>
+      <div class="card-h"><span class="ct"><?= phIcon('link') ?> Lib Endpoints &amp; Links</span></div>
       <div class="card-b">
         <div class="info-box" style="margin-bottom:14px">
           Direct lib download is <strong>blocked</strong>. The app must first hit
@@ -714,12 +704,12 @@ function urlRow(string $label, string $url, string $sv): string {
     <!-- Uploaded libs list -->
     <div class="card">
       <div class="card-h">
-        <span class="ct">Uploaded Libraries (<?=count($libs)?>)</span>
+        <span class="ct"><?= phIcon('package') ?> Uploaded Libraries (<?=count($libs)?>)</span>
         <span style="font-size:10px;color:var(--muted);"><?=$panelBase?>/server/libs/</span>
       </div>
       <?php if (empty($libs)): ?>
         <div style="text-align:center;padding:40px;color:var(--muted)">
-          <svg viewBox="0 0 24 24" <?=$sv?> style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M242.87-71.87q-37.78 0-64.39-26.61t-26.61-64.39v-634.26q0-37.78 26.61-64.39t64.39-26.61H525.8q18.16 0 34.69 6.84 16.53 6.83 29.21 19.51L781.78-669.7q12.68 12.68 19.51 29.21 6.84 16.53 6.84 34.69v442.93q0 37.78-26.61 64.39t-64.39 26.61H242.87Zm274.26-570.76q0 19.15 13.17 32.33 13.18 13.17 32.33 13.17h154.5l-200-200v154.5Z"/></svg>
           <div style="font-size:12px">No libraries uploaded yet</div>
         </div>
       <?php else: ?>
@@ -761,7 +751,7 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card" style="border-color:<?=$libKillOn?'rgba(255,77,109,.3)':'var(--border)'?>">
       <div class="card-h">
         <span class="ct">
-          <svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M111.63-115.93q-12.67 0-22.89-6.29T72.85-138.8q-5.72-10.2-6.22-22.16t6.22-23.34L440.22-820q6.71-11.43 17.55-17.03 10.84-5.6 22.25-5.6t22.23 5.6q10.82 5.6 17.53 17.03l367.37 635.7q6.72 11.38 6.22 23.34-.5 11.96-6.22 22.16-5.72 10.19-15.91 16.53-10.2 6.34-22.87 6.34H111.63ZM480-240.72q17.24 0 29.22-11.98 11.98-11.97 11.98-29.21 0-17.24-11.98-29.1-11.98-11.86-29.22-11.86t-29.22 11.86q-11.98 11.86-11.98 29.1 0 17.24 11.98 29.21 11.98 11.98 29.22 11.98ZM480-360q17 0 28.5-11.5T520-400v-117.37q0-17-11.5-28.5t-28.5-11.5q-17 0-28.5 11.5t-11.5 28.5V-400q0 17 11.5 28.5T480-360Z"/></svg>
           Lib Killer Status
         </span>
         <span class="kill-badge <?=$libKillOn?'kill-on':'kill-off'?>">
@@ -825,7 +815,7 @@ function urlRow(string $label, string $url, string $sv): string {
 
     <!-- How it works -->
     <div class="card">
-      <div class="card-h"><span class="ct">How Lib Killer Works</span></div>
+      <div class="card-h"><span class="ct"><?= phIcon('info') ?> How Lib Killer Works</span></div>
       <div class="card-b" style="font-size:12px;line-height:1.8;color:var(--muted)">
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;gap:10px;align-items:flex-start">
@@ -868,7 +858,7 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card">
       <div class="card-h">
         <span class="ct">
-          <svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
           Upload APK
         </span>
         <div style="display:flex;align-items:center;gap:10px">
@@ -892,7 +882,7 @@ function urlRow(string $label, string $url, string $sv): string {
                 <div id="apkFileName" style="font-size:13px;color:var(--acc);font-weight:700"></div>
                 <div id="apkFileSize" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
               </div>
-              <svg viewBox="0 0 24 24" <?=$sv?> style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
               <div style="font-size:11px;color:var(--muted);text-transform:uppercase">Click to select APK</div>
               <input type="file" id="apkFileInp" name="apk_file" accept=".apk" onchange="prevApk(this)" style="display:none">
             </div>
@@ -914,7 +904,7 @@ function urlRow(string $label, string $url, string $sv): string {
             </div>
           </div>
           <button type="submit" class="btn btn-acc btn-full" style="margin-top:4px">
-            <svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
             UPLOAD APK
           </button>
         </form>
@@ -941,7 +931,7 @@ function urlRow(string $label, string $url, string $sv): string {
 
     <!-- APK endpoints & links -->
     <div class="card">
-      <div class="card-h"><span class="ct">APK Endpoints &amp; Links</span></div>
+      <div class="card-h"><span class="ct"><?= phIcon('link') ?> APK Endpoints &amp; Links</span></div>
       <div class="card-b">
         <?= urlRow('APK version.txt', $apkVerTxtUrl, $sv) ?>
         <?= urlRow('APK kill / update-check endpoint', $apkKillUrl, $sv) ?>
@@ -951,12 +941,12 @@ function urlRow(string $label, string $url, string $sv): string {
     <!-- APK list -->
     <div class="card">
       <div class="card-h">
-        <span class="ct">Uploaded APKs (<?=count($apks)?>)</span>
+        <span class="ct"><?= phIcon('package') ?> Uploaded APKs (<?=count($apks)?>)</span>
         <span style="font-size:10px;color:var(--muted);"><?=$panelBase?>/server/apks/</span>
       </div>
       <?php if (empty($apks)): ?>
         <div style="text-align:center;padding:40px;color:var(--muted)">
-          <svg viewBox="0 0 24 24" <?=$sv?> style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M242.87-71.87q-37.78 0-64.39-26.61t-26.61-64.39v-634.26q0-37.78 26.61-64.39t64.39-26.61H525.8q18.16 0 34.69 6.84 16.53 6.83 29.21 19.51L781.78-669.7q12.68 12.68 19.51 29.21 6.84 16.53 6.84 34.69v442.93q0 37.78-26.61 64.39t-64.39 26.61H242.87Zm274.26-570.76q0 19.15 13.17 32.33 13.18 13.17 32.33 13.17h154.5l-200-200v154.5Z"/></svg>
           <div style="font-size:12px">No APKs uploaded yet</div>
         </div>
       <?php else: ?>
@@ -998,7 +988,7 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card" style="border-color:<?=$apkKillOn?'rgba(255,77,109,.3)':'var(--border)'?>">
       <div class="card-h">
         <span class="ct">
-          <svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M111.63-115.93q-12.67 0-22.89-6.29T72.85-138.8q-5.72-10.2-6.22-22.16t6.22-23.34L440.22-820q6.71-11.43 17.55-17.03 10.84-5.6 22.25-5.6t22.23 5.6q10.82 5.6 17.53 17.03l367.37 635.7q6.72 11.38 6.22 23.34-.5 11.96-6.22 22.16-5.72 10.19-15.91 16.53-10.2 6.34-22.87 6.34H111.63ZM480-240.72q17.24 0 29.22-11.98 11.98-11.97 11.98-29.21 0-17.24-11.98-29.1-11.98-11.86-29.22-11.86t-29.22 11.86q-11.98 11.86-11.98 29.1 0 17.24 11.98 29.21 11.98 11.98 29.22 11.98ZM480-360q17 0 28.5-11.5T520-400v-117.37q0-17-11.5-28.5t-28.5-11.5q-17 0-28.5 11.5t-11.5 28.5V-400q0 17 11.5 28.5T480-360Z"/></svg>
           APK Killer Control
         </span>
         <span class="kill-badge <?=$apkKillOn?'kill-on':'kill-off'?>">
@@ -1071,7 +1061,7 @@ function urlRow(string $label, string $url, string $sv): string {
 
     <!-- APK Kill how-it-works -->
     <div class="card">
-      <div class="card-h"><span class="ct">How APK Killer Works</span></div>
+      <div class="card-h"><span class="ct"><?= phIcon('info') ?> How APK Killer Works</span></div>
       <div class="card-b" style="font-size:12px;line-height:1.8;color:var(--muted)">
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;gap:10px;align-items:flex-start">
@@ -1112,7 +1102,7 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card" style="border-color:<?=$modKillOn?'rgba(255,77,109,.3)':'var(--border)'?>">
       <div class="card-h">
         <span class="ct">
-          <svg viewBox="0 0 24 24" <?=$sv?> width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M111.63-115.93q-12.67 0-22.89-6.29T72.85-138.8q-5.72-10.2-6.22-22.16t6.22-23.34L440.22-820q6.71-11.43 17.55-17.03 10.84-5.6 22.25-5.6t22.23 5.6q10.82 5.6 17.53 17.03l367.37 635.7q6.72 11.38 6.22 23.34-.5 11.96-6.22 22.16-5.72 10.19-15.91 16.53-10.2 6.34-22.87 6.34H111.63ZM480-240.72q17.24 0 29.22-11.98 11.98-11.97 11.98-29.21 0-17.24-11.98-29.1-11.98-11.86-29.22-11.86t-29.22 11.86q-11.98 11.86-11.98 29.1 0 17.24 11.98 29.21 11.98 11.98 29.22 11.98ZM480-360q17 0 28.5-11.5T520-400v-117.37q0-17-11.5-28.5t-28.5-11.5q-17 0-28.5 11.5t-11.5 28.5V-400q0 17 11.5 28.5T480-360Z"/></svg>
           Mod Lib Kill
         </span>
         <span class="kill-badge <?=$modKillOn?'kill-on':'kill-off'?>"><span class="kill-dot"></span><?=$modKillOn?'KILL-ALL ON':'VERSION MODE'?></span>
@@ -1170,7 +1160,7 @@ function urlRow(string $label, string $url, string $sv): string {
     <!-- Game versions -->
     <div class="card">
       <div class="card-h">
-        <span class="ct">App Config — Visible Game Versions</span>
+        <span class="ct"><?= phIcon('device-mobile') ?> App Config — Visible Game Versions</span>
         <span class="owner-only">Owner Only</span>
       </div>
       <div class="card-b">
@@ -1208,7 +1198,7 @@ function urlRow(string $label, string $url, string $sv): string {
 
     <!-- Slot names editor -->
     <div class="card">
-      <div class="card-h"><span class="ct">Slot Names &amp; Descriptions (shown in app)</span></div>
+      <div class="card-h"><span class="ct"><?= phIcon('note-pencil') ?> Slot Names &amp; Descriptions (shown in app)</span></div>
       <div class="card-b">
         <div class="info-box" style="margin-bottom:14px">These names appear on the mode selection screen. Leave blank to use defaults.</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">

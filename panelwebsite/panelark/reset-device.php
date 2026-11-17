@@ -49,69 +49,33 @@ if (!empty($_SESSION['rd_flash'])) {
 }
 $panelName=getSetting('panel_name','HB Panel');
 $panelLogo=getSetting('panel_logo','');
+$authTitle = 'Reset login device'; $authHeading = 'Reset login device'; $authSub = 'Unbind your account so you can sign in from a new device.';
+require __DIR__.'/app/Views/Layout/auth_head.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Reset Device — <?=htmlspecialchars($panelName)?></title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/panel.css?v=12">
-</head>
-<body>
-<div class="login-scene">
-  <div class="orb1"></div><div class="orb2"></div>
-  <div class="pts" id="pts"></div>
-  <div class="login-wrap">
-    <div class="login-card anim-in">
-      <div class="login-top">
-        <div class="brand-logo" style="background:linear-gradient(140deg,var(--gold),var(--coral));color:#3a2c05">
-          <div class="brand-logo-inner"><?=svgIcon('phone',19)?></div>
-        </div>
-        <div class="brand-name">Reset login device</div>
-        <div class="brand-sub">Unbind your account from its current device</div>
-      </div>
-      <div class="login-body">
-        <?php if($msg): ?>
-        <div class="alert a-<?=$msgType?>" style="margin-bottom:16px">
-          <?=svgIcon($msgType==='ok'?'check':'ban',14)?> <?=htmlspecialchars($msg)?>
-        </div>
-        <?php endif; ?>
-        <?php if(!$done): ?>
-        <div class="alert a-warn" style="margin-bottom:16px">
-          <?=svgIcon('alert',14)?> This resets the device your account is bound to.
-        </div>
-        <form method="POST">
-          <?=csrfField()?>
-          <div class="login-field">
-            <label class="login-label">Username</label>
-            <input class="login-input" type="text" name="username" placeholder="Your username" required autocomplete="username">
+      <?php if($msg): ?>
+      <div class="alert a-<?=$msgType==='ok'?'ok':'err'?>"><?= phIcon($msgType==='ok'?'check-circle':'prohibit') ?> <?=htmlspecialchars($msg)?></div>
+      <?php endif; ?>
+      <?php if(!$done): ?>
+      <div class="alert a-warn"><?= phIcon('warning') ?> Only the panel login binding is reset. Your license keys are not changed.</div>
+      <form method="POST">
+        <?=csrfField()?>
+        <div class="af">
+          <label for="rUser">Username</label>
+          <div class="af-inp"><?= phIcon('user') ?>
+            <input type="text" id="rUser" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
           </div>
-          <div class="login-field">
-            <label class="login-label">Password</label>
-            <div class="login-inp-wrap">
-              <input class="login-input" type="password" name="password" id="rPass" placeholder="Your password" required autocomplete="current-password" style="padding-right:44px">
-              <button type="button" class="login-input-icon-right" onclick="toggleR()"><span id="rEye"><?=svgIcon('eye',16)?></span></button>
-            </div>
+        </div>
+        <div class="af">
+          <label for="rPass">Password</label>
+          <div class="af-inp"><?= phIcon('lock-key') ?>
+            <input type="password" id="rPass" name="password" required autocomplete="current-password">
+            <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
           </div>
-          <button type="submit" class="btn-login" style="background:var(--gold);color:#3a2c05">
-            Reset login device
-          </button>
-        </form>
-        <?php else: ?>
-        <a href="/" class="btn btn-acc btn-full" style="margin-top:8px">Back to sign in</a>
-        <?php endif; ?>
-      </div>
-      <div class="login-foot"><p><a href="/">Back to sign in</a></p></div>
-    </div>
-  </div>
-</div>
-<div id="toasts" class="toasts"></div>
-<script src="/assets/js/panel.js?v=7"></script>
-<script>
-spawnParticles('pts',16);
-let rv=false;
-function toggleR(){rv=!rv;document.getElementById('rPass').type=rv?'text':'password';document.getElementById('rEye').innerHTML=rv?`<?=svgIcon('eye-off',16)?>`:`<?=svgIcon('eye',16)?>`;}</script>
-</body>
-</html>
+        </div>
+        <button type="submit" class="btn-login" style="margin-top:6px"><?= phIcon('device-mobile') ?> Reset login device</button>
+      </form>
+      <?php else: ?>
+      <a href="/" class="btn btn-solid btn-full"><?= phIcon('sign-in') ?> Back to sign in</a>
+      <?php endif; ?>
+      <div class="auth-foot"><span><a href="/">Back to sign in</a></span></div>
+<?php require __DIR__.'/app/Views/Layout/auth_foot.php'; ?>

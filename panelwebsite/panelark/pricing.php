@@ -59,7 +59,7 @@ $selPrice = $priceMap[$sel]??0;
 
 <div class="g2">
   <div class="card">
-    <div class="card-h"><span class="ct">Update Price</span></div>
+    <div class="card-h"><span class="ct"><?= phIcon('tag') ?> Update Price</span></div>
     <div class="card-b">
       <div class="fg">
         <label class="fl">Select Duration</label>
@@ -92,7 +92,7 @@ $selPrice = $priceMap[$sel]??0;
   </div>
 
   <div class="card">
-    <div class="card-h"><span class="ct">All Prices</span></div>
+    <div class="card-h"><span class="ct"><?= phIcon('coins') ?> All Prices</span></div>
     <div class="tw"><table>
       <thead><tr><th>Duration</th><th>Hours</th><th>Price/Device</th><th></th></tr></thead>
       <tbody>
@@ -183,13 +183,13 @@ async function savePrice(){
 <div class="card" style="margin-top:16px">
   <div class="card-h">
     <span class="ct">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="13" height="16"><path d="M438.09-438.09V-320q0 17.81 12.05 29.86T480-278.09q17.81 0 29.86-12.05T521.91-320v-118.09H640q17.81 0 29.86-12.05T681.91-480q0-17.81-12.05-29.86T640-521.91H521.91V-640q0-17.81-12.05-29.86T480-681.91q-17.81 0-29.86 12.05T438.09-640v118.09H320q-17.81 0-29.86 12.05T278.09-480q0 17.81 12.05 29.86T320-438.09h118.09ZM480-71.87q-84.91 0-159.34-32.12-74.44-32.12-129.5-87.17-55.05-55.06-87.17-129.5Q71.87-395.09 71.87-480t32.12-159.34q32.12-74.44 87.17-129.5 55.06-55.05 129.5-87.17 74.43-32.12 159.34-32.12t159.34 32.12q74.44 32.12 129.5 87.17 55.05 55.06 87.17 129.5 32.12 74.43 32.12 159.34t-32.12 159.34q-32.12 74.44-87.17 129.5-55.06 55.05-129.5 87.17Q564.91-71.87 480-71.87Z"/></svg>
       Add / Delete Duration
     </span>
     <span class="owner-only">Owner Only</span>
   </div>
   <div class="card-b">
-    <div style="background:rgba(45,212,191,.04);border:1px solid rgba(45,212,191,.15);border-radius:var(--r);padding:14px;margin-bottom:16px">
+    <div style="background:var(--acc-bg);border:1px solid var(--acc-20);border-radius:var(--r);padding:14px;margin-bottom:16px">
       <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add New Duration</div>
       <div class="g2" style="gap:10px;margin-bottom:10px">
         <div class="fg" style="margin:0">
@@ -206,7 +206,7 @@ async function savePrice(){
         <input class="fi fi-mono" type="number" id="newDurPrice" placeholder="5.00" step="0.01" min="0">
       </div>
       <button onclick="addDuration()" class="btn btn-acc btn-full">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="13" height="15"><path d="M438.09-438.09V-320q0 17.81 12.05 29.86T480-278.09q17.81 0 29.86-12.05T521.91-320v-118.09H640q17.81 0 29.86-12.05T681.91-480q0-17.81-12.05-29.86T640-521.91H521.91V-640q0-17.81-12.05-29.86T480-681.91q-17.81 0-29.86 12.05T438.09-640v118.09H320q-17.81 0-29.86 12.05T278.09-480q0 17.81 12.05 29.86T320-438.09h118.09ZM480-71.87q-84.91 0-159.34-32.12-74.44-32.12-129.5-87.17-55.05-55.06-87.17-129.5Q71.87-395.09 71.87-480t32.12-159.34q32.12-74.44 87.17-129.5 55.06-55.05 129.5-87.17 74.43-32.12 159.34-32.12t159.34 32.12q74.44 32.12 129.5 87.17 55.05 55.06 87.17 129.5 32.12 74.43 32.12 159.34t-32.12 159.34q-32.12 74.44-87.17 129.5-55.06 55.05-129.5 87.17Q564.91-71.87 480-71.87Z"/></svg>
         Add Duration
       </button>
     </div>
@@ -215,7 +215,7 @@ async function savePrice(){
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <?php foreach($prices as $p): ?>
       <button class="btn btn-red btn-sm" onclick="delDuration('<?=htmlspecialchars(addslashes($p->duration))?>')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="13" height="13"><path d="M277.37-111.87q-37.78 0-64.39-26.61t-26.61-64.39v-514.5q-19.15 0-32.33-13.17-13.17-13.18-13.17-32.33t13.17-32.33q13.18-13.17 32.33-13.17H354.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17h159.52q19.15 0 32.33 13.17 13.17 13.18 13.17 32.33h168.61q19.15 0 32.33 13.17 13.17 13.18 13.17 32.33t-13.17 32.33q-13.18 13.17-32.33 13.17v514.5q0 37.78-26.61 64.39t-64.39 26.61H277.37Zm121.2-168.37q17.95 0 30.29-12.34 12.34-12.33 12.34-30.29v-274.74q0-17.96-12.34-30.29-12.34-12.34-30.29-12.34-17.96 0-30.42 12.34-12.45 12.33-12.45 30.29v274.74q0 17.96 12.45 30.29 12.46 12.34 30.42 12.34Zm163.1 0q17.96 0 30.3-12.34 12.33-12.33 12.33-30.29v-274.74q0-17.96-12.33-30.29-12.34-12.34-30.3-12.34-17.95 0-30.41 12.34-12.46 12.33-12.46 30.29v274.74q0 17.96 12.46 30.29 12.46 12.34 30.41 12.34Z"/></svg>
         <?=htmlspecialchars($p->duration)?>
       </button>
       <?php endforeach; ?>

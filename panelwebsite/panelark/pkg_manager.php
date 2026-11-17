@@ -104,8 +104,8 @@ $topPkgs = db()->all(
 <?php $s='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"'; ?>
 <style>
 .pkg-chip{display:inline-flex;align-items:center;gap:8px;background:var(--acc-08);border:1px solid var(--acc-20);
-  border-radius:20px;padding:5px 12px;font-size:12.5px;color:var(--acc);margin:0 6px 6px 0}
-.pkg-cnt{background:var(--acc);color:#062a26;border-radius:20px;padding:1px 8px;font-size:11px;font-weight:600}
+  border-radius:8px;padding:5px 12px;font-size:12.5px;color:var(--acc);margin:0 6px 6px 0}
+.pkg-cnt{background:var(--acc);color:var(--acc-tx);border-radius:8px;padding:1px 8px;font-size:11px;font-weight:600}
 </style>
 
 <div class="g3" style="margin-bottom:18px">
@@ -148,7 +148,7 @@ $topPkgs = db()->all(
     <span class="ct"><?=svgIcon('key',15)?> Keys &amp; bindings</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <div class="sbar" style="width:230px">
-        <svg viewBox="0 0 24 24" <?=$s?> style="width:13px;height:13px;flex-shrink:0;margin-right:8px;opacity:.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" style="width:13px;height:13px;flex-shrink:0;margin-right:8px;opacity:.5"><path d="M378.09-314.5q-111.16 0-188.33-77.17-77.17-77.18-77.17-188.33t77.17-188.33q77.17-77.17 188.33-77.17 111.15 0 188.32 77.17 77.18 77.18 77.18 188.33 0 44.48-13.52 83.12-13.53 38.64-36.57 68.16l222.09 222.33q12.67 12.91 12.67 31.94 0 19.04-12.91 31.71-12.68 12.67-31.83 12.67t-31.82-12.67L529.85-364.59q-29.76 23.05-68.64 36.57-38.88 13.52-83.12 13.52Zm0-91q72.84 0 123.67-50.83 50.83-50.82 50.83-123.67t-50.83-123.67q-50.83-50.83-123.67-50.83-72.85 0-123.68 50.83-50.82 50.82-50.82 123.67t50.82 123.67q50.83 50.83 123.68 50.83Z"/></svg>
         <input id="pkgSearch" placeholder="Search key or package...">
       </div>
       <select class="fi" id="pmFilter" style="width:150px;padding:8px 10px;font-size:12.5px">
@@ -188,8 +188,8 @@ $topPkgs = db()->all(
 
 <script>
 let _modalKid = 0;
-const ICON_EDIT  = '<svg viewBox="0 0 24 24" <?=$s?> width="11" height="11"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
-const ICON_RESET = '<svg viewBox="0 0 24 24" <?=$s?> width="11" height="11"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>';
+const ICON_EDIT  = '<svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="13" height="13"><path d="M157.37-111.87q-19.15 0-32.33-13.17-13.17-13.18-13.17-32.33v-102.26q0-18.15 6.84-34.69 6.83-16.53 19.51-29.2l501.17-500.41q12.48-11.72 27.7-17.96 15.21-6.24 31.93-6.24 16.48 0 32.2 6.24 15.71 6.24 27.67 18.72l65.28 65.56q12.48 11.72 18.34 27.56 5.86 15.83 5.86 31.79 0 16.72-5.86 32.05-5.86 15.34-18.34 27.82L324-138.22q-12.67 12.68-29.21 19.51-16.53 6.84-34.68 6.84H157.37ZM698.74-642.5l56-55.76-56.24-56.48-56.24 56 56.48 56.24Z"/></svg>';
+const ICON_RESET = '<svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="13" height="13"><path d="M385.83-125.54q-103.48-30.92-168.72-116.85-65.24-85.94-65.24-197.13 0-55.57 18.04-106.23 18.05-50.66 50.89-93.42 11.96-15.11 31.31-15.85 19.35-.74 34.74 14.65 11.72 11.72 12.45 29.03.74 17.32-10.5 32.75-22.08 29.81-34.01 65.13-11.92 35.33-11.92 73.94 0 78.85 45.59 140.79 45.58 61.95 117.95 85.43 14.68 4.95 24.13 17.39 9.46 12.43 9.46 26.87 0 23.34-16.27 36.64-16.27 13.29-37.9 6.86Zm188.34 0q-21.63 6.43-37.9-7.24Q520-146.46 520-169.8q0-13.44 9.46-25.99 9.45-12.56 24.13-17.51 72.13-24.48 117.83-86.05 45.71-61.56 45.71-140.17 0-97.37-67.49-166.18-67.49-68.8-164.62-70.71h-3.95l16.23 16.24q11.72 11.71 11.72 29.31 0 17.6-11.72 29.32-11.71 11.71-29.31 11.71-17.6 0-29.32-11.71l-90.21-90.22q-6.72-6.72-9.7-14.79-2.98-8.08-2.98-17.04 0-8.95 2.98-17.03 2.98-8.08 9.7-14.79l90.21-90.46q11.72-11.72 29.32-11.72t29.31 11.72q11.72 11.72 11.72 29.32 0 17.59-11.72 29.31l-19.58 19.59h4.19q136.63 0 231.43 95.63 94.79 95.63 94.79 232.5 0 110.43-65.24 196.63-65.24 86.19-168.72 117.35Z"/></svg>';
 
 function esc(v){ const d=document.createElement('div'); d.textContent=v==null?'':String(v); return d.innerHTML; }
 
@@ -277,6 +277,7 @@ async function resetAllPkg(){
   if(r.ok){ toast(r.msg,'s'); loadList(); } else toast(r.msg,'e');
 }
 
-loadList();
+// panel.js (formPost/toast) loads in the footer, so wait for the DOM before the first fetch
+document.addEventListener('DOMContentLoaded', loadList);
 </script>
 <?php require_once __DIR__.'/app/Views/Layout/footer.php'; ?>

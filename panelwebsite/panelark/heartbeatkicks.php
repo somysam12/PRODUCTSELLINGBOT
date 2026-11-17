@@ -101,7 +101,7 @@ $s  = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="roun
     <span class="ct"><?=svgIcon('heartbeat',15)?> Kicked sessions <span style="color:var(--muted);font-size:11px;font-weight:400">(<?=$total?>)</span></span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <div class="sbar" style="width:230px">
-        <svg viewBox="0 0 24 24" <?=$s?> style="width:13px;height:13px;flex-shrink:0;margin-right:8px;opacity:.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" style="width:13px;height:13px;flex-shrink:0;margin-right:8px;opacity:.5"><path d="M378.09-314.5q-111.16 0-188.33-77.17-77.17-77.18-77.17-188.33t77.17-188.33q77.17-77.17 188.33-77.17 111.15 0 188.32 77.17 77.18 77.18 77.18 188.33 0 44.48-13.52 83.12-13.53 38.64-36.57 68.16l222.09 222.33q12.67 12.91 12.67 31.94 0 19.04-12.91 31.71-12.68 12.67-31.83 12.67t-31.82-12.67L529.85-364.59q-29.76 23.05-68.64 36.57-38.88 13.52-83.12 13.52Zm0-91q72.84 0 123.67-50.83 50.83-50.82 50.83-123.67t-50.83-123.67q-50.83-50.83-123.67-50.83-72.85 0-123.68 50.83-50.82 50.82-50.82 123.67t50.82 123.67q50.83 50.83 123.68 50.83Z"/></svg>
         <input id="kickSearch" placeholder="Search key, device, package, IP..." value="<?=htmlspecialchars($q)?>">
       </div>
       <select class="fi" style="width:170px;padding:8px 10px;font-size:12.5px" onchange="location.href='/heartbeatkicks.php?r='+encodeURIComponent(this.value)">
@@ -141,7 +141,7 @@ $s  = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="roun
           <td style="font-size:11.5px;color:var(--muted)"><?= date('d M, H:i', strtotime($r->last_seen)) ?></td>
           <td>
             <button class="btn btn-ghost btn-xs" onclick="delKick(<?=(int)$r->id?>)" title="Remove">
-              <svg viewBox="0 0 24 24" <?=$s?> width="10" height="10"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="13" height="13"><path d="M277.37-111.87q-37.78 0-64.39-26.61t-26.61-64.39v-514.5q-19.15 0-32.33-13.17-13.17-13.18-13.17-32.33t13.17-32.33q13.18-13.17 32.33-13.17H354.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17h159.52q19.15 0 32.33 13.17 13.17 13.18 13.17 32.33h168.61q19.15 0 32.33 13.17 13.17 13.18 13.17 32.33t-13.17 32.33q-13.18 13.17-32.33 13.17v514.5q0 37.78-26.61 64.39t-64.39 26.61H277.37Zm121.2-168.37q17.95 0 30.29-12.34 12.34-12.33 12.34-30.29v-274.74q0-17.96-12.34-30.29-12.34-12.34-30.29-12.34-17.96 0-30.42 12.34-12.45 12.33-12.45 30.29v274.74q0 17.96 12.45 30.29 12.46 12.34 30.42 12.34Zm163.1 0q17.96 0 30.3-12.34 12.33-12.33 12.33-30.29v-274.74q0-17.96-12.33-30.29-12.34-12.34-30.3-12.34-17.95 0-30.41 12.34-12.46 12.33-12.46 30.29v274.74q0 17.96 12.46 30.29 12.46 12.34 30.41 12.34Z"/></svg>
             </button>
           </td>
         </tr>

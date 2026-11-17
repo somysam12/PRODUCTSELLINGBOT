@@ -98,165 +98,109 @@ $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 $initCode = ''; // Generated fresh on button click
 ?>
 
+<?php
+// level of each creator in one query (was one query per row)
+$creatorLvl = [];
+if ($refCodes) {
+    $names = array_values(array_unique(array_map(fn($r) => $r->created_by, $refCodes)));
+    $in = implode(',', array_fill(0, count($names), '?'));
+    foreach (db()->all("SELECT username, level FROM users WHERE username IN ($in)", $names) as $cu) $creatorLvl[$cu->username] = (int)$cu->level;
+}
+$usedCnt = count(array_filter($refCodes, fn($r) => (int)$r->is_used === 1));
+?>
 <?php if($success): ?>
-<div class="alert a-ok" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+<div class="alert a-ok" style="justify-content:space-between;flex-wrap:wrap">
   <span><?= $success ?></span>
-  <button onclick="copyText('<?= htmlspecialchars($code??'') ?>','Code')" class="btn btn-acc btn-sm">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-    Copy Code
-  </button>
+  <button onclick="copyText('<?= htmlspecialchars($code??'') ?>','Code')" class="btn btn-solid btn-sm"><?= phIcon('copy') ?> Copy code</button>
 </div>
 <?php endif; ?>
 <?php if($error): ?>
-<div class="alert a-err"><?= htmlspecialchars($error) ?></div>
+<div class="alert a-err"><?= phIcon('prohibit') ?> <?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
-<div class="g-left">
-  <!-- GENERATE FORM -->
-  <div class="card" style="height:fit-content">
-    <div class="card-h"><span class="ct"><?=svgIcon('link',14)?> Generate Referral Code</span></div>
-    <div class="card-b">
-      <!-- Limit widget -->
-      <?php if($ulevel>1): ?>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 17px;background:var(--acc-08);border:1px solid var(--acc-20);border-radius:var(--r2);margin-bottom:18px">
-        <div>
-          <div style="font-size:12.5px;color:var(--muted);margin-bottom:4px">Your limit</div>
-          <div style="font-size:23px;font-weight:600;letter-spacing:-.6px;color:<?= $refLimitRem>0?'var(--acc)':'var(--coral)' ?>">
-            <?= $refLimitRem ?> <span style="font-size:12.5px;font-weight:400;color:var(--muted)">remaining</span>
-          </div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:12.5px;color:var(--muted);margin-bottom:4px">Total assigned</div>
-          <div style="font-size:16px;font-weight:600;color:var(--text)"><?= (int)($myUser->referral_limit??0) ?></div>
-        </div>
-      </div>
-      <?php endif; ?>
+<div class="strip">
+  <div class="met"><div class="met-ic" style="--c:var(--sky-tx);--cb:var(--sky-bg)"><?= phIcon('ticket') ?></div><div class="met-x"><b><?= $totalRef ?></b><span>Codes</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--acc-tx);--cb:var(--acc-bg)"><?= phIcon('check-circle') ?></div><div class="met-x"><b><?= $totalRef - $usedCnt ?></b><span>Available</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--rose-tx);--cb:var(--rose-bg)"><?= phIcon('user-plus') ?></div><div class="met-x"><b><?= $usedCnt ?></b><span>Used</span></div></div>
+  <?php if($ulevel>1): ?>
+  <div class="met"><div class="met-ic" style="--c:var(--amber-tx);--cb:var(--amber-bg)"><?= phIcon('hourglass-medium') ?></div><div class="met-x"><b><?= $refLimitRem ?> / <?= (int)($myUser->referral_limit??0) ?></b><span>Your limit left</span></div></div>
+  <?php endif; ?>
+</div>
 
-      <form method="POST" id="refForm">
-        <?= csrfField() ?>
-        <input type="hidden" name="gen_ref" value="1">
-
-        <div class="fg">
-          <label class="fl">Generated Code <span style="color:var(--muted);font-weight:400">(auto)</span></label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <div class="ref-pill" id="refPreview" style="color:<?= $code ? 'var(--acc)' : 'var(--muted)' ?>;letter-spacing:2px"><?= $code ?: 'AUTO' ?></div>
-            <!-- left empty so every submit generates a fresh unique code server-side -->
-            <input type="hidden" name="custom_code" id="refCodeInput" value="">
-          </div>
-          <div class="fi-hint">A fresh unique 6-character code is generated on each click.</div>
-        </div>
-
-        <div class="fg">
-          <label class="fl">Starting Balance (Saldo)</label>
-          <div style="position:relative">
-            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);">$</span>
-            <input class="fi" type="number" name="saldo" value="10000" min="0" step="0.01" style="padding-left:26px">
-          </div>
-        </div>
-
-        <div class="fg">
-          <label class="fl">Account Expiration</label>
-          <select class="fi" name="acc_expire">
-            <?php foreach($expireOptions as $o): ?>
-            <option<?= $o==='90 Days' ? ' selected' : '' ?>><?= htmlspecialchars($o) ?></option>
-            <?php endforeach; ?>
-          </select>
-          <div class="fi-hint">How long the new account stays active after registering.</div>
-        </div>
-
-        <?php if($ulevel===1): ?>
-        <div class="fg">
-          <label class="fl">Account Level</label>
-          <select class="fi" name="acc_level" id="accLevel" onchange="onLevelChange(this.value)">
-            <option value="1">Level 1 — Owner</option>
-            <option value="2">Level 2 — Admin</option>
-            <option value="3" selected>Level 3 — Reseller</option>
-          </select>
-        </div>
-
-        <!-- Admin-only: how many referral codes the new admin may issue -->
-        <div class="fg" id="refLimitWrap" style="display:none">
-          <label class="fl">Referral Limit for this Admin</label>
-          <input class="fi" type="number" name="ref_limit" id="refLimitInput" value="5" min="0" step="1">
-          <div class="fi-hint">Number of referral codes this admin can create. Use <strong>0</strong> for none.</div>
-        </div>
-        <?php elseif($ulevel===2): // Admin can only create reseller ?>
-        <input type="hidden" name="acc_level" value="3">
-        <?php endif; ?>
-
-        <button type="submit" class="btn btn-acc btn-full"><?=svgIcon('zap',14)?> Generate code</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- CODE HISTORY -->
-  <div class="card">
+<div class="work">
+  <!-- CODES -->
+  <div class="card work-main" style="margin:0">
     <div class="card-h">
-      <span class="ct"><?=svgIcon('key',14)?> Code History <span style="color:var(--muted);font-size:11px;font-weight:400;text-transform:none">(<?= $totalRef ?>)</span></span>
+      <span class="ct"><?= phIcon('ticket') ?> Codes</span>
+      <div class="sbar" style="flex:1 1 180px;max-width:300px">
+        <?= phIcon('magnifying-glass') ?>
+        <input aria-label="Search codes" placeholder="Search" value="<?= htmlspecialchars($q) ?>" onkeydown="if(event.key==='Enter')location.href='/referral.php?q='+encodeURIComponent(this.value)">
+      </div>
       <?php if($ulevel===1): ?>
-      <button class="btn btn-red btn-sm" onclick="confirmDo('Clear ALL referral history?',clearAll)"><?=svgIcon('trash',12)?> Clear All</button>
+      <button class="btn btn-red btn-sm" onclick="confirmDo('Clear ALL referral history?',clearAll)"><?= phIcon('trash') ?> Clear all</button>
       <?php endif; ?>
     </div>
-    <div class="card-b" style="padding:12px">
-      <div class="sbar" style="margin-bottom:12px">
-        <span class="sbar-i"><?=svgIcon('link',13)?></span>
-        <input placeholder="Search codes, used by..." value="<?= htmlspecialchars($q) ?>" onkeydown="if(event.key==='Enter')location.href='/referral.php?q='+encodeURIComponent(this.value)">
+    <div id="refTable">
+      <?php if(empty($refCodes)): ?>
+      <div class="empty">No referral codes yet.</div>
+      <?php else: foreach($refCodes as $rc):
+        $lvl = (int)$rc->level; $lvlName = [1=>'Owner',2=>'Admin',3=>'Reseller'][$lvl] ?? 'Reseller';
+        $lvlCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'][$lvl] ?? 'b-reseller';
+      ?>
+      <div class="li" id="rr-<?= $rc->id ?>">
+        <button type="button" class="btn icon-btn" onclick="copyText('<?= htmlspecialchars($rc->code, ENT_QUOTES) ?>','Code')" title="Copy code" aria-label="Copy code"><?= phIcon('copy') ?></button>
+        <div class="li-x">
+          <b class="mono" style="font-size:14px;letter-spacing:2px"><?= htmlspecialchars($rc->code) ?></b>
+          <span>$<?= number_format((float)$rc->saldo,2) ?> · <?= htmlspecialchars($rc->acc_expire) ?><?= ($lvl===2 && (int)($rc->referral_limit??0)>0) ? ' · '.(int)$rc->referral_limit.' referrals' : '' ?> · by <?= htmlspecialchars($rc->created_by) ?><?= $rc->used_by ? ' · used by '.htmlspecialchars($rc->used_by) : '' ?></span>
+        </div>
+        <span class="bx <?= $lvlCls ?>"><?= $lvlName ?></span>
+        <span class="bx <?= $rc->is_used ? 'b-ban' : 'b-active' ?>"><?= $rc->is_used ? 'Used' : 'Available' ?></span>
+        <?php if(!$rc->is_used): ?>
+        <button type="button" class="btn btn-red icon-btn" onclick="confirmDo('Delete this code?',()=>delRef(<?= $rc->id ?>))" title="Delete code" aria-label="Delete code"><?= phIcon('trash') ?></button>
+        <?php endif; ?>
       </div>
-    </div>
-    <div class="tw">
-      <table id="refTable">
-        <thead><tr>
-          <th>#</th><th>Code</th><th>Saldo</th><th>Level</th><th>Expiry</th><th>Used</th><th>Used By</th><th>Created By</th><th></th>
-        </tr></thead>
-        <tbody>
-          <?php if(empty($refCodes)): ?>
-          <tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">No referral codes yet</td></tr>
-          <?php else: $i=1; foreach($refCodes as $rc): ?>
-          <tr id="rr-<?= $rc->id ?>">
-            <td style="color:var(--muted)"><?= $i++ ?></td>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px">
-                <div style="background:var(--acc-08);border:1px solid var(--acc-20);border-radius:var(--r4);padding:4px 11px;font-size:13px;color:var(--acc);letter-spacing:1px;font-weight:600"><?= htmlspecialchars($rc->code) ?></div>
-                <button class="btn btn-ghost btn-xs" onclick="copyText('<?= htmlspecialchars($rc->code) ?>','Code')" title="Copy">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                </button>
-              </div>
-            </td>
-            <td style="color:var(--acc);font-weight:700">$<?= number_format((float)$rc->saldo,2) ?></td>
-            <td>
-              <?php if($rc->level==1): ?><span class="bx b-owner">Owner</span>
-              <?php elseif($rc->level==2): ?>
-                <span class="bx b-admin">Admin</span>
-                <?php if((int)($rc->referral_limit??0) > 0): ?>
-                <div style="font-size:11px;color:var(--muted);margin-top:4px"><?= (int)$rc->referral_limit ?> referrals</div>
-                <?php endif; ?>
-              <?php else: ?><span class="bx b-reseller">Reseller</span>
-              <?php endif; ?>
-            </td>
-            <td style="font-size:11px;color:var(--muted2)"><?= htmlspecialchars($rc->acc_expire) ?></td>
-            <td>
-              <?php if($rc->is_used): ?>
-                <span class="bx b-ban" style="font-size:9px">Used</span>
-              <?php else: ?>
-                <span class="bx b-active" style="font-size:9px">Available</span>
-              <?php endif; ?>
-            </td>
-            <td style="font-size:11px"><?= $rc->used_by ? '<code style="font-size:10px">'.htmlspecialchars($rc->used_by).'</code>' : '<span style="color:var(--muted)">—</span>' ?></td>
-            <td>
-              <?php $cl = ['1'=>'b-owner','2'=>'b-admin','3'=>'b-reseller'][db()->one("SELECT level FROM users WHERE username=?",[$rc->created_by])->level??'3']??'b-reseller'; ?>
-              <span class="bx <?= $cl ?>" style="font-size:9px"><?= htmlspecialchars($rc->created_by) ?></span>
-            </td>
-            <td>
-              <?php if(!$rc->is_used): ?>
-              <button class="btn btn-red btn-xs" onclick="confirmDo('Delete this code?',()=>delRef(<?= $rc->id ?>))"><?=svgIcon('trash',12)?></button>
-              <?php endif; ?>
-            </td>
-          </tr>
-          <?php endforeach; endif; ?>
-        </tbody>
-      </table>
+      <?php endforeach; endif; ?>
     </div>
   </div>
+
+  <!-- NEW CODE -->
+  <aside class="work-side">
+    <form method="POST" id="refForm" class="gsec" style="margin:0">
+      <?= csrfField() ?>
+      <input type="hidden" name="gen_ref" value="1">
+      <input type="hidden" name="custom_code" id="refCodeInput" value="">
+      <div class="gsec-h"><span class="gnum"><?= phIcon('plus') ?></span><h3>New code</h3></div>
+
+      <?php if($code): ?><div class="ref-pill" id="refPreview" style="width:100%;justify-content:center;margin-bottom:14px"><?= htmlspecialchars($code) ?></div><?php endif; ?>
+
+      <?php if($ulevel===1): ?>
+      <label class="glabel">Account level</label>
+      <select name="acc_level" id="accLevel" data-ui="tiles" onchange="onLevelChange(this.value)">
+        <option value="3" selected data-t="Reseller">Level 3 — Reseller</option>
+        <option value="2" data-t="Admin">Level 2 — Admin</option>
+        <option value="1" data-t="Owner">Level 1 — Owner</option>
+      </select>
+      <div class="fg" id="refLimitWrap" style="display:none;margin-top:14px">
+        <label class="glabel" for="refLimitInput">Codes this admin can create</label>
+        <input type="number" name="ref_limit" id="refLimitInput" data-ui="stepper" value="5" min="0" step="1">
+      </div>
+      <?php elseif($ulevel===2): ?>
+      <input type="hidden" name="acc_level" value="3">
+      <?php endif; ?>
+
+      <label class="glabel" style="margin-top:14px">Account valid for</label>
+      <select name="acc_expire" data-ui="tiles">
+        <?php foreach($expireOptions as $o): ?>
+        <option<?= $o==='90 Days' ? ' selected' : '' ?>><?= htmlspecialchars($o) ?></option>
+        <?php endforeach; ?>
+      </select>
+
+      <label class="glabel" for="saldoInp" style="margin-top:14px">Starting balance ($)</label>
+      <input class="fi" type="number" name="saldo" id="saldoInp" value="10000" min="0" step="0.01" inputmode="decimal">
+
+      <button type="submit" class="btn btn-solid btn-full" style="margin-top:16px"><?= phIcon('sparkle') ?> Generate code</button>
+    </form>
+  </aside>
 </div>
 
 <script>

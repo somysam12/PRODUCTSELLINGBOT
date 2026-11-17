@@ -121,8 +121,8 @@ $resellerEditKeys = getSetting('reseller_can_edit_keys','0')==='1';
     <div class="card-b">
       <?php if($plogo): ?>
       <!-- Current logo + remove — SEPARATE form (must NOT be nested inside branding form) -->
-      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);border-radius:var(--r);margin-bottom:14px">
-        <img src="<?= htmlspecialchars($plogo) ?>" style="width:54px;height:54px;border-radius:var(--r);object-fit:cover;border:2px solid rgba(45,212,191,.3)" onerror="this.style.display='none'">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--acc-bg);border:1px solid var(--acc-20);border-radius:var(--r);margin-bottom:14px">
+        <img src="<?= htmlspecialchars($plogo) ?>" style="width:54px;height:54px;border-radius:var(--r);object-fit:cover;border:2px solid var(--acc-20)" onerror="this.style.display='none'">
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--acc);margin-bottom:4px">Current Logo</div>
           <div style="font-size:10px;color:var(--muted)"><?= htmlspecialchars(basename($plogo)) ?></div>
@@ -153,7 +153,7 @@ $resellerEditKeys = getSetting('reseller_can_edit_keys','0')==='1';
           <label class="fl">Panel Logo</label>
           <div class="logo-drop" onclick="document.getElementById('logoFile').click()" id="dropZone">
             <div id="logoPrevWrap" style="display:none;margin-bottom:10px">
-              <img id="logoPrev" style="width:64px;height:64px;border-radius:var(--r);object-fit:cover;margin:0 auto;display:block;border:2px solid rgba(45,212,191,.3)">
+              <img id="logoPrev" style="width:64px;height:64px;border-radius:var(--r);object-fit:cover;margin:0 auto;display:block;border:2px solid var(--acc-20)">
             </div>
             <div style="font-size:28px;margin-bottom:8px;opacity:.5"></div>
             <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Click to upload logo</div>

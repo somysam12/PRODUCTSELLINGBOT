@@ -94,211 +94,112 @@ $resellerCount = (int)(db()->one("SELECT COUNT(*) c FROM users WHERE level=3 AND
 $s = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
 ?>
 
-<!-- Maintenance Mode -->
-<div class="card" style="border-color:<?=$maintMode?'rgba(255,184,0,.3)':'var(--border)'?>">
-  <div class="card-h">
-    <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      Maintenance Mode
-    </span>
-    <span id="maintBadge" class="<?=$maintMode?'pill p-warn':'pill p-on'?>">
-      <span class="dot"></span><?=$maintMode?'ON':'OFF'?>
-    </span>
-  </div>
-  <div class="card-b">
-    <div class="fg">
-      <label class="fl">Maintenance Message</label>
-      <textarea class="fi" id="maintMsg" rows="2"><?=htmlspecialchars($maintMsg)?></textarea>
-    </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-acc" style="flex:1" onclick="saveMaint(0)">
-        <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
-        Turn OFF
-      </button>
-      <button class="btn btn-warn" style="flex:1" onclick="saveMaint(1)">
-        <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-        Turn ON
-      </button>
-    </div>
-  </div>
+<div class="strip">
+  <div class="met"><div class="met-ic" style="--c:var(--amber-tx);--cb:var(--amber-bg)"><?= phIcon('crown') ?></div><div class="met-x"><b><?=$ownerCount?></b><span>Owners</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--blue-tx);--cb:var(--blue-bg)"><?= phIcon('identification-badge') ?></div><div class="met-x"><b><?=$adminCount?></b><span>Admins</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--violet-tx);--cb:var(--violet-bg)"><?= phIcon('storefront') ?></div><div class="met-x"><b><?=$resellerCount?></b><span>Resellers</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--acc-tx);--cb:var(--acc-bg)"><?= phIcon('android') ?></div><div class="met-x"><b><?=htmlspecialchars($apkVer)?></b><span>APK version</span></div></div>
 </div>
 
-<!-- Server Settings -->
-<div class="card">
-  <div class="card-h">
-    <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-      Server Settings
-    </span>
+<!-- Maintenance -->
+<section class="gsec">
+  <div class="gsec-h">
+    <span class="gnum"><?= phIcon('build') ?></span>
+    <h3>Maintenance mode</h3>
+    <span id="maintBadge" class="<?=$maintMode?'pill p-warn':'pill p-on'?>"><span class="dot"></span><?=$maintMode?'ON':'OFF'?></span>
   </div>
-  <div class="card-b">
-    <!-- Base domain — drives every generated link across the panel -->
-    <div class="fg">
-      <label class="fl">Base Domain <span style="color:var(--muted)">(for a new domain/subdomain — all links follow this)</span></label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input class="fi fi-mono" id="baseUrl" style="flex:1;min-width:200px" value="<?=htmlspecialchars($panelBaseSet)?>" placeholder="https://sub.yourdomain.com">
-        <button class="btn btn-acc btn-sm" onclick="saveBase()">Save</button>
-      </div>
-      <div class="fi-hint">Blank = default <code><?=htmlspecialchars(rtrim(PANEL_URL,'/'))?></code>. Active now: <code><?=htmlspecialchars(panelBase())?></code></div>
+  <div class="work" style="grid-template-columns:minmax(0,1fr) 260px;gap:14px">
+    <div>
+      <label class="glabel" for="maintMsg">Message shown to devices</label>
+      <textarea class="fi" id="maintMsg" rows="3" style="min-height:0"><?=htmlspecialchars($maintMsg)?></textarea>
     </div>
-    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
+    <div style="display:grid;gap:10px;align-content:end">
+      <button class="btn btn-warn" onclick="saveMaint(1)"><?= phIcon('power') ?> Turn on</button>
+      <button class="btn btn-solid" onclick="saveMaint(0)"><?= phIcon('check-circle') ?> Turn off</button>
+    </div>
+  </div>
+</section>
+
+<div class="g2" style="align-items:start">
+  <!-- Server -->
+  <section class="gsec" style="margin:0">
+    <div class="gsec-h"><span class="gnum"><?= phIcon('hard-drives') ?></span><h3>Server</h3></div>
+
+    <label class="glabel" for="baseUrl">Base domain</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <input class="fi fi-mono" id="baseUrl" style="flex:1;min-width:180px" value="<?=htmlspecialchars($panelBaseSet)?>" placeholder="<?=htmlspecialchars(rtrim(PANEL_URL,'/'))?>">
+      <button class="btn" onclick="saveBase()">Save</button>
+    </div>
+    <div class="rowi" style="margin-bottom:16px"><div class="rowi-ic"><?= phIcon('globe') ?></div><div class="rowi-x"><b>Active base</b><code><?=htmlspecialchars(panelBase())?></code></div></div>
+
     <?php if(empty($serverUrl)): ?>
-    <!-- APK URL - First time only -->
-    <div class="alert a-info" style="margin-bottom:14px;font-size:11px">
-      <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      APK Connect URL sirf 1 baar set hoti hai — save ke baad permanently lock ho jaayegi.
-    </div>
-    <div class="fg">
-      <label class="fl">APK Connect URL</label>
-      <input class="fi fi-mono" id="serverUrl" placeholder="https://yourdomain.com/server/" oninput="updatePreview(this.value)">
-      <div class="fi-hint" id="urlPreview" style="color:var(--acc);margin-top:6px;word-break:break-all"></div>
-    </div>
-    <div class="fg">
-      <label class="fl">APK Version</label>
-      <input class="fi fi-mono" id="apkVer" value="<?=htmlspecialchars($apkVer)?>" placeholder="1.0.0">
-    </div>
-    <button class="btn btn-acc btn-full" onclick="saveServer()">
-      <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
-      Save & Lock APK URL
-    </button>
-
+    <label class="glabel" for="serverUrl">APK connect URL (locks after the first save)</label>
+    <input class="fi fi-mono" id="serverUrl" placeholder="https://yourdomain.com/server/" oninput="updatePreview(this.value)" style="margin-bottom:6px">
+    <div class="fi-hint" id="urlPreview" style="margin:0 0 12px;word-break:break-all"></div>
+    <label class="glabel" for="apkVer">APK version</label>
+    <input class="fi fi-mono" id="apkVer" value="<?=htmlspecialchars($apkVer)?>" style="margin-bottom:14px">
+    <button class="btn btn-solid btn-full" onclick="saveServer()"><?= phIcon('lock') ?> Save &amp; lock URL</button>
     <?php else: ?>
-    <!-- APK Connect URL - set, but editable -->
-    <div style="background:var(--s3);border:1px solid rgba(45,212,191,.2);border-radius:var(--r);padding:14px;margin-bottom:12px">
-      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:4px">
-        <svg viewBox="0 0 24 24" <?=$s?> width="11" height="11"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
-        APK / Lib Connect URL
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap" id="urlLockedView">
-        <code style="flex:1;font-size:12px;color:var(--acc);word-break:break-all;background:rgba(45,212,191,.06);padding:8px 10px;border-radius:var(--r);border:1px solid rgba(45,212,191,.15)"><?=htmlspecialchars($serverUrl)?></code>
-        <button onclick="copyText('<?=htmlspecialchars(addslashes($serverUrl))?>','Connect URL')" class="btn btn-acc btn-sm" style="flex-shrink:0">
-          <svg viewBox="0 0 24 24" <?=$s?> width="12" height="12"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
-        </button>
-        <button onclick="document.getElementById('urlEditView').style.display='block';this.parentElement.style.display='none'" class="btn btn-ghost btn-sm" style="flex-shrink:0">Edit</button>
-      </div>
-      <div id="urlEditView" style="display:none">
-        <input class="fi fi-mono" id="serverUrl" value="<?=htmlspecialchars($serverUrl)?>" placeholder="https://arkcheat.battleground-hub.shop/validbool" oninput="updatePreview(this.value)" style="margin-bottom:8px">
-        <div class="fi-hint" id="urlPreview" style="color:var(--acc);margin-bottom:8px;word-break:break-all"></div>
-        <button class="btn btn-acc btn-sm" onclick="saveServer()">Save New URL</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">
-        APK &amp; lib use this URL to verify keys. Recommended: <code>https://arkcheat.battleground-hub.shop/validbool</code>
-      </div>
+    <label class="glabel">APK / lib connect URL</label>
+    <div class="rowi" id="urlLockedView" style="margin-bottom:12px">
+      <div class="rowi-ic"><?= phIcon('link') ?></div>
+      <div class="rowi-x"><code style="font-size:12.5px"><?=htmlspecialchars($serverUrl)?></code></div>
+      <button onclick="copyText('<?=htmlspecialchars(addslashes($serverUrl))?>','Connect URL')" class="btn icon-btn" title="Copy" aria-label="Copy URL"><?= phIcon('copy') ?></button>
+      <button onclick="document.getElementById('urlEditView').style.display='block';this.parentElement.style.display='none'" class="btn icon-btn" title="Edit" aria-label="Edit URL"><?= phIcon('pencil-simple-line') ?></button>
     </div>
-    <div class="fg">
-      <label class="fl">APK Version</label>
-      <input class="fi fi-mono" id="apkVer" value="<?=htmlspecialchars($apkVer)?>" placeholder="1.0.0">
+    <div id="urlEditView" style="display:none;margin-bottom:12px">
+      <input class="fi fi-mono" id="serverUrl" value="<?=htmlspecialchars($serverUrl)?>" oninput="updatePreview(this.value)" style="margin-bottom:8px">
+      <div class="fi-hint" id="urlPreview" style="margin:0 0 8px;word-break:break-all"></div>
+      <button class="btn btn-solid btn-sm" onclick="saveServer()">Save new URL</button>
     </div>
-    <button class="btn btn-acc btn-full" onclick="saveApkVer()">
-      <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
-      Save APK Version
-    </button>
+    <label class="glabel" for="apkVer">APK version</label>
+    <div style="display:flex;gap:8px">
+      <input class="fi fi-mono" id="apkVer" value="<?=htmlspecialchars($apkVer)?>" style="flex:1;min-width:0">
+      <button class="btn" onclick="saveApkVer()">Save</button>
+    </div>
     <?php endif; ?>
-  </div>
-</div>
+  </section>
 
-<!-- Panel Stats -->
-<div class="card">
-  <div class="card-h">
-    <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Panel Stats (Owner Only)
-    </span>
-  </div>
-  <div class="card-b">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div style="background:var(--s3);border:1px solid rgba(45,212,191,.15);border-radius:var(--r);padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:900;color:var(--acc)"><?=$ownerCount?></div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:4px">Owners</div>
+  <div>
+    <!-- Protection -->
+    <section class="gsec">
+      <div class="gsec-h">
+        <span class="gnum"><?= phIcon('shield-check') ?></span><h3>DDoS protection</h3>
+        <label class="tog"><input type="checkbox" id="ddosTog" <?=$ddosProt?'checked':''?> onchange="saveDdos()"><span class="togsl"></span></label>
       </div>
-      <div style="background:var(--s3);border:1px solid rgba(0,148,255,.15);border-radius:var(--r);padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:900;color:var(--acc2)"><?=$adminCount?></div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:4px">Admins</div>
+      <div class="gpair">
+        <div><label class="glabel" for="maxAttempts">Login attempts</label><input type="number" id="maxAttempts" data-ui="stepper" value="<?=$maxAttempts?>" min="3" max="20"></div>
+        <div><label class="glabel" for="lockoutMins">Lockout minutes</label><input type="number" id="lockoutMins" data-ui="stepper" value="<?=$lockoutMins?>" min="1" max="60"></div>
       </div>
-      <div style="background:var(--s3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;text-align:center">
-        <div style="font-size:22px;font-weight:900;color:var(--muted2)"><?=$resellerCount?></div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:4px">Resellers</div>
-      </div>
-    </div>
-  </div>
-</div>
+      <button class="btn btn-full" style="margin-top:14px" onclick="saveDdos()"><?= phIcon('floppy-disk') ?> Save protection</button>
+    </section>
 
-<!-- DDoS Protection -->
-<div class="card">
-  <div class="card-h">
-    <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      DDoS Protection
-    </span>
-    <label class="tog">
-      <input type="checkbox" id="ddosTog" <?=$ddosProt?'checked':''?> onchange="saveDdos()">
-      <span class="togsl"></span>
-    </label>
-  </div>
-  <div class="card-b">
-    <div class="g2" style="gap:12px">
-      <div class="fg" style="margin:0">
-        <label class="fl">Max Login Attempts</label>
-        <input class="fi" type="number" id="maxAttempts" value="<?=$maxAttempts?>" min="3" max="20">
+    <!-- License -->
+    <section class="gsec" style="margin:0">
+      <div class="gsec-h">
+        <span class="gnum"><?= phIcon('seal-check') ?></span><h3>Panel license</h3>
+        <?php if($licValid===true): ?><span class="bx b-active">Active · <?=$licDaysLeft?>d left</span>
+        <?php elseif($licValid===false): ?><span class="bx b-ban">Expired</span>
+        <?php elseif(!empty($curLicKey)): ?><span class="bx b-reseller">Not verified</span><?php endif; ?>
       </div>
-      <div class="fg" style="margin:0">
-        <label class="fl">Lockout (Minutes)</label>
-        <input class="fi" type="number" id="lockoutMins" value="<?=$lockoutMins?>" min="1" max="60">
-      </div>
-    </div>
-    <button class="btn btn-acc btn-full" style="margin-top:12px" onclick="saveDdos()">
-      <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
-      Save DDoS Settings
-    </button>
-  </div>
-</div>
-
-<!-- Panel License -->
-<div class="card" style="border-color:<?=$licValid===false?'rgba(255,77,109,.3)':($licValid===true?'rgba(45,212,191,.2)':'var(--border)')?>">
-  <div class="card-h">
-    <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Panel License Key
-    </span>
-    <?php if($licValid===true): ?>
-      <span class="bx b-active">● ACTIVE — <?=$licDaysLeft?>d left</span>
-    <?php elseif($licValid===false): ?>
-      <span class="bx b-ban">● EXPIRED</span>
-    <?php elseif(!empty($curLicKey)): ?>
-      <span class="bx b-reseller">● Not Verified</span>
-    <?php endif; ?>
-  </div>
-  <div class="card-b">
-    <?php if($licValid===false): ?>
-    <div class="alert a-err" style="margin-bottom:14px">License expired! Enter new key below.</div>
-    <?php elseif($licValid===true && $licDaysLeft<=7): ?>
-    <div class="alert a-warn" style="margin-bottom:14px">Expiring in <?=$licDaysLeft?> days! Contact @Hamzakhan24</div>
-    <?php endif; ?>
-
-    <?php if($curLicKey): ?>
-    <div style="background:var(--s3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Current Key</div>
-        <div style="color:var(--acc);font-weight:700"><?=htmlspecialchars($curLicKey)?></div>
-      </div>
-      <?php if($licExpiry): ?>
-      <div style="text-align:right">
-        <div style="font-size:10px;color:var(--muted)">Expires</div>
-        <div style="font-size:12px;color:<?=$licDaysLeft<=7?'var(--danger)':'var(--muted2)'?>"><?=date('d M Y',strtotime($licExpiry))?></div>
+      <?php if($licValid===false): ?>
+      <div class="alert a-err"><?= phIcon('warning') ?> License expired — enter a new key.</div>
+      <?php elseif($licValid===true && $licDaysLeft<=7): ?>
+      <div class="alert a-warn"><?= phIcon('warning') ?> License expires in <?=$licDaysLeft?> days.</div>
+      <?php endif; ?>
+      <?php if($curLicKey): ?>
+      <div class="rowi" style="margin-bottom:12px">
+        <div class="rowi-ic"><?= phIcon('key') ?></div>
+        <div class="rowi-x"><b>Current key</b><code><?=htmlspecialchars($curLicKey)?></code></div>
+        <?php if($licExpiry): ?><span class="bx <?=$licDaysLeft<=7?'b-ban':'b-unused'?>"><?=date('d M Y',strtotime($licExpiry))?></span><?php endif; ?>
       </div>
       <?php endif; ?>
-    </div>
-    <?php endif; ?>
-
-    <div class="fg">
-      <label class="fl">Enter / Update License Key</label>
-      <input class="fi fi-mono" type="text" id="newLicKey" placeholder="HBL-XXXXX-XXXXX-XXXXX-XXXXX" oninput="this.value=this.value.toUpperCase()">
-    </div>
-    <button onclick="saveLicense()" class="btn btn-acc btn-full">
-      <svg viewBox="0 0 24 24" <?=$s?> width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Save License Key
-    </button>
+      <label class="glabel" for="newLicKey">New license key</label>
+      <div style="display:flex;gap:8px">
+        <input class="fi fi-mono" type="text" id="newLicKey" placeholder="HBL-XXXXX-XXXXX-XXXXX-XXXXX" oninput="this.value=this.value.toUpperCase()" style="flex:1;min-width:0">
+        <button onclick="saveLicense()" class="btn">Save</button>
+      </div>
+    </section>
   </div>
 </div>
 

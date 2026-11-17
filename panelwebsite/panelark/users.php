@@ -238,184 +238,135 @@ $levelMap = [1=>'Owner',2=>'Admin',3=>'Reseller'];
 $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 ?>
 
-<!-- SEARCH CARD -->
-<div class="card" style="margin-bottom:14px">
-  <div class="card-h">
-    <span class="ct"><svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search & Filter</span>
-    <?php if($ulevel===1): ?>
-    <button class="btn btn-red btn-sm" onclick="deleteAll()">
-      <svg viewBox="0 0 24 24" <?=$s?> width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-      Delete All Users
-    </button>
-    <?php endif; ?>
-  </div>
-  <div class="card-b" style="padding:14px">
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <div style="position:relative;flex:1;min-width:180px">
-        <div class="sbar">
-          <svg viewBox="0 0 24 24" <?=$s?> style="width:13px;height:13px;flex-shrink:0;margin-right:7px;opacity:.35"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input id="userSearch" placeholder="Type to search users..." value="<?=htmlspecialchars($q)?>" autocomplete="off" oninput="searchU(this.value);liveFilter(this.value)" onfocus="searchU(this.value)" onkeydown="if(event.key==='Enter')applyF()">
-        </div>
-        <div id="uDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s3);border:1px solid rgba(45,212,191,.18);border-radius:var(--r);z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 12px 36px rgba(0,0,0,.8);"></div>
-      </div>
-      <?php if($ulevel===1): ?>
-      <select class="fi" id="roleF" style="width:130px;padding:8px 10px;font-size:12px" onchange="applyF()">
-        <option value="">All Roles</option>
-        <option value="owner"    <?=$role==='owner'   ?'selected':''?>>Owner</option>
-        <option value="admin"    <?=$role==='admin'   ?'selected':''?>>Admin</option>
-        <option value="reseller" <?=$role==='reseller'?'selected':''?>>Reseller</option>
-      </select>
-      <?php else: ?>
-      <input type="hidden" id="roleF" value="">
-      <?php endif; ?>
-      <button class="btn btn-acc btn-sm" onclick="applyF()">Search</button>
-    </div>
-  </div>
+<?php
+// last known IP per user in ONE query (owner only) instead of one query per row
+$lastIps = [];
+if ($ulevel===1 && $users) {
+    foreach (db()->all("SELECT l.user_id, l.ip FROM activity_logs l
+                        JOIN (SELECT user_id, MAX(id) mid FROM activity_logs WHERE ip IS NOT NULL AND user_id IS NOT NULL GROUP BY user_id) m ON m.mid = l.id") as $ipr) {
+        $lastIps[(int)$ipr->user_id] = (string)$ipr->ip;
+    }
+}
+$cnt = [1=>0,2=>0,3=>0]; $banned = 0;
+foreach ($users as $cu) { $cnt[(int)$cu->level] = ($cnt[(int)$cu->level] ?? 0) + 1; if ((int)$cu->status === 0) $banned++; }
+?>
+<div class="strip">
+  <div class="met"><div class="met-ic" style="--c:var(--amber-tx);--cb:var(--amber-bg)"><?= phIcon('crown') ?></div><div class="met-x"><b><?= $cnt[1] ?></b><span>Owners</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--blue-tx);--cb:var(--blue-bg)"><?= phIcon('identification-badge') ?></div><div class="met-x"><b><?= $cnt[2] ?></b><span>Admins</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--violet-tx);--cb:var(--violet-bg)"><?= phIcon('storefront') ?></div><div class="met-x"><b><?= $cnt[3] ?></b><span>Resellers</span></div></div>
+  <div class="met"><div class="met-ic" style="--c:var(--rose-tx);--cb:var(--rose-bg)"><?= phIcon('prohibit') ?></div><div class="met-x"><b><?= $banned ?></b><span>Banned</span></div></div>
 </div>
 
-<!-- USERS TABLE -->
 <div class="card">
   <div class="card-h">
-    <span class="ct">
-      <svg viewBox="0 0 24 24" <?=$s?> width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      All Users <span style="color:var(--muted);font-size:11px;font-weight:400;text-transform:none">(<?=count($users)?>)</span>
-    </span>
+    <span class="ct"><?= phIcon('users-three') ?> Users <span style="color:var(--muted);font-size:12px;font-weight:600">(<?=count($users)?>)</span></span>
+    <?php if($ulevel===1): ?>
+    <div class="chips">
+      <?php foreach ([''=>'All','owner'=>'Owners','admin'=>'Admins','reseller'=>'Resellers'] as $rv=>$rl): ?>
+      <button type="button" class="chip <?= $role===$rv ? 'on' : '' ?>" onclick="document.getElementById('roleF').value='<?= $rv ?>';applyF()"><?= $rl ?></button>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+    <input type="hidden" id="roleF" value="<?= htmlspecialchars($role) ?>">
+    <div style="position:relative;flex:1 1 200px;max-width:320px">
+      <div class="sbar">
+        <?= phIcon('magnifying-glass') ?>
+        <input id="userSearch" aria-label="Search users" placeholder="Search" value="<?=htmlspecialchars($q)?>" autocomplete="off" oninput="searchU(this.value);liveFilter(this.value)" onfocus="searchU(this.value)" onkeydown="if(event.key==='Enter')applyF()">
+      </div>
+      <div id="uDrop" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card-bg);border:1px solid var(--line2);border-radius:var(--r2);z-index:200;max-height:220px;overflow-y:auto;box-shadow:var(--pop)"></div>
+    </div>
+    <?php if($ulevel===1): ?>
+    <button class="btn btn-red btn-sm" onclick="deleteAll()"><?= phIcon('trash') ?> Delete all</button>
+    <?php endif; ?>
   </div>
-  <div class="tw">
-    <table id="usersTable">
-      <thead>
-        <tr>
-          <th>#</th><th>Username</th><th>Role</th><th>Balance</th>
-          <th>Ref Code Used</th><th>Ref Given By</th><th>Expiry</th><th>Status</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php if (empty($users)): ?>
-        <tr><td colspan="9" style="text-align:center;padding:36px;color:var(--muted)">No users found</td></tr>
-        <?php else: $i=1; foreach ($users as $u):
-          $lvl  = (int)$u->level;
-          $lname= $levelMap[$lvl]??'?';
-          $lcls = $levelCls[$lvl]??'b-reseller';
-          $exp  = $u->expiration_date && strtotime($u->expiration_date) < time();
-          // Last IP (owner only, avoid N+1 by only fetching when needed)
-          $lastIp = '';
-          if ($ulevel===1) {
-              $ipRow  = db()->one("SELECT ip FROM activity_logs WHERE user_id=? AND ip IS NOT NULL ORDER BY id DESC LIMIT 1",[$u->id]);
-              $lastIp = $ipRow ? ($ipRow->ip??'') : '';
-          }
-        ?>
-        <tr id="ur-<?=$u->id?>">
-          <td style="color:var(--muted);font-size:11px"><?=$i++?></td>
-          <td>
-            <div style="font-weight:700;font-size:12px"><?=htmlspecialchars($u->username)?></div>
-            <?php if($u->last_login): ?>
-            <div style="font-size:10px;color:var(--muted)">Last: <?=date('d M H:i',strtotime($u->last_login))?></div>
-            <?php endif; ?>
-            <?php if($lastIp): ?>
-            <div style="font-size:9px;color:var(--muted);"><?=htmlspecialchars($lastIp)?></div>
-            <?php endif; ?>
-          </td>
-          <td>
-            <span class="bx <?=$lcls?>" style="font-size:9px">
-              <?=$lvl===1?'● ':($lvl===2?'▲ ':'○ ')?>
-              <?=$lname?>
-            </span>
-          </td>
-          <td style="color:var(--acc);font-weight:700;font-size:12px">
-            <?=number_format((float)$u->balance,0)?>
-          </td>
-          <td>
-            <?php if($u->ref_code_used): ?>
-            <code style="font-size:10px"><?=htmlspecialchars($u->ref_code_used)?></code>
+
+  <div id="usersList">
+    <?php if (empty($users)): ?>
+    <div class="empty">No users found.</div>
+    <?php else: foreach ($users as $u):
+      $lvl   = (int)$u->level;
+      $lname = $levelMap[$lvl]??'?';
+      $lcls  = $levelCls[$lvl]??'b-reseller';
+      $exp   = $u->expiration_date && strtotime($u->expiration_date) < time();
+      $lastIp= $lastIps[(int)$u->id] ?? '';
+      $un    = htmlspecialchars(addslashes($u->username));
+      $canManage   = ($ulevel===1) || ($ulevel===2 && $lvl===3);
+      $isOwnerUser = ($lvl===1);
+    ?>
+    <div class="urow" id="ur-<?=$u->id?>">
+      <div class="u-who">
+        <span class="av av-<?= $lvl ?>"><?= strtoupper(substr($u->username,0,2)) ?></span>
+        <div class="li-x">
+          <b><?=htmlspecialchars($u->username)?></b>
+          <span><?= $u->last_login ? 'Last '.date('d M, H:i',strtotime($u->last_login)) : 'Never signed in' ?><?= $lastIp ? ' · '.htmlspecialchars($lastIp) : '' ?></span>
+        </div>
+      </div>
+      <div class="u-tags">
+        <span class="bx <?=$lcls?>"><?=$lname?></span>
+        <?php if($u->status==1): ?><span class="bx b-active">Active</span>
+        <?php elseif($u->status==2): ?><span class="bx b-exp">Pending</span>
+        <?php else: ?><span class="bx b-ban">Banned</span><?php endif; ?>
+      </div>
+      <div class="u-meta"><small>Balance</small><b><?= $lvl===1 ? 'Unlimited' : number_format((float)$u->balance,0) ?></b></div>
+      <div class="u-meta"><small>Referral</small><b><?= $u->ref_code_used ? htmlspecialchars($u->ref_code_used).($u->ref_giver ? ' · '.htmlspecialchars($u->ref_giver) : '') : '—' ?></b></div>
+      <div class="u-meta"><small>Expires</small><b<?= $exp ? ' style="color:var(--danger)"' : '' ?>><?=$u->expiration_date ? date('d M Y',strtotime($u->expiration_date)) : 'Never'?></b></div>
+      <div class="u-acts">
+        <?php if ($u->id != $_SESSION['uid']): ?>
+          <?php if($canManage && !$isOwnerUser): ?>
+            <?php if ($u->status == 1): ?>
+              <button class="btn btn-red icon-btn" title="Ban" aria-label="Ban" onclick="openBanModal(<?=$u->id?>,'<?=$un?>',<?=$lvl?>)"><?= phIcon('prohibit') ?></button>
             <?php else: ?>
-            <span style="color:var(--muted)">—</span>
-            <?php endif; ?>
-          </td>
-          <td style="font-size:11px;color:var(--muted2)"><?=htmlspecialchars($u->ref_giver??'—')?></td>
-          <td style="font-size:11px;<?=$exp?'color:var(--danger)':''?>">
-            <?=$u->expiration_date ? date('d M Y',strtotime($u->expiration_date)) : '∞'?>
-          </td>
-          <td>
-            <?php if($u->status==1):    echo '<span class="bx b-active" style="font-size:9px">Active</span>';
-            elseif($u->status==2): echo '<span class="bx b-exp" style="font-size:9px">Pending</span>';
-            else:                   echo '<span class="bx b-ban" style="font-size:9px">Banned</span>';
-            endif; ?>
-          </td>
-          <td>
-            <?php if ($u->id != $_SESSION['uid']): ?>
-            <div style="display:flex;gap:3px;flex-wrap:wrap">
-              <?php
-              $canManage = ($ulevel===1) || ($ulevel===2 && $lvl===3);
-              $isOwnerUser = ($lvl===1);
-              if($canManage && !$isOwnerUser):
-              ?>
-                <?php if ($u->status == 1): ?>
-                  <button class="btn btn-red btn-xs" onclick="openBanModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>',<?=$lvl?>)">Ban</button>
-                <?php else: ?>
-                  <button class="btn btn-acc btn-xs" onclick="uAct(<?=$u->id?>,'unban')">Unban</button>
-                  <?php if ($ulevel===1 && $lastIp): ?>
-                  <button class="btn btn-blue btn-xs" onclick="unblockIp('<?=htmlspecialchars($lastIp)?>')">Unblock IP</button>
-                  <?php endif; ?>
-                <?php endif; ?>
-                <?php if ($ulevel===1): ?>
-                <button class="btn btn-blue btn-xs" onclick="openPassModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>')">Password</button>
-                <?php endif; ?>
-                <button class="btn btn-acc btn-xs" onclick="openExtendModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>','<?=$u->expiration_date?date('d M Y',strtotime($u->expiration_date)):'∞'?>')">Extend</button>
-                <?php if ($ulevel===1): ?>
-                <button class="btn btn-blue btn-xs" onclick="openRoleModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>',<?=$lvl?>)">Role</button>
-                <button class="btn btn-blue btn-xs" onclick="openLimitModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>'  ,<?=(int)($u->referral_limit??0)?>)">Limit</button>
-                <button class="btn btn-ghost btn-xs" onclick="openDeleteModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>')">Del</button>
-                <?php endif; ?>
+              <button class="btn btn-acc icon-btn" title="Unban" aria-label="Unban" onclick="uAct(<?=$u->id?>,'unban')"><?= phIcon('check-circle') ?></button>
+              <?php if ($ulevel===1 && $lastIp): ?>
+              <button class="btn btn-blue icon-btn" title="Unblock IP" aria-label="Unblock IP" onclick="unblockIp('<?=htmlspecialchars($lastIp)?>')"><?= phIcon('shield-check') ?></button>
               <?php endif; ?>
-              <?php if($ulevel===1 && $isOwnerUser): // owner can re-role another owner ?>
-              <button class="btn btn-blue btn-xs" onclick="openRoleModal(<?=$u->id?>,'<?=htmlspecialchars(addslashes($u->username))?>',<?=$lvl?>)">Role</button>
-              <?php endif; ?>
-            </div>
             <?php endif; ?>
-          </td>
-        </tr>
-        <?php endforeach; endif; ?>
-      </tbody>
-    </table>
+            <?php if ($ulevel===1): ?>
+            <button class="btn icon-btn" title="Change password" aria-label="Change password" onclick="openPassModal(<?=$u->id?>,'<?=$un?>')"><?= phIcon('password') ?></button>
+            <?php endif; ?>
+            <button class="btn icon-btn" title="Extend validity" aria-label="Extend validity" onclick="openExtendModal(<?=$u->id?>,'<?=$un?>','<?=$u->expiration_date?date('d M Y',strtotime($u->expiration_date)):'Never'?>')"><?= phIcon('clock-clockwise') ?></button>
+            <?php if ($ulevel===1): ?>
+            <button class="btn icon-btn" title="Change role" aria-label="Change role" onclick="openRoleModal(<?=$u->id?>,'<?=$un?>',<?=$lvl?>)"><?= phIcon('identification-badge') ?></button>
+            <button class="btn icon-btn" title="Referral limit" aria-label="Referral limit" onclick="openLimitModal(<?=$u->id?>,'<?=$un?>',<?=(int)($u->referral_limit??0)?>)"><?= phIcon('ticket') ?></button>
+            <button class="btn btn-red icon-btn" title="Delete user" aria-label="Delete user" onclick="openDeleteModal(<?=$u->id?>,'<?=$un?>')"><?= phIcon('trash') ?></button>
+            <?php endif; ?>
+          <?php endif; ?>
+          <?php if($ulevel===1 && $isOwnerUser): ?>
+          <button class="btn icon-btn" title="Change role" aria-label="Change role" onclick="openRoleModal(<?=$u->id?>,'<?=$un?>',<?=$lvl?>)"><?= phIcon('identification-badge') ?></button>
+          <?php endif; ?>
+        <?php else: ?>
+          <span class="bx b-unused">You</span>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endforeach; endif; ?>
   </div>
 </div>
 
 <!-- BAN MODAL -->
 <div class="modal-bg" id="banModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--danger)"></span> BAN USER</div><button class="mcls" onclick="closeModal('banModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--danger)"></span> Ban user</div><button class="mcls" onclick="closeModal('banModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">Username</label><input class="fi fi-mono" id="bm-user" readonly style="color:var(--danger);font-weight:700"></div>
-
-      <!-- Cascade options (shown based on target role) -->
-      <div id="bm-optAdminResellers" style="display:none;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.15);border-radius:var(--r);margin-bottom:10px">
-        <div>
-          <div style="font-weight:700;font-size:12px">Also Block All Resellers</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">Ban every reseller under this admin + disable their keys</div>
-        </div>
+      <div class="fg"><label class="fl">Username</label><input class="fi fi-mono" id="bm-user" readonly></div>
+      <div id="bm-optAdminResellers" class="perm-row" style="display:none">
+        <div class="perm-txt"><div class="perm-title">Also ban this admin's resellers</div></div>
         <label class="tog"><input type="checkbox" id="bm-alsoResellers"><span class="togsl"></span></label>
       </div>
-      <div id="bm-optKeys" style="display:none;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.15);border-radius:var(--r);margin-bottom:10px">
-        <div>
-          <div style="font-weight:700;font-size:12px" id="bm-keysLabel">Also Block All Keys</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px" id="bm-keysSub">Disable all keys generated by this user</div>
-        </div>
+      <div id="bm-optKeys" class="perm-row" style="display:none">
+        <div class="perm-txt"><div class="perm-title" id="bm-keysLabel">Also block all keys</div><div class="perm-sub" id="bm-keysSub"></div></div>
         <label class="tog"><input type="checkbox" id="bm-alsoKeys"><span class="togsl"></span></label>
       </div>
-
       <?php if($ulevel===1): ?>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.15);border-radius:var(--r)">
-        <div>
-          <div style="font-weight:700;font-size:12px">Also Block IP Address</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">User cannot register again or use any account</div>
-        </div>
+      <div class="perm-row">
+        <div class="perm-txt"><div class="perm-title">Also block IP address</div></div>
         <label class="tog"><input type="checkbox" id="bm-blockip"><span class="togsl"></span></label>
       </div>
       <?php endif; ?>
     </div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('banModal')">Cancel</button>
-      <button class="btn btn-red" onclick="doBan()">Ban User</button>
+      <button class="btn btn-red" onclick="doBan()">Ban user</button>
     </div>
   </div>
 </div>
@@ -423,14 +374,14 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 <!-- CHANGE PASSWORD MODAL -->
 <div class="modal-bg" id="passModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot"></span> CHANGE PASSWORD</div><button class="mcls" onclick="closeModal('passModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot"></span> Change password</div><button class="mcls" onclick="closeModal('passModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">User</label><input class="fi fi-mono" id="pm-user" readonly style="font-weight:700"></div>
-      <div class="fg"><label class="fl">New Password</label><input class="fi fi-mono" id="pm-newpass" type="text" placeholder="Enter new password (min 4 chars)"><div class="fi-hint">The user will log in with this new password on panel and bot.</div></div>
+      <div class="fg"><label class="fl">User</label><input class="fi fi-mono" id="pm-user" readonly></div>
+      <div class="fg"><label class="fl" for="pm-newpass">New password (min 4 characters)</label><input class="fi fi-mono" id="pm-newpass" type="text" autocomplete="off"></div>
     </div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('passModal')">Cancel</button>
-      <button class="btn btn-acc" onclick="savePass()">Change Password</button>
+      <button class="btn btn-acc" onclick="savePass()">Change password</button>
     </div>
   </div>
 </div>
@@ -438,20 +389,21 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 <!-- EXTEND VALIDITY MODAL -->
 <div class="modal-bg" id="extendModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--acc)"></span> EXTEND VALIDITY</div><button class="mcls" onclick="closeModal('extendModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot"></span> Extend validity</div><button class="mcls" onclick="closeModal('extendModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">User</label><input class="fi fi-mono" id="xm-user" readonly style="font-weight:700"></div>
-      <div class="fg"><label class="fl">Current Expiry</label><input class="fi fi-mono" id="xm-cur" readonly></div>
-      <div class="fg">
-        <label class="fl">Add Days</label>
-        <input class="fi fi-mono" id="xm-days" type="number" value="30" placeholder="e.g. 30 (use negative to reduce)">
-        <div class="fi-hint">Extends from current expiry if still valid, else from today. Negative reduces.</div>
+      <div class="g2" style="gap:12px">
+        <div class="fg"><label class="fl">User</label><input class="fi fi-mono" id="xm-user" readonly></div>
+        <div class="fg"><label class="fl">Current expiry</label><input class="fi fi-mono" id="xm-cur" readonly></div>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-        <button class="btn btn-ghost btn-xs" onclick="document.getElementById('xm-days').value=7">+7d</button>
-        <button class="btn btn-ghost btn-xs" onclick="document.getElementById('xm-days').value=30">+30d</button>
-        <button class="btn btn-ghost btn-xs" onclick="document.getElementById('xm-days').value=90">+90d</button>
-        <button class="btn btn-ghost btn-xs" onclick="document.getElementById('xm-days').value=365">+365d</button>
+      <div class="fg">
+        <label class="fl" for="xm-days">Days to add (negative to reduce)</label>
+        <input class="fi fi-mono" id="xm-days" type="number" value="30">
+      </div>
+      <div class="chips">
+        <button type="button" class="chip" onclick="document.getElementById('xm-days').value=7">+7</button>
+        <button type="button" class="chip" onclick="document.getElementById('xm-days').value=30">+30</button>
+        <button type="button" class="chip" onclick="document.getElementById('xm-days').value=90">+90</button>
+        <button type="button" class="chip" onclick="document.getElementById('xm-days').value=365">+365</button>
       </div>
     </div>
     <div class="mfoot">
@@ -464,20 +416,17 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 <!-- DELETE MODAL -->
 <div class="modal-bg" id="deleteModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--danger)"></span> DELETE USER</div><button class="mcls" onclick="closeModal('deleteModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--danger)"></span> Delete user</div><button class="mcls" onclick="closeModal('deleteModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">Username</label><input class="fi fi-mono" id="dm-user" readonly style="color:var(--danger);font-weight:700"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.15);border-radius:var(--r)">
-        <div>
-          <div style="font-weight:700;font-size:12px">Also Block IP Address</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">Prevents re-registration from same IP</div>
-        </div>
+      <div class="fg"><label class="fl">Username</label><input class="fi fi-mono" id="dm-user" readonly></div>
+      <div class="perm-row">
+        <div class="perm-txt"><div class="perm-title">Also block IP address</div></div>
         <label class="tog"><input type="checkbox" id="dm-blockip"><span class="togsl"></span></label>
       </div>
     </div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
-      <button class="btn btn-red" onclick="doDelete()">Delete User</button>
+      <button class="btn btn-red" onclick="doDelete()">Delete user</button>
     </div>
   </div>
 </div>
@@ -485,23 +434,22 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 <!-- SET ROLE MODAL -->
 <div class="modal-bg" id="roleModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot"></span> CHANGE ROLE</div><button class="mcls" onclick="closeModal('roleModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot"></span> Change role</div><button class="mcls" onclick="closeModal('roleModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">Username</label><input class="fi" id="rm-uname" readonly style="color:var(--acc);"></div>
+      <div class="fg"><label class="fl">Username</label><input class="fi fi-mono" id="rm-uname" readonly></div>
       <div class="fg">
-        <label class="fl">Role / Level</label>
+        <label class="fl" for="rm-level">Role</label>
         <select class="fi" id="rm-level">
-          <option value="1">Level 1 — Owner</option>
-          <option value="2">Level 2 — Admin</option>
-          <option value="3">Level 3 — Reseller</option>
+          <option value="1">Owner (unlimited balance)</option>
+          <option value="2">Admin</option>
+          <option value="3">Reseller</option>
         </select>
-        <div class="fi-hint">Setting a user to Owner grants unlimited balance.</div>
       </div>
       <input type="hidden" id="rm-uid" value="">
     </div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('roleModal')">Cancel</button>
-      <button class="btn btn-acc" onclick="saveRole()">Save Role</button>
+      <button class="btn btn-acc" onclick="saveRole()">Save role</button>
     </div>
   </div>
 </div>
@@ -509,23 +457,15 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 <!-- DELETE ALL USERS MODAL -->
 <div class="modal-bg" id="deleteAllModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--danger)"></span> DELETE ALL USERS</div><button class="mcls" onclick="closeModal('deleteAllModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot" style="background:var(--danger)"></span> Delete all users</div><button class="mcls" onclick="closeModal('deleteAllModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div style="text-align:center;padding:8px 0 16px">
-        <div style="width:54px;height:54px;margin:0 auto 14px;background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:var(--r);display:flex;align-items:center;justify-content:center">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-        </div>
-        <div style="font-size:15px;font-weight:700;color:var(--danger);margin-bottom:6px">This cannot be undone</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.6">All <strong style="color:var(--text)">Admins and Resellers</strong> will be permanently deleted.<br>Owner accounts will be kept.</div>
-      </div>
-      <div style="background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:var(--r);padding:12px 14px;font-size:11px;color:var(--muted2)">
-        <strong style="color:var(--danger)">⚠ Warning:</strong> Type <code style="color:var(--danger);background:rgba(255,77,109,.1);padding:1px 5px;border-radius:var(--r2)">DELETE</code> below to confirm.
-      </div>
-      <input class="fi fi-mono" id="da-confirm" placeholder="Type DELETE to confirm" oninput="document.getElementById('da-btn').disabled=this.value!=='DELETE'" style="margin-top:12px;color:var(--danger);letter-spacing:2px">
+      <p style="font-size:13.5px;line-height:1.6;margin-bottom:14px">Every admin and reseller is deleted permanently. Owner accounts are kept.</p>
+      <label class="fl" for="da-confirm">Type DELETE to confirm</label>
+      <input class="fi fi-mono" id="da-confirm" autocomplete="off" oninput="document.getElementById('da-btn').disabled=this.value!=='DELETE'" style="letter-spacing:2px">
     </div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('deleteAllModal')">Cancel</button>
-      <button class="btn btn-red" id="da-btn" disabled onclick="doDeleteAll()">Delete All Users</button>
+      <button class="btn btn-red" id="da-btn" disabled onclick="doDeleteAll()">Delete all users</button>
     </div>
   </div>
 </div>
@@ -533,15 +473,15 @@ $levelCls = [1=>'b-owner',2=>'b-admin',3=>'b-reseller'];
 <!-- SET LIMIT MODAL -->
 <div class="modal-bg" id="limitModal">
   <div class="mbox mbox-sm">
-    <div class="mhead"><div class="mtit"><span class="mdot"></span> SET REFERRAL LIMIT</div><button class="mcls" onclick="closeModal('limitModal')">×</button></div>
+    <div class="mhead"><div class="mtit"><span class="mdot"></span> Referral limit</div><button class="mcls" onclick="closeModal('limitModal')" aria-label="Close">×</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">Username</label><input class="fi" id="lm-uname" readonly style="color:var(--acc);"></div>
-      <div class="fg"><label class="fl">Max Referral Codes (0 = unlimited)</label><input class="fi fi-mono" type="number" id="lm-limit" min="0" value="0"></div>
+      <div class="fg"><label class="fl">Username</label><input class="fi fi-mono" id="lm-uname" readonly></div>
+      <div class="fg"><label class="fl" for="lm-limit">Max referral codes (0 = unlimited)</label><input class="fi fi-mono" type="number" id="lm-limit" min="0" value="0"></div>
       <input type="hidden" id="lm-uid" value="">
     </div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('limitModal')">Cancel</button>
-      <button class="btn btn-acc" onclick="saveLimit()">Save Limit</button>
+      <button class="btn btn-acc" onclick="saveLimit()">Save limit</button>
     </div>
   </div>
 </div>
@@ -667,10 +607,10 @@ async function saveLimit(){
 function applyF(){location.href=`/users.php?q=${encodeURIComponent(document.getElementById('userSearch').value)}&role=${encodeURIComponent(document.getElementById('roleF').value)}`;}
 // Live filter visible table rows without reload
 function liveFilter(q){
-  const tbody=document.querySelector('#usersTable tbody');
-  if(!tbody) return;
+  const list=document.getElementById('usersList');
+  if(!list) return;
   const lq=q.toLowerCase().trim();
-  tbody.querySelectorAll('tr').forEach(r=>{ r.style.display=(!lq||r.textContent.toLowerCase().includes(lq))?'':'none'; });
+  list.querySelectorAll('.urow').forEach(r=>{ r.style.display=(!lq||r.textContent.toLowerCase().includes(lq))?'':'none'; });
 }
 let uT;
 function searchU(q){
@@ -683,7 +623,7 @@ function searchU(q){
       const list=await r.json();
       if(!list.length){ dd.style.display='none'; return; }
       const lv={1:'Owner',2:'Admin',3:'Reseller'};
-      dd.innerHTML=list.map(u=>`<div onclick="pickU('${u.username}')" style="padding:10px 14px;cursor:pointer;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.05);transition:.1s" onmouseover="this.style.background='rgba(45,212,191,.08)'" onmouseout="this.style.background=''"><span style="font-weight:700">${u.username}</span><span style="color:var(--muted2);font-size:11px">${lv[u.level]||''}</span></div>`).join('');
+      dd.innerHTML=list.map(u=>`<div onclick="pickU('${u.username}')" style="padding:10px 14px;cursor:pointer;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line2);transition:.1s" onmouseover="this.style.background='var(--paper)'" onmouseout="this.style.background=''"><span style="font-weight:700">${u.username}</span><span style="color:var(--muted2);font-size:11px">${lv[u.level]||''}</span></div>`).join('');
       dd.style.display='block';
     }catch(e){ dd.style.display='none'; }
   },250);

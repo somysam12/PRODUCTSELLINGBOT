@@ -45,7 +45,7 @@ require_once __DIR__.'/app/Views/Layout/header.php';
 
 <div class="g2">
   <div class="card">
-    <div class="card-h"><span class="ct">Key Format Settings</span><span class="owner-only">Owner Only</span></div>
+    <div class="card-h"><span class="ct"><?= phIcon('pencil-simple-line') ?> Key Format Settings</span><span class="owner-only">Owner Only</span></div>
     <div class="card-b">
       <div style="text-align:center;margin-bottom:22px">
         <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Live Preview</div>
@@ -86,7 +86,7 @@ require_once __DIR__.'/app/Views/Layout/header.php';
   </div>
 
   <div class="card">
-    <div class="card-h"><span class="ct">Key Stats</span></div>
+    <div class="card-h"><span class="ct"><?= phIcon('chart-bar') ?> Key Stats</span></div>
     <div class="card-b">
       <?php
       $total  = db()->one("SELECT COUNT(*) c FROM keys_code WHERE branch=?",[currentBranch()])->c??0;
@@ -105,7 +105,7 @@ require_once __DIR__.'/app/Views/Layout/header.php';
 </div>
 
 <style>
-.fmt-opt.sel{border-color:var(--acc)!important;background:rgba(45,212,191,.08)!important;box-shadow:0 0 0 1px var(--acc) inset}
+.fmt-opt.sel{border-color:var(--acc)!important;background:var(--acc-bg)!important;box-shadow:0 0 0 1px var(--acc) inset}
 </style>
 <script>
 // Client-side samples mirror generateKey() / keyFormatSample()

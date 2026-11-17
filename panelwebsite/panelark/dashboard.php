@@ -3,35 +3,51 @@ $pageTitle = 'Dashboard';
 $activeNav = 'dashboard';
 require_once __DIR__.'/app/Views/Layout/header.php';
 
-// ── Stats (all branch-scoped so hidden branches never leak into totals) ──
-$br = currentBranch();
-$totalKeys  = (int)(db()->one("SELECT COUNT(*) c FROM keys_code WHERE branch=?",[$br])->c ?? 0);
-$activeKeys = (int)(db()->one("SELECT COUNT(*) c FROM keys_code WHERE branch=? AND status=1 AND (expired_date IS NULL OR expired_date>NOW())",[$br])->c ?? 0);
+// ── Scope: owner sees the whole branch, admin/reseller see their own keys ──
+$br    = currentBranch();
+$own   = $ulevel > 1;
+$scope = $own ? 'registrator=?' : 'branch=?';
+$sp    = [$own ? $uname : $br];
+
+$k = db()->one("SELECT COUNT(*) total,
+        COALESCE(SUM(status=0),0) blocked,
+        COALESCE(SUM(status=1 AND expired_date IS NOT NULL AND expired_date<NOW()),0) expired,
+        COALESCE(SUM(status=1 AND (expired_date IS NULL OR expired_date>=NOW()) AND device_count=0),0) unused,
+        COALESCE(SUM(status=1 AND (expired_date IS NULL OR expired_date>=NOW()) AND device_count>0),0) inuse,
+        COALESCE(SUM(DATE(created_at)=CURDATE()),0) today,
+        COALESCE(SUM(status=1 AND expired_date BETWEEN NOW() AND DATE_ADD(NOW(),INTERVAL 3 DAY)),0) soon
+    FROM keys_code WHERE $scope", $sp);
+$totalKeys = (int)$k->total;  $kBlocked = (int)$k->blocked; $kExpired = (int)$k->expired;
+$kUnused   = (int)$k->unused; $kInUse   = (int)$k->inuse;
+$todayKeys = (int)$k->today;  $expiringSoon = (int)$k->soon;
+$activeKeys = $kUnused + $kInUse;
+$activeRate = $totalKeys > 0 ? min(100, (int)round($activeKeys / $totalKeys * 100)) : 0;
+
+// Keys created per day, last 7 days
+$series = [];
+foreach (db()->all("SELECT DATE(created_at) d, COUNT(*) c FROM keys_code
+                    WHERE $scope AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                    GROUP BY DATE(created_at)", $sp) as $r) { $series[$r->d] = (int)$r->c; }
+$days = []; $weekTotal = 0; $weekMax = 0;
+for ($i = 6; $i >= 0; $i--) {
+    $d = date('Y-m-d', strtotime("-$i day")); $c = $series[$d] ?? 0;
+    $days[] = ['lbl' => date('D', strtotime($d)), 'c' => $c, 'today' => $i === 0];
+    $weekTotal += $c; $weekMax = max($weekMax, $c);
+}
+
 $totalUsers = (int)(db()->one("SELECT COUNT(*) c FROM users WHERE branch=?",[$br])->c ?? 0);
 $totalRefs  = (int)(db()->one("SELECT COUNT(*) c FROM referral_codes WHERE branch=?",[$br])->c ?? 0);
 $usedRefs   = (int)(db()->one("SELECT COUNT(*) c FROM referral_codes WHERE branch=? AND is_used=1",[$br])->c ?? 0);
 $blockedIPs = (int)(db()->one("SELECT COUNT(*) c FROM blocked_ips WHERE expires_at IS NULL OR expires_at>NOW()")->c ?? 0);
-$todayKeys  = (int)(db()->one("SELECT COUNT(*) c FROM keys_code WHERE branch=? AND DATE(created_at)=CURDATE()",[$br])->c ?? 0);
-$totalBal   = (float)(db()->one("SELECT COALESCE(SUM(balance),0) t FROM users WHERE branch=?",[$br])->t ?? 0);
-$expiringSoon = (int)(db()->one("SELECT COUNT(*) c FROM keys_code WHERE branch=? AND status=1 AND expired_date BETWEEN NOW() AND DATE_ADD(NOW(),INTERVAL 3 DAY)",[$br])->c ?? 0);
+// Owner: balance held by admins/resellers (the owner's own unlimited balance is excluded). Others: their own balance.
+$balance = $own
+    ? (float)(db()->one("SELECT balance b FROM users WHERE id=?",[(int)$_SESSION['uid']])->b ?? 0)
+    : (float)(db()->one("SELECT COALESCE(SUM(balance),0) t FROM users WHERE branch=? AND level>1",[$br])->t ?? 0);
 
-if ($ulevel > 1) {
-    $totalKeys  = (int)(db()->one("SELECT COUNT(*) c FROM keys_code WHERE registrator=?",[$uname])->c ?? 0);
-    $activeKeys = (int)(db()->one("SELECT COUNT(*) c FROM keys_code WHERE registrator=? AND status=1 AND (expired_date IS NULL OR expired_date>NOW())",[$uname])->c ?? 0);
-}
-
-// Recent keys (branch-scoped)
-$recentKeys = ($ulevel===1)
-    ? db()->all("SELECT * FROM keys_code WHERE branch=? ORDER BY created_at DESC LIMIT 8",[$br])
-    : db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY created_at DESC LIMIT 8",[$uname]);
-
-// Recent logs (branch-scoped)
-$recentLogs = db()->all("SELECT * FROM activity_logs WHERE branch=? ORDER BY created_at DESC LIMIT 6",[$br]);
-
-// User breakdown (owner only, within branch)
-$ownerCount    = $ulevel===1 ? (int)(db()->one("SELECT COUNT(*) c FROM users WHERE level=1 AND branch=?",[$br])->c??0) : 0;
-$adminCount    = $ulevel===1 ? (int)(db()->one("SELECT COUNT(*) c FROM users WHERE level=2 AND branch=?",[$br])->c??0) : 0;
-$resellerCount = $ulevel===1 ? (int)(db()->one("SELECT COUNT(*) c FROM users WHERE level=3 AND branch=?",[$br])->c??0) : 0;
+$recentKeys = db()->all("SELECT * FROM keys_code WHERE $scope ORDER BY created_at DESC LIMIT 7", $sp);
+$recentLogs = $own
+    ? db()->all("SELECT * FROM activity_logs WHERE username=? ORDER BY created_at DESC LIMIT 7", [$uname])
+    : db()->all("SELECT * FROM activity_logs WHERE branch=? ORDER BY created_at DESC LIMIT 7", [$br]);
 
 function keyStatus($key): array {
     if (!$key->status) return ['Blocked','b-ban'];
@@ -39,222 +55,142 @@ function keyStatus($key): array {
     if (!$key->device_count) return ['Unused','b-unused'];
     return ['Active','b-active'];
 }
-function fmtDur(int $h): string {
-    if ($h < 24) return "{$h}H";
-    return round($h/24)."D";
+function fmtDur(int $h): string { return $h < 24 ? "{$h}H" : round($h/24)."D"; }
+function logIcon(string $a): string {
+    $a = strtoupper($a);
+    foreach (['LOGIN'=>'sign-in','GENERAT'=>'sparkle','BLOCK'=>'prohibit','BAN'=>'prohibit','DELETE'=>'trash','EXTEND'=>'clock-clockwise',
+              'BALANCE'=>'wallet','USER'=>'user-plus','REF'=>'ticket','RESET'=>'arrow-counter-clockwise','UPDATE'=>'gear-six'] as $needle=>$ic) {
+        if (strpos($a, $needle) !== false) return $ic;
+    }
+    return 'pulse';
 }
+function logLabel(string $a): string { return ucfirst(strtolower(str_replace('_',' ',$a))); }
 
-$activeRate = $totalKeys > 0 ? min(100, round($activeKeys/$totalKeys*100)) : 0;
-?>
-
-<!-- ── Greeting ── -->
-<?php
-$hour = (int)date('G');
+$hour  = (int)date('G');
 $greet = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
+$circ  = 326.73; // 2πr, r = 52
 ?>
-<div style="margin-bottom:24px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px">
+
+<div class="dash-head">
   <div>
-    <h1 style="font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px"><?= $greet ?>, <?= htmlspecialchars($uname) ?></h1>
-    <div style="font-size:13.5px;color:var(--muted)">
-      You have <?= number_format($activeKeys) ?> active <?= $activeKeys===1?'key':'keys' ?>.
-      <?php if($expiringSoon>0): ?><?= $expiringSoon ?> <?= $expiringSoon===1?'key expires':'keys expire' ?> in the next 3 days.<?php endif; ?>
-    </div>
+    <h1><?= $greet ?>, <?= htmlspecialchars($uname) ?></h1>
+    <p><?= number_format($activeKeys) ?> active <?= $activeKeys===1?'key':'keys' ?><?php if($expiringSoon>0): ?> · <?= $expiringSoon ?> expiring within 3 days<?php endif; ?></p>
   </div>
-  <div style="display:flex;gap:9px;flex-wrap:wrap">
-    <a href="/keys.php" class="btn btn-ghost btn-sm"><?= ico('keys') ?> All keys</a>
-    <a href="/generate.php" class="btn btn-solid btn-sm"><?= ico('generate') ?> Generate key</a>
+  <div class="dash-acts">
+    <a href="/keys.php" class="btn"><?= phIcon('key') ?> All keys</a>
+    <a href="/generate.php" class="btn btn-ink"><?= phIcon('sparkle') ?> Generate key</a>
   </div>
 </div>
 
-<!-- ── Bento stats: one hero + supporting tiles ── -->
-<?php
-// shared icon-tile svg attrs
-$svgA = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-?>
-<div class="bento">
-  <div class="b-hero">
-    <div class="bh-top">
-      <span class="bh-ic"><svg <?= $svgA ?>><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L21 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg></span>
-      <span class="bh-lbl">Total keys</span>
+<div class="dash-top">
+  <!-- Key overview -->
+  <section class="dcard">
+    <div class="dcard-t"><h3>Key overview</h3><span><?= $own ? 'Your keys' : 'All keys' ?></span></div>
+    <div class="ov">
+      <div class="ring">
+        <svg viewBox="0 0 132 132" aria-hidden="true">
+          <defs><linearGradient id="ringG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#059669"/></linearGradient></defs>
+          <circle class="trk" cx="66" cy="66" r="52"/>
+          <circle class="val" cx="66" cy="66" r="52" stroke-dasharray="<?= $circ ?>" stroke-dashoffset="<?= round($circ * (1 - $activeRate/100), 2) ?>"/>
+        </svg>
+        <div class="ring-c"><b><?= $activeRate ?>%</b><small>active</small></div>
+      </div>
+      <div class="ov-r">
+        <div class="ov-num count" id="statKeys"><?= number_format($totalKeys) ?></div>
+        <div class="ov-lbl">Total keys</div>
+        <div class="ov-row"><i style="background:var(--acc)"></i>In use<b><?= number_format($kInUse) ?></b></div>
+        <div class="ov-row"><i style="background:#38a5d6"></i>Unused<b><?= number_format($kUnused) ?></b></div>
+        <div class="ov-row"><i style="background:#d99a2b"></i>Expired<b><?= number_format($kExpired) ?></b></div>
+        <div class="ov-row"><i style="background:#e0566b"></i>Blocked<b><?= number_format($kBlocked) ?></b></div>
+      </div>
     </div>
-    <div class="hero-v" id="statKeys"><?= number_format($totalKeys) ?></div>
-    <div class="bh-sub"><b><?= number_format($activeKeys) ?> active</b> · <?= $activeRate ?>% active rate</div>
-    <div class="hero-bar"><i style="width:<?= $activeRate ?>%"></i></div>
-    <div class="bh-f"><?= $todayKeys ?> <?= $todayKeys===1?'key':'keys' ?> created today</div>
-  </div>
+  </section>
 
-  <div class="b">
-    <div class="b-top">
-      <span class="b-ic" style="--c:var(--lilac);--cb:var(--violet-bg)"><svg <?= $svgA ?>><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-      <span class="b-lbl">Total users</span>
+  <!-- 7-day chart -->
+  <section class="dcard">
+    <div class="dcard-t"><h3>Keys created</h3><span><?= number_format($weekTotal) ?> in 7 days</span></div>
+    <div class="bars">
+      <?php foreach ($days as $d): $h = $weekMax > 0 ? max(6, (int)round($d['c'] / $weekMax * 96)) : 6; ?>
+      <div class="bar <?= $d['today'] ? 'today' : '' ?>">
+        <em><?= $d['c'] ?></em>
+        <i style="height:<?= $h ?>px"></i>
+        <span><?= $d['today'] ? 'Today' : $d['lbl'] ?></span>
+      </div>
+      <?php endforeach; ?>
     </div>
-    <div class="b-v" id="statUsers"><?= number_format($totalUsers) ?></div>
-    <div class="b-f"><?php if($ulevel===1): ?><?= $ownerCount ?> owner · <?= $adminCount ?> admin · <?= $resellerCount ?> reseller<?php else: ?>Registered accounts<?php endif; ?></div>
-  </div>
+  </section>
 
-  <div class="b">
-    <div class="b-top">
-      <span class="b-ic" style="--c:var(--cyan);--cb:var(--sky-bg)"><svg <?= $svgA ?>><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span>
-      <span class="b-lbl">Referral codes</span>
+  <!-- Highlights -->
+  <div class="hl">
+    <div class="hl-t hl-acc">
+      <div class="hl-ic"><?= phIcon('sparkle') ?></div>
+      <div><b class="count"><?= number_format($todayKeys) ?></b><span>Created today</span></div>
     </div>
-    <div class="b-v" id="statRefs"><?= number_format($totalRefs) ?></div>
-    <div class="b-f"><?= $usedRefs ?> used · <?= $totalRefs-$usedRefs ?> available</div>
-  </div>
-
-  <?php if ($ulevel===1): ?>
-  <div class="b">
-    <div class="b-top">
-      <span class="b-ic" style="--c:var(--gold);--cb:var(--amber-bg)"><svg <?= $svgA ?>><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 1 1 1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></span>
-      <span class="b-lbl">Total balance</span>
+    <div class="hl-t hl-ink">
+      <div class="hl-ic"><?= phIcon('hourglass-medium') ?></div>
+      <div><b class="count"><?= number_format($expiringSoon) ?></b><span>Expiring in 3 days</span></div>
     </div>
-    <div class="b-v" id="statBal"><?= number_format($totalBal, 0) ?></div>
-    <div class="b-f">Across all accounts</div>
-  </div>
-  <?php else: ?>
-  <div class="b">
-    <div class="b-top">
-      <span class="b-ic" style="--c:var(--gold);--cb:var(--amber-bg)"><svg <?= $svgA ?>><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
-      <span class="b-lbl">Blocked IPs</span>
-    </div>
-    <div class="b-v"><?= number_format($blockedIPs) ?></div>
-    <div class="b-f">Automatic protection</div>
-  </div>
-  <?php endif; ?>
-
-  <div class="b">
-    <div class="b-top">
-      <span class="b-ic" style="--c:var(--coral);--cb:var(--rose-bg)"><svg <?= $svgA ?>><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg></span>
-      <span class="b-lbl">Expiring soon</span>
-    </div>
-    <div class="b-v"><?= number_format($expiringSoon) ?></div>
-    <div class="b-f">Within the next 3 days</div>
   </div>
 </div>
 
-<style>
-.bento{
-  display:grid;grid-template-columns:1.35fr 1fr 1fr;
-  grid-template-rows:auto auto;gap:16px;margin-bottom:24px;
-}
-/* hero */
-.b-hero{
-  grid-row:span 2;padding:26px;border-radius:var(--r);
-  background:linear-gradient(165deg,var(--ink2),var(--ink));
-  border:none;box-shadow:var(--ink-sh);color:var(--ink-tx);
-  position:relative;overflow:hidden;display:flex;flex-direction:column;
-}
-.b-hero::after{content:'';position:absolute;bottom:-45px;right:-35px;width:190px;height:190px;border-radius:50%;
-  background:radial-gradient(circle,rgba(52,211,153,.22),transparent 70%);pointer-events:none}
-.bh-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
-.bh-ic{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
-.bh-ic svg{width:22px;height:22px;stroke:#34d399;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.bh-lbl{font-size:14px;color:var(--ink-mut);font-weight:600}
-.hero-v{font-size:52px;font-weight:800;letter-spacing:-2.4px;line-height:1;margin:20px 0 8px;font-variant-numeric:tabular-nums;color:#fff;position:relative;z-index:1}
-.bh-sub{font-size:13px;color:var(--ink-mut);position:relative;z-index:1}
-.bh-sub b{color:#6ee7b7;font-weight:700}
-.hero-bar{height:9px;border-radius:40px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.35);overflow:hidden;margin:22px 0 0;position:relative;z-index:1}
-.hero-bar i{display:block;height:100%;border-radius:40px;background:linear-gradient(90deg,#34d399,#10b981);box-shadow:0 0 10px rgba(52,211,153,.5)}
-.bh-f{font-size:12.5px;color:var(--ink-mut);margin-top:12px;position:relative;z-index:1}
-/* stat card */
-.b{
-  background:var(--card-bg);border:1px solid var(--line);border-radius:var(--r);
-  padding:22px;box-shadow:var(--raise);transition:transform .2s,box-shadow .2s;
-  display:flex;flex-direction:column;
-}
-.b:hover{transform:translateY(-3px);box-shadow:var(--pop)}
-.b-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.b-ic{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  background:var(--cb);color:var(--c);box-shadow:var(--raise-sm)}
-.b-ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.b-lbl{font-size:13px;color:var(--muted);font-weight:600}
-.b-v{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;color:var(--text);
-     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.b-f{font-size:12.5px;color:var(--muted);margin-top:auto;padding-top:12px;font-weight:500}
-@media(max-width:900px){
-  .bento{grid-template-columns:1fr 1fr}
-  .b-hero{grid-row:auto;grid-column:span 2}
-  .hero-v{font-size:44px}
-}
-@media(max-width:520px){
-  .bento{grid-template-columns:1fr}
-  .b-hero{grid-column:auto}
-}
-</style>
+<div class="mets">
+  <div class="met">
+    <div class="met-ic" style="--c:var(--violet-tx);--cb:var(--violet-bg)"><?= phIcon('users-three') ?></div>
+    <div class="met-x"><b class="count" id="statUsers"><?= number_format($totalUsers) ?></b><span>Users</span></div>
+  </div>
+  <div class="met">
+    <div class="met-ic" style="--c:var(--sky-tx);--cb:var(--sky-bg)"><?= phIcon('ticket') ?></div>
+    <div class="met-x"><b class="count" id="statRefs"><?= number_format($totalRefs) ?></b><span>Referral codes · <?= $totalRefs - $usedRefs ?> open</span></div>
+  </div>
+  <div class="met">
+    <div class="met-ic" style="--c:var(--amber-tx);--cb:var(--amber-bg)"><?= phIcon('wallet') ?></div>
+    <div class="met-x"><b class="count" id="statBal"><?= number_format($balance, 0) ?></b><span><?= $own ? 'My balance' : 'Reseller balance' ?></span></div>
+  </div>
+  <div class="met">
+    <div class="met-ic" style="--c:var(--rose-tx);--cb:var(--rose-bg)"><?= phIcon('shield-check') ?></div>
+    <div class="met-x"><b class="count"><?= number_format($blockedIPs) ?></b><span>Blocked IPs</span></div>
+  </div>
+</div>
 
-<!-- ── Recent Keys + Activity ── -->
-<div class="g2">
-
-  <!-- Recent Keys -->
-  <div class="card" style="margin-bottom:0">
+<div class="dash-bot">
+  <!-- Recent keys -->
+  <div class="card">
     <div class="card-h">
-      <span class="ct">
-        <?= ico('keys') ?> Recent Keys
-      </span>
-      <?php if ($ulevel===1): ?>
-      <a href="/keys.php" class="btn btn-ghost btn-sm">View All →</a>
-      <?php endif; ?>
+      <span class="ct"><?= phIcon('key') ?> Recent keys</span>
+      <a href="/keys.php" class="btn btn-sm">View all <?= phIcon('arrow-right') ?></a>
     </div>
-    <div class="tw">
-      <table>
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>Duration</th>
-            <th>Devices</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (empty($recentKeys)): ?>
-          <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">No keys yet</td></tr>
-          <?php else: foreach ($recentKeys as $k):
-            [$st,$sc] = keyStatus($k);
-          ?>
-          <tr>
-            <td>
-              <code class="kcode" style="font-size:11px"><?= htmlspecialchars(substr($k->user_key,0,20)).'...' ?></code>
-            </td>
-            <td style="font-size:12px"><?= fmtDur((int)$k->duration) ?></td>
-            <td style="font-size:12px"><?= (int)$k->device_count ?>/<?= (int)$k->max_devices ?></td>
-            <td><span class="bx <?= $sc ?>"><?= $st ?></span></td>
-          </tr>
-          <?php endforeach; endif; ?>
-        </tbody>
-      </table>
-    </div>
+    <?php if (empty($recentKeys)): ?>
+      <div class="empty">No keys yet — generate your first key.</div>
+    <?php else: foreach ($recentKeys as $rk): [$st,$sc] = keyStatus($rk); ?>
+      <div class="li">
+        <div class="li-ic"><?= phIcon('key') ?></div>
+        <div class="li-x">
+          <b class="mono"><?= htmlspecialchars($rk->user_key) ?></b>
+          <span><?= fmtDur((int)$rk->duration) ?> · <?= (int)$rk->device_count ?>/<?= (int)$rk->max_devices ?> devices<?= $own ? '' : ' · '.htmlspecialchars($rk->registrator) ?></span>
+        </div>
+        <span class="bx <?= $sc ?>"><?= $st ?></span>
+      </div>
+    <?php endforeach; endif; ?>
   </div>
 
-  <!-- Recent Activity -->
-  <div class="card" style="margin-bottom:0">
+  <!-- Recent activity -->
+  <div class="card">
     <div class="card-h">
-      <span class="ct">
-        <?= ico('logs') ?> Recent Activity
-      </span>
-      <?php if ($ulevel===1): ?>
-      <a href="/logs.php" class="btn btn-ghost btn-sm">View All →</a>
-      <?php endif; ?>
+      <span class="ct"><?= phIcon('pulse') ?> Recent activity</span>
+      <?php if ($ulevel===1): ?><a href="/logs.php" class="btn btn-sm">View all <?= phIcon('arrow-right') ?></a><?php endif; ?>
     </div>
-    <div class="tw">
-      <table>
-        <thead>
-          <tr><th>Action</th><th>User</th><th>Time</th></tr>
-        </thead>
-        <tbody>
-          <?php if (empty($recentLogs)): ?>
-          <tr><td colspan="3" style="text-align:center;padding:32px;color:var(--muted)">No activity yet</td></tr>
-          <?php else: foreach ($recentLogs as $l): ?>
-          <tr>
-            <td>
-              <span class="bx b-admin" style="font-size:9px;padding:3px 8px"><?= htmlspecialchars($l->action) ?></span>
-            </td>
-            <td style="font-size:12px;color:var(--text2)"><?= htmlspecialchars($l->username ?? 'System') ?></td>
-            <td style="font-size:11px;color:var(--muted);"><?= date('d M H:i', strtotime($l->created_at)) ?></td>
-          </tr>
-          <?php endforeach; endif; ?>
-        </tbody>
-      </table>
-    </div>
+    <?php if (empty($recentLogs)): ?>
+      <div class="empty">No activity yet.</div>
+    <?php else: foreach ($recentLogs as $l): ?>
+      <div class="li">
+        <div class="li-ic"><?= phIcon(logIcon((string)$l->action)) ?></div>
+        <div class="li-x">
+          <b><?= htmlspecialchars(logLabel((string)$l->action)) ?></b>
+          <span><?= htmlspecialchars($l->username ?? 'System') ?><?= !empty($l->detail) ? ' · '.htmlspecialchars($l->detail) : '' ?></span>
+        </div>
+        <span class="li-r"><?= date('d M, H:i', strtotime($l->created_at)) ?></span>
+      </div>
+    <?php endforeach; endif; ?>
   </div>
 </div>
 

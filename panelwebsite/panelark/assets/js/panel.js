@@ -1,5 +1,5 @@
 /* ================================================
-   ARKCHEAT PANEL — Core JS v7.0 (Marine UI)
+   PANEL — Core JS v10
    ================================================ */
 
 // ── TOAST ──────────────────────────────────────
@@ -7,19 +7,19 @@ function toast(msg, type='s', dur=3200) {
   const c = document.getElementById('toasts');
   if (!c) return;
   const cfg = {
-    s: { color:'#059669', bg:'rgba(16,185,129,.16)',  icon:'✓' },
-    e: { color:'#b4263a', bg:'rgba(224,65,79,.16)',   icon:'✕' },
-    w: { color:'#8a5e12', bg:'rgba(198,135,26,.18)',  icon:'!' },
-    i: { color:'#2d5fb0', bg:'rgba(59,118,214,.16)',  icon:'i' }
+    s: { color:'#6ee7b7', bg:'rgba(52,211,153,.18)',  icon:'✓' },
+    e: { color:'#fdaab5', bg:'rgba(244,63,94,.22)',   icon:'✕' },
+    w: { color:'#f6cf8b', bg:'rgba(240,178,74,.2)',   icon:'!' },
+    i: { color:'#9cc2ff', bg:'rgba(110,168,255,.2)',  icon:'i' }
   };
   const { color, bg, icon } = cfg[type] || cfg.i;
   const t = document.createElement('div');
   t.className = 'toast';
   t.style.cssText = `animation:toastIn .25s cubic-bezier(.34,1.3,.64,1)`;
   t.innerHTML = `
-    <span style="width:22px;height:22px;border-radius:50%;background:${bg};color:${color};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon}</span>
+    <span style="width:24px;height:24px;border-radius:8px;background:${bg};color:${color};font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon}</span>
     <span style="flex:1;min-width:0;font-size:13.5px">${msg}</span>
-    <span style="color:rgba(40,33,24,.35);font-size:16px;cursor:pointer;line-height:1;flex-shrink:0" onclick="this.closest('.toast').remove()">×</span>
+    <span style="color:rgba(255,255,255,.45);font-size:17px;cursor:pointer;line-height:1;flex-shrink:0" onclick="this.closest('.toast').remove()">×</span>
   `;
   c.appendChild(t);
   const remove = () => {
@@ -93,6 +93,7 @@ function toggleTheme(btn) {
   let ecl = document.getElementById('eclipse');
   if (!ecl) { ecl = document.createElement('div'); ecl.id = 'eclipse'; document.body.appendChild(ecl); }
   ecl.style.left = ox; ecl.style.top = oy;
+  ecl.classList.toggle('dawn', !goingDark);
   ecl.classList.remove('go'); void ecl.offsetWidth; ecl.classList.add('go');
 
   // Slow, whole-page colour cross-fade (~2.2s) + flip theme as the shadow lands
@@ -101,10 +102,55 @@ function toggleTheme(btn) {
   setTimeout(() => root.classList.remove('theme-anim'), 2500);
 }
 
+// ── UI ENHANCERS ───────────────────────────────
+// <select data-ui="tiles">  → tappable option tiles (the select stays in the form, hidden, and in sync)
+// <input type="number" data-ui="stepper"> → − / + stepper
+const ICO_MINUS = '<svg class="ph" viewBox="0 -960 960 960" fill="currentColor"><path d="M237.37-434.5q-19.15 0-32.33-13.17-13.17-13.18-13.17-32.33t13.17-32.33q13.18-13.17 32.33-13.17h485.26q19.15 0 32.33 13.17 13.17 13.18 13.17 32.33t-13.17 32.33q-13.18 13.17-32.33 13.17H237.37Z"/></svg>';
+const ICO_PLUS  = '<svg class="ph" viewBox="0 -960 960 960" fill="currentColor"><path d="M434.5-434.5H237.37q-19.15 0-32.33-13.17-13.17-13.18-13.17-32.33t13.17-32.33q13.18-13.17 32.33-13.17H434.5v-197.13q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v197.13h197.13q19.15 0 32.33 13.17 13.17 13.18 13.17 32.33t-13.17 32.33q-13.18 13.17-32.33 13.17H525.5v197.13q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33V-434.5Z"/></svg>';
+function enhanceUI(root) {
+  (root || document).querySelectorAll('select[data-ui="tiles"]:not([data-enh])').forEach(sel => {
+    sel.setAttribute('data-enh', '1');
+    const wrap = document.createElement('div');
+    wrap.className = 'tiles' + (sel.dataset.wide ? ' tiles-wide' : '');
+    wrap.setAttribute('role', 'radiogroup');
+    const sync = () => wrap.querySelectorAll('.tile').forEach(t => {
+      const on = t.dataset.v === sel.value; t.classList.toggle('on', on); t.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    Array.from(sel.options).forEach(o => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'tile'; b.dataset.v = o.value; b.setAttribute('role', 'radio');
+      const t = document.createElement('b'); t.textContent = o.dataset.t || o.textContent.trim(); b.appendChild(t);
+      if (o.dataset.s) { const sub = document.createElement('span'); sub.textContent = o.dataset.s; b.appendChild(sub); }
+      b.addEventListener('click', () => { sel.value = o.value; sel.dispatchEvent(new Event('change', { bubbles: true })); sync(); });
+      wrap.appendChild(b);
+    });
+    sel.classList.add('ui-hidden'); sel.setAttribute('tabindex', '-1');
+    sel.parentNode.insertBefore(wrap, sel.nextSibling);
+    sel.addEventListener('change', sync); sync();
+  });
+  (root || document).querySelectorAll('input[data-ui="stepper"]:not([data-enh])').forEach(inp => {
+    inp.setAttribute('data-enh', '1');
+    const box = document.createElement('div'); box.className = 'stepper';
+    inp.parentNode.insertBefore(box, inp);
+    const mk = (html, d, label) => { const b = document.createElement('button'); b.type = 'button'; b.innerHTML = html; b.setAttribute('aria-label', label);
+      b.addEventListener('click', () => {
+        if (inp.readOnly || inp.disabled) return;
+        const min = inp.min !== '' ? +inp.min : -Infinity, max = inp.max !== '' ? +inp.max : Infinity;
+        inp.value = Math.min(max, Math.max(min, (parseInt(inp.value, 10) || 0) + d));
+        inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true }));
+      }); return b; };
+    const minus = mk(ICO_MINUS, -1, 'Decrease'), plus = mk(ICO_PLUS, 1, 'Increase');
+    inp.classList.remove('fi');
+    box.appendChild(minus); box.appendChild(inp); box.appendChild(plus);
+    if (inp.readOnly || inp.disabled) { minus.disabled = plus.disabled = true; }
+  });
+}
+document.addEventListener('DOMContentLoaded', () => enhanceUI());
+
 // ── NUMBER COUNT-UP (dashboard stats / KPI values) ──
 function animateCounts() {
   if (prefersReducedMotion()) return;
-  document.querySelectorAll('.hero-v, .b-v, .kpi-val').forEach(el => {
+  document.querySelectorAll('.count, .kpi-val').forEach(el => {
     const raw = el.textContent.trim();
     if (!/^[\d,]+$/.test(raw)) return;                 // only plain numbers
     const target = parseInt(raw.replace(/,/g, ''), 10);
@@ -122,19 +168,36 @@ function animateCounts() {
   });
 }
 
-// ── MOBILE SIDEBAR ─────────────────────────────
+// ── SIDEBAR (drawer on phones · hover/pin rail on desktop) ──
+function isPhoneNav() { return window.matchMedia('(max-width: 860px)').matches; }
 function toggleSidebar() {
   const sb = document.querySelector('.sidebar');
   const ov = document.getElementById('mobOverlay');
-  if (sb) sb.classList.toggle('open');
-  if (ov) ov.classList.toggle('show');
+  if (!sb) return;
+  if (isPhoneNav()) {
+    const open = sb.classList.toggle('open');
+    if (ov) ov.classList.toggle('show', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+    return;
+  }
+  const pinned = document.documentElement.classList.toggle('sb-pin');
+  try { localStorage.setItem('hb_rail', pinned ? 'pin' : ''); } catch (e) {}
 }
 document.addEventListener('DOMContentLoaded', () => {
+  const sb = document.querySelector('.sidebar');
   const ov = document.getElementById('mobOverlay');
-  if (ov) ov.addEventListener('click', () => {
-    document.querySelector('.sidebar')?.classList.remove('open');
-    ov.classList.remove('show');
-  });
+  const close = () => { if (sb) sb.classList.remove('open'); if (ov) ov.classList.remove('show'); document.body.style.overflow = ''; };
+  if (ov) ov.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  if (!sb) return;
+  // hover-expand (pointer devices only), with a small intent delay
+  let t;
+  sb.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && !isPhoneNav()) { clearTimeout(t); t = setTimeout(() => sb.classList.add('is-open'), 90); } });
+  sb.addEventListener('pointerleave', () => { clearTimeout(t); sb.classList.remove('is-open'); });
+  sb.addEventListener('focusin', () => { if (!isPhoneNav()) sb.classList.add('is-open'); });
+  sb.addEventListener('focusout', e => { if (!sb.contains(e.relatedTarget)) sb.classList.remove('is-open'); });
+  // keep the active item in view inside the rail
+  const on = sb.querySelector('.ni.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest' });
 });
 
 // ── PASSWORD TOGGLE ────────────────────────────
@@ -307,7 +370,7 @@ function updateStatCards(stats) {
   const map = { statKeys:'total_keys', statUsers:'total_users', statRefs:'total_refs', statBal:'total_bal' };
   for (const [id, key] of Object.entries(map)) {
     const el = document.getElementById(id);
-    if (el && stats[key] !== undefined) el.textContent = stats[key];
+    if (el && stats[key] !== undefined) el.textContent = isFinite(stats[key]) ? Number(stats[key]).toLocaleString('en-US') : stats[key];
   }
 }
 

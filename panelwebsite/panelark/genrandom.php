@@ -53,8 +53,8 @@ $prices=db()->all("SELECT * FROM prices ORDER BY hours ASC");
 
 <?php if(!empty($genKeys)): ?>
 <!-- Generated Batch — at the very top -->
-<div class="card" style="margin-bottom:16px;border-color:rgba(45,212,191,.35);box-shadow:0 0 30px rgba(45,212,191,.12)">
-  <div class="card-h" style="background:rgba(45,212,191,.06)"><span class="ct" style="color:var(--acc)"><?= count($genKeys) ?> Key<?= count($genKeys)>1?'s':'' ?> Generated!</span><button class="btn btn-acc btn-sm" onclick="copyText(document.getElementById('keyBatch').textContent.trim(),'All keys')">Copy All</button></div>
+<div class="card" style="margin-bottom:16px;border-color:var(--acc-20);box-shadow:0 0 30px rgba(45,212,191,.12)">
+  <div class="card-h" style="background:var(--acc-bg)"><span class="ct"><?= phIcon('check-circle') ?> <?= count($genKeys) ?> Key<?= count($genKeys)>1?'s':'' ?> Generated!</span><button class="btn btn-acc btn-sm" onclick="copyText(document.getElementById('keyBatch').textContent.trim(),'All keys')">Copy All</button></div>
   <div class="card-b" style="padding:14px">
     <div style="background:var(--ink);border:none;box-shadow:var(--ink-sh);border-radius:var(--r2);padding:16px;font-family:var(--mono);font-size:13px;color:#8fe9c4;line-height:2;max-height:240px;overflow:auto;word-break:break-all" id="keyBatch"><?= implode("\n",array_map('htmlspecialchars',$genKeys)) ?></div>
     <div style="display:flex;gap:8px;margin-top:12px">
@@ -72,12 +72,12 @@ $prices=db()->all("SELECT * FROM prices ORDER BY hours ASC");
 
 <div class="g-left">
   <div class="card">
-    <div class="card-h"><span class="ct">Generate Random Keys</span></div>
+    <div class="card-h"><span class="ct"><?= phIcon('shuffle') ?> Generate Random Keys</span></div>
     <div class="card-b">
       <?php if($oneDevMode): ?><div class="alert a-warn" style="margin-bottom:14px">One Device Mode ON — Keys limited to 1 device</div><?php endif; ?>
       <form method="POST"><?= csrfField() ?>
         <input type="hidden" name="game" value="PUBG">
-        <div style="padding:10px 14px;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.15);border-radius:var(--r);margin-bottom:14px;font-size:13px;color:var(--acc);font-weight:700">PUBG</div>
+        <div style="padding:10px 14px;background:var(--acc-bg);border:1px solid var(--acc-20);border-radius:var(--r);margin-bottom:14px;font-size:13px;color:var(--acc);font-weight:700">PUBG</div>
         <div class="g2" style="gap:12px">
           <?php if($ulevel<=2): ?>
           <div class="fg" style="margin:0 0 14px"><label class="fl">Quantity (Max 10)</label><input class="fi fi-mono" type="number" name="qty" value="1" min="1" max="10"></div>
