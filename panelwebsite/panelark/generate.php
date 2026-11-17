@@ -38,8 +38,10 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                 for ($i=0; $i<$qty; $i++) {
                     $key = ($isCustom && $i===0) ? $customKey : generateKey($keyPrefix);
                     while(db()->one("SELECT id FROM keys_code WHERE user_key=?",[$key])) $key=generateKey($keyPrefix);
-                    db()->q("INSERT INTO keys_code(user_key,game,duration,max_devices,status,registrator,expired_date,branch) VALUES(?,?,?,?,1,?,?,?)",
-                        [$key,'PUBG',$hours,$maxDev,$uname,$expiry,currentBranch()]);
+                    // expired_date stays NULL until the key is first used — the
+                    // clock starts on first login/activation, not at generation.
+                    db()->q("INSERT INTO keys_code(user_key,game,duration,max_devices,status,registrator,expired_date,branch) VALUES(?,?,?,?,1,?,NULL,?)",
+                        [$key,'PUBG',$hours,$maxDev,$uname,currentBranch()]);
                     $success[] = $key;
                 }
                 if ($ulevel > 1) db()->q("UPDATE users SET balance=balance-? WHERE id=?",[$cost,$_SESSION['uid']]);

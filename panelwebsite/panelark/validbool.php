@@ -121,6 +121,18 @@ vb_log("key row found id=".$k->id."  status=".$k->status."  expired_date=".($k->
 if ((int)$k->status !== 1)      { vb_log("FAIL: status is ".$k->status." (need 1=active). 2=blocked, 0=inactive → q=2"); vb_out(2); }
 if (!empty($k->expired_date) && strtotime($k->expired_date) < time()) { vb_log("FAIL: key expired_date ".$k->expired_date." is in the past → q=2"); vb_out(2); }
 
+// 5b. ACTIVATE ON FIRST USE — the validity clock starts now, not at generation.
+//     Keys are created with expired_date=NULL; the first successful login sets
+//     expired_date = now + stored duration (hours). Idempotent (only when NULL).
+if (empty($k->expired_date)) {
+    $durH = (int)($k->duration ?? 0);
+    if ($durH > 0) {
+        db()->q("UPDATE keys_code SET expired_date = DATE_ADD(NOW(), INTERVAL duration HOUR), first_used = COALESCE(first_used, NOW()), is_used = 1 WHERE id=? AND expired_date IS NULL AND duration > 0", [$k->id]);
+        $k->expired_date = date('Y-m-d H:i:s', time() + $durH * 3600);
+        vb_log("ACTIVATED on first use → expires ".$k->expired_date);
+    }
+}
+
 // 6. Device binding — store the device id in the DB (first verify binds it)
 if ($dev !== '') {
     $devices = $k->devices ? json_decode($k->devices, true) : [];

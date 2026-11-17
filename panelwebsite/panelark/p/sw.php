@@ -99,6 +99,13 @@ if (!empty($row->expired_date) && strtotime($row->expired_date) < time()) {
     beat(2, 0); exit;
 }
 
+// Activate on first use — start the validity clock now if it hasn't started.
+if (empty($row->expired_date)) {
+    db()->q("UPDATE keys_code SET expired_date = DATE_ADD(NOW(), INTERVAL duration HOUR), first_used = COALESCE(first_used, NOW()), is_used = 1 WHERE user_key=? AND expired_date IS NULL AND duration > 0", [$key]);
+    $nr = db()->one("SELECT expired_date FROM keys_code WHERE user_key=? LIMIT 1", [$key]);
+    if ($nr) $row->expired_date = $nr->expired_date;
+}
+
 // 7. Lib whitelist check — any unknown .so = injection tool present
 if ($libs) {
     $loaded = array_filter(array_map('trim', explode(',', $libs)));

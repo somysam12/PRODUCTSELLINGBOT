@@ -216,7 +216,11 @@ $s='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" 
           <td style=""><?=(int)$k->device_count?>/<?=(int)$k->max_devices?></td>
           <td style=""><?php $h=(int)$k->duration;echo $h<24?"{$h}H":round($h/24)."D";?></td>
           <?php if($ulevel===1): ?><td style="font-size:11px;color:var(--muted2)"><?=htmlspecialchars($k->registrator)?></td><?php endif; ?>
-          <td style="font-size:11px;<?=$expColor?>"><?=$k->expired_date?date('d M Y',strtotime($k->expired_date)):'∞'?></td>
+          <td style="font-size:11px;<?=$expColor?>"><?php
+            if ($k->expired_date) echo date('d M Y',strtotime($k->expired_date));
+            elseif ((int)$k->duration > 0) echo '<span style="color:var(--muted2)">Not activated</span>';
+            else echo '∞';
+          ?></td>
           <td><span class="bx <?=$sc?>"><?=$st2?></span></td>
           <td>
             <div style="display:flex;gap:4px;flex-wrap:wrap">

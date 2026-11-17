@@ -76,6 +76,12 @@ if (!$k)                                                              deny(); //
 if ((int)$k->status !== 1)                                            deny(); // blocked/disabled
 if (!empty($k->expired_date) && strtotime($k->expired_date) < time())deny(); // expired
 
+// Activate on first use — start the validity clock now if it hasn't started.
+if (empty($k->expired_date) && (int)($k->duration ?? 0) > 0) {
+    db()->q("UPDATE keys_code SET expired_date = DATE_ADD(NOW(), INTERVAL duration HOUR), first_used = COALESCE(first_used, NOW()), is_used = 1 WHERE id=? AND expired_date IS NULL AND duration > 0", [$k->id]);
+    $k->expired_date = date('Y-m-d H:i:s', time() + (int)$k->duration * 3600);
+}
+
 // 5. Device binding (optional but enforced when serial supplied)
 if ($dev !== '') {
     $devices = $k->devices ? json_decode($k->devices, true) : [];

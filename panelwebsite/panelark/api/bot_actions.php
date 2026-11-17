@@ -173,8 +173,9 @@ function genDoKeyReal($chatId, $msgId, $cbId, object $u, string $duration, int $
         while (db()->one("SELECT id FROM keys_code WHERE user_key=?", [$key])) $key = generateKey($prefix);
     }
 
-    db()->q("INSERT INTO keys_code(user_key,game,duration,max_devices,status,registrator,expired_date,branch) VALUES(?,?,?,?,1,?,?,?)",
-        [$key,'PUBG',$hours,$dev,$u->username,$expiry,($u->branch ?? 'main')]);
+    // expired_date NULL → clock starts on first use, not at generation.
+    db()->q("INSERT INTO keys_code(user_key,game,duration,max_devices,status,registrator,expired_date,branch) VALUES(?,?,?,?,1,?,NULL,?)",
+        [$key,'PUBG',$hours,$dev,$u->username,($u->branch ?? 'main')]);
     if ((int)$u->level > 1) db()->q("UPDATE users SET balance=balance-? WHERE id=?", [$cost,$u->id]);
     logAct($u->id, $u->username, 'BOT_GENERATE_KEY', "1 key Dur:$duration Dev:$dev");
 
@@ -285,9 +286,17 @@ function flowExtendKey($chatId, object $u, string $text, string $key): void {
     if (!$k || !ownsOrOwner($u,$k)) { tgSend($chatId,"🚫 Not allowed."); return; }
     if (!ctype_digit(trim($text))) { tgSend($chatId,"❌ Enter a number of days."); return; }
     $days = (int)$text;
-    $base = ($k->expired_date && strtotime($k->expired_date) > time()) ? strtotime($k->expired_date) : time();
+    if (empty($k->expired_date)) {
+        // Key not activated yet → extend the stored plan length; the clock still
+        // starts on first use (don't activate it early).
+        db()->q("UPDATE keys_code SET duration = duration + ? WHERE id=?", [$days*24, $k->id]);
+        logAct($u->id,$u->username,'BOT_EXTEND_KEY',"$key +{$days}d (pre-activation)");
+        tgSend($chatId, "✅ Added <b>{$days}</b> days to the plan. The clock still starts on first login.");
+        return;
+    }
+    $base = strtotime($k->expired_date) > time() ? strtotime($k->expired_date) : time();
     $newExp = date('Y-m-d H:i:s', $base + $days*86400);
-    db()->q("UPDATE keys_code SET expired_date=? WHERE id=?", [$newExp,$k->id]);
+    db()->q("UPDATE keys_code SET duration = duration + ?, expired_date=? WHERE id=?", [$days*24, $newExp, $k->id]);
     logAct($u->id,$u->username,'BOT_EXTEND_KEY',"$key +{$days}d");
     tgSend($chatId, "✅ Extended by <b>{$days}</b> days.\nNew expiry: <b>".date('d M Y H:i',strtotime($newExp))."</b>");
 }

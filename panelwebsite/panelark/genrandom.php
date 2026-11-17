@@ -24,8 +24,9 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             for ($i=0;$i<$qty;$i++) {
                 $k=generateKey($keyPrefix);
                 while(db()->one("SELECT id FROM keys_code WHERE user_key=?",[$k])) $k=generateKey($keyPrefix);
-                db()->q("INSERT INTO keys_code(user_key,game,duration,max_devices,status,registrator,expired_date,branch) VALUES(?,?,?,?,1,?,?,?)",
-                    [$k,'PUBG',$hrs,$maxDev,$uname,$exp,currentBranch()]);
+                // expired_date NULL → clock starts on first use, not at generation.
+                db()->q("INSERT INTO keys_code(user_key,game,duration,max_devices,status,registrator,expired_date,branch) VALUES(?,?,?,?,1,?,NULL,?)",
+                    [$k,'PUBG',$hrs,$maxDev,$uname,currentBranch()]);
                 $genKeys[]=$k;
             }
             logAct($_SESSION['uid'],$uname,'GEN_RANDOM_KEYS',"{$qty} keys {$duration}");
