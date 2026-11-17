@@ -64,29 +64,22 @@ require __DIR__.'/app/Views/Layout/auth_head.php';
       <?php if(!$success): ?>
       <form method="POST">
         <?=csrfField()?>
-        <div class="af">
-          <label for="regUser">Username</label>
-          <div class="af-inp"><?= phIcon('user') ?>
-            <input type="text" id="regUser" name="username" required minlength="4" autocomplete="username" autocapitalize="none" spellcheck="false" value="<?=htmlspecialchars($_POST['username']??'')?>">
-          </div>
-          <div class="fi-hint">At least 4 characters — letters, numbers and underscore.</div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('user') ?></span>
+          <input class="fld-in" type="text" id="regUser" name="username" placeholder=" " required minlength="4" autocomplete="username" autocapitalize="none" spellcheck="false" value="<?=htmlspecialchars($_POST['username']??'')?>">
+          <label class="fld-lb" for="regUser">Username</label>
         </div>
-        <div class="af">
-          <label for="regPass">Password</label>
-          <div class="af-inp"><?= phIcon('lock-key') ?>
-            <input type="password" id="regPass" name="password" required minlength="6" autocomplete="new-password">
-            <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
-          </div>
-          <div class="fi-hint">At least 6 characters.</div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('lock-key') ?></span>
+          <input class="fld-in" type="password" id="regPass" name="password" placeholder=" " required minlength="6" autocomplete="new-password">
+          <label class="fld-lb" for="regPass">Password</label>
+          <button type="button" class="fld-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
         </div>
-        <div class="af">
-          <label for="regRef">Referral code</label>
-          <div class="af-inp"><?= phIcon('ticket') ?>
-            <input type="text" id="regRef" name="referral" required maxlength="6" minlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false"
-                   style="font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:4px;text-transform:uppercase"
-                   oninput="this.value=this.value.toUpperCase()" value="<?=htmlspecialchars($_POST['referral']??'')?>">
-          </div>
-          <div class="fi-hint">6 characters, for example AB12CD.</div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('ticket') ?></span>
+          <input class="fld-in fld-code" type="text" id="regRef" name="referral" placeholder=" " required maxlength="6" minlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                 oninput="this.value=this.value.toUpperCase()" value="<?=htmlspecialchars($_POST['referral']??'')?>">
+          <label class="fld-lb" for="regRef">Referral code</label>
         </div>
         <button type="submit" class="btn-login" style="margin-top:6px"><?= phIcon('user-plus') ?> Create account</button>
       </form>

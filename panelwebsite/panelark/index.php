@@ -41,18 +41,16 @@ require __DIR__.'/app/Views/Layout/auth_head.php';
 
       <form method="POST" id="loginForm">
         <?= csrfField() ?>
-        <div class="af">
-          <label for="usernameInp">Username</label>
-          <div class="af-inp"><?= phIcon('user') ?>
-            <input type="text" id="usernameInp" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
-          </div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('user') ?></span>
+          <input class="fld-in" type="text" id="usernameInp" name="username" placeholder=" " required autocomplete="username" autocapitalize="none" spellcheck="false">
+          <label class="fld-lb" for="usernameInp">Username</label>
         </div>
-        <div class="af">
-          <label for="passInp">Password</label>
-          <div class="af-inp"><?= phIcon('lock-key') ?>
-            <input type="password" id="passInp" name="password" required autocomplete="current-password">
-            <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
-          </div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('lock-key') ?></span>
+          <input class="fld-in" type="password" id="passInp" name="password" placeholder=" " required autocomplete="current-password">
+          <label class="fld-lb" for="passInp">Password</label>
+          <button type="button" class="fld-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
         </div>
         <div class="af-opts" style="justify-content:flex-end">
           <a href="/forgot.php" class="auth-link">Forgot password?</a>

@@ -59,18 +59,16 @@ require __DIR__.'/app/Views/Layout/auth_head.php';
       <div class="alert a-warn"><?= phIcon('warning') ?> Only the panel login binding is reset. Your license keys are not changed.</div>
       <form method="POST">
         <?=csrfField()?>
-        <div class="af">
-          <label for="rUser">Username</label>
-          <div class="af-inp"><?= phIcon('user') ?>
-            <input type="text" id="rUser" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
-          </div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('user') ?></span>
+          <input class="fld-in" type="text" id="rUser" name="username" placeholder=" " required autocomplete="username" autocapitalize="none" spellcheck="false">
+          <label class="fld-lb" for="rUser">Username</label>
         </div>
-        <div class="af">
-          <label for="rPass">Password</label>
-          <div class="af-inp"><?= phIcon('lock-key') ?>
-            <input type="password" id="rPass" name="password" required autocomplete="current-password">
-            <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
-          </div>
+        <div class="fld">
+          <span class="fld-ic"><?= phIcon('lock-key') ?></span>
+          <input class="fld-in" type="password" id="rPass" name="password" placeholder=" " required autocomplete="current-password">
+          <label class="fld-lb" for="rPass">Password</label>
+          <button type="button" class="fld-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
         </div>
         <button type="submit" class="btn-login" style="margin-top:6px"><?= phIcon('device-mobile') ?> Reset login device</button>
       </form>
