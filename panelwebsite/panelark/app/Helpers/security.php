@@ -241,6 +241,18 @@ function logAct(?int $uid, ?string $uname, string $action, string $detail='', st
     if ($branch === null) $branch = 'main';
     db()->q("INSERT INTO activity_logs(user_id,username,action,detail,ip,branch) VALUES(?,?,?,?,?,?)",
         [$uid,$uname,$action,$detail,$ip ?: clientIp(),$branch]);
+    // Keep the logs table small: whenever it grows past 1000 rows for this branch,
+    // delete the oldest ones so it self-trims to the latest 1000. (~6% of writes.)
+    if (random_int(1,16) === 1) {
+        try {
+            db()->q("DELETE FROM activity_logs WHERE branch=? AND id < (
+                        SELECT min_id FROM (
+                            SELECT MIN(id) min_id FROM (
+                                SELECT id FROM activity_logs WHERE branch=? ORDER BY id DESC LIMIT 1000
+                            ) keep
+                        ) t)", [$branch, $branch]);
+        } catch (Throwable $e) {}
+    }
 }
 
 // ─── REFERRAL CODE GENERATOR ──────────────────────

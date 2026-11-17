@@ -151,7 +151,7 @@ $usedCnt = count(array_filter($refCodes, fn($r) => (int)$r->is_used === 1));
         <button type="button" class="btn icon-btn" onclick="copyText('<?= htmlspecialchars($rc->code, ENT_QUOTES) ?>','Code')" title="Copy code" aria-label="Copy code"><?= phIcon('copy') ?></button>
         <div class="li-x">
           <b class="mono" style="font-size:14px;letter-spacing:2px"><?= htmlspecialchars($rc->code) ?></b>
-          <span>$<?= number_format((float)$rc->saldo,2) ?> · <?= htmlspecialchars($rc->acc_expire) ?><?= ($lvl===2 && (int)($rc->referral_limit??0)>0) ? ' · '.(int)$rc->referral_limit.' referrals' : '' ?> · by <?= htmlspecialchars($rc->created_by) ?><?= $rc->used_by ? ' · used by '.htmlspecialchars($rc->used_by) : '' ?></span>
+          <span>₹<?= number_format((float)$rc->saldo,2) ?> · <?= htmlspecialchars($rc->acc_expire) ?><?= ($lvl===2 && (int)($rc->referral_limit??0)>0) ? ' · '.(int)$rc->referral_limit.' referrals' : '' ?> · by <?= htmlspecialchars($rc->created_by) ?><?= $rc->used_by ? ' · used by '.htmlspecialchars($rc->used_by) : '' ?></span>
         </div>
         <span class="bx <?= $lvlCls ?>"><?= $lvlName ?></span>
         <span class="bx <?= $rc->is_used ? 'b-ban' : 'b-active' ?>"><?= $rc->is_used ? 'Used' : 'Available' ?></span>

@@ -94,7 +94,7 @@ $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY cre
       <div class="gsec-h"><span class="gnum">1</span><h3>Duration</h3></div>
       <select name="duration" id="durationSel" data-ui="tiles" onchange="updateEst()">
         <?php foreach($prices as $pr): ?>
-        <option value="<?= htmlspecialchars($pr->duration) ?>" data-price="<?= $pr->price ?>" data-t="<?= htmlspecialchars($pr->duration) ?>" data-s="$<?= $pr->price ?> / device"><?= htmlspecialchars($pr->duration) ?> — $<?= $pr->price ?>/device</option>
+        <option value="<?= htmlspecialchars($pr->duration) ?>" data-price="<?= $pr->price ?>" data-t="<?= htmlspecialchars($pr->duration) ?>" data-s="₹<?= $pr->price ?> / device"><?= htmlspecialchars($pr->duration) ?> — ₹<?= $pr->price ?>/device</option>
         <?php endforeach; ?>
       </select>
     </section>
@@ -136,10 +136,10 @@ $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY cre
       <div class="rc-row"><span>Duration</span><b id="rcDur">—</b></div>
       <div class="rc-row"><span>Devices per key</span><b id="rcDev">1</b></div>
       <div class="rc-row"><span>Keys</span><b id="rcQty">1</b></div>
-      <div class="rc-total"><span>Total</span><b id="rcTotal">$0.00</b></div>
+      <div class="rc-total"><span>Total</span><b id="rcTotal">₹0.00</b></div>
       <input type="hidden" id="estimation">
       <button type="submit" form="genForm" class="btn btn-solid btn-full"><?= phIcon('sparkle') ?> Generate <span id="rcBtnN">key</span></button>
-      <?php if($ulevel>1): ?><div class="rc-note"><span>Your balance</span><b>$<?= number_format($myBal,2) ?></b></div><?php endif; ?>
+      <?php if($ulevel>1): ?><div class="rc-note"><span>Your balance</span><b>₹<?= number_format($myBal,2) ?></b></div><?php endif; ?>
     </div>
 
     <div class="card" style="margin:0">
@@ -176,11 +176,11 @@ function updateEst(){
   const dur = document.getElementById('durationSel').value;
   const unit= parseFloat(priceMap[dur]||0);
   const total = (dev*qty*unit).toFixed(2);
-  document.getElementById('estimation').value = '$ '+total;
+  document.getElementById('estimation').value = '₹'+total;
   document.getElementById('rcDur').textContent = dur;
   document.getElementById('rcDev').textContent = dev;
   document.getElementById('rcQty').textContent = qty;
-  document.getElementById('rcTotal').textContent = '$'+total;
+  document.getElementById('rcTotal').textContent = '₹'+total;
   document.getElementById('rcBtnN').textContent = qty>1 ? qty+' keys' : 'key';
 }
 updateEst();

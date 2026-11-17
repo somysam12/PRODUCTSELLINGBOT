@@ -2,33 +2,52 @@
 </div><!-- /main -->
 </div><!-- /app -->
 
-<!-- ═══ MOBILE BOTTOM NAV ═══ -->
-<nav class="mob-bottom-nav" id="mobBottomNav">
-  <div class="mob-bottom-nav-inner">
-    <a href="/dashboard.php" class="mbn-item <?= ($activeNav==='dashboard')?'on':'' ?>">
-      <?= ico('dashboard') ?>
-      <span class="mbn-label">Home</span>
+<!-- ═══ BOTTOM DOCK + iOS NAV TRAY ═══ -->
+<?php
+$navOrder  = ['dashboard','allkeys','generate','genrandom','extend','users','referral','balance',
+              'panelset','onedevice','keyformat','pricing','iplimit','rebranding','heartbeat','kicks',
+              'pkg_manager','panelalert','botusers','panelupdate','settings','logs'];
+$navGroups = ['Main'=>['dashboard','allkeys','generate','genrandom'],
+              'Management'=>['extend','users','referral','balance'],
+              'System'=>['panelset','onedevice','keyformat','pricing','iplimit','rebranding','heartbeat','kicks','pkg_manager','panelalert','botusers','panelupdate','settings','logs']];
+$navFlat = [];
+foreach ($navOrder as $k) { $it = $navItems[$k] ?? null; if (!$it) continue; if (($ulevel ?? 3) > $it['min']) continue; $navFlat[$k] = $it; }
+$navKeys = array_keys($navFlat);
+$ci = array_search($activeNav, $navKeys, true); if ($ci === false) $ci = 0;
+$win = 2; $n = count($navKeys);
+$start = max(0, min($ci - $win, $n - (2*$win + 1))); $start = max(0, $start);
+$slice = array_slice($navKeys, $start, 2*$win + 1);
+?>
+<nav class="dock" aria-label="Pages">
+  <div class="dock-rail">
+    <?php foreach ($slice as $k): $it = $navFlat[$k]; $on = ($k === $activeNav); $near = (abs(array_search($k,$navKeys,true) - $ci) === 1); ?>
+    <a href="<?= $it['href'] ?>" class="dock-item <?= $on?'on':'' ?> <?= $near?'near':'' ?>" title="<?= $it['label'] ?>">
+      <?= $it['ico'] ?><span class="dlbl"><?= $it['label'] ?></span>
     </a>
-    <a href="/keys.php" class="mbn-item <?= ($activeNav==='allkeys')?'on':'' ?>">
-      <?= ico('keys') ?>
-      <span class="mbn-label">Keys</span>
-    </a>
-    <a href="/generate.php" class="mbn-item <?= ($activeNav==='generate')?'on':'' ?>">
-      <?= ico('generate') ?>
-      <span class="mbn-label">Generate</span>
-    </a>
-    <?php if(($ulevel??3)<=2): ?>
-    <a href="/users.php" class="mbn-item <?= ($activeNav==='users')?'on':'' ?>">
-      <?= ico('users') ?>
-      <span class="mbn-label">Users</span>
-    </a>
-    <?php endif; ?>
-    <button class="mbn-item mbn-more-btn" onclick="toggleSidebar()" aria-label="More">
-      <?= phIcon('list') ?>
-      <span class="mbn-label">More</span>
-    </button>
+    <?php endforeach; ?>
   </div>
+  <button type="button" class="dock-more" onclick="openNavSheet()" aria-label="All pages" aria-haspopup="dialog">
+    <?= phIcon('dots-three') ?><span class="dlbl">More</span>
+  </button>
 </nav>
+
+<div class="sheet-bg" id="sheetBg" onclick="closeNavSheet()"></div>
+<div class="nav-sheet" id="navSheet" role="dialog" aria-modal="true" aria-label="All pages">
+  <div class="sheet-grip"></div>
+  <?php foreach ($navGroups as $gname => $gkeys):
+    $vis = array_values(array_filter($gkeys, fn($k) => isset($navFlat[$k])));
+    if (!$vis) continue; ?>
+  <div class="sheet-sec"><?= $gname ?></div>
+  <div class="sheet-grid">
+    <?php foreach ($vis as $k): $it = $navFlat[$k]; ?>
+    <a href="<?= $it['href'] ?>" class="sheet-item <?= $k===$activeNav?'on':'' ?>">
+      <span class="si-ic"><?= $it['ico'] ?></span>
+      <span><?= $it['label'] ?></span>
+    </a>
+    <?php endforeach; ?>
+  </div>
+  <?php endforeach; ?>
+</div>
 
 <div id="toasts" class="toasts"></div>
 <script src="<?= asset('/assets/js/panel.js') ?>"></script>
@@ -90,6 +109,21 @@
     return 0;
   }
   <?php endif; ?>
+})();
+</script>
+<script>
+// iOS-style nav tray
+(function(){
+  var sheet=document.getElementById('navSheet'), bg=document.getElementById('sheetBg');
+  window.openNavSheet=function(){ if(!sheet) return; bg.classList.add('show'); sheet.classList.add('show'); document.body.style.overflow='hidden'; };
+  window.closeNavSheet=function(){ if(!sheet) return; bg.classList.remove('show'); sheet.classList.remove('show'); document.body.style.overflow=''; };
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeNavSheet(); });
+  // swipe-down to dismiss
+  if(sheet){ var y0=null;
+    sheet.addEventListener('touchstart',function(e){ if(sheet.scrollTop<=0) y0=e.touches[0].clientY; },{passive:true});
+    sheet.addEventListener('touchmove',function(e){ if(y0===null) return; var dy=e.touches[0].clientY-y0; if(dy>0) sheet.style.transform='translateY('+dy+'px)'; },{passive:true});
+    sheet.addEventListener('touchend',function(e){ if(y0===null) return; var dy=(e.changedTouches[0].clientY-y0); sheet.style.transform=''; if(dy>90) closeNavSheet(); y0=null; });
+  }
 })();
 </script>
 </body>

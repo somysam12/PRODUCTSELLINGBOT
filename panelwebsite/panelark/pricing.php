@@ -100,7 +100,7 @@ $selPrice = $priceMap[$sel]??0;
         <tr>
           <td style="font-weight:700"><?=htmlspecialchars($p->duration)?></td>
           <td style="color:var(--muted)"><?=$p->hours?>h</td>
-          <td style="color:var(--acc);font-weight:700" id="pval-<?=md5($p->duration)?>">$<?=number_format((float)$p->price,2)?></td>
+          <td style="color:var(--acc);font-weight:700" id="pval-<?=md5($p->duration)?>">₹<?=number_format((float)$p->price,2)?></td>
           <td><button class="btn btn-ghost btn-xs" onclick="selectDur('<?=htmlspecialchars(addslashes($p->duration))?>')">Edit</button></td>
         </tr>
         <?php endforeach; ?>
@@ -159,7 +159,7 @@ async function savePrice(){
       btn.style.background='linear-gradient(135deg,#00a870,#00c88a)';
       txt.textContent='SAVED!';
       txt.style.display='block'; load.style.display='none';
-      toast('Price saved: '+dur+' → $'+price.toFixed(2),'s');
+      toast('Price saved: '+dur+' → ₹'+price.toFixed(2),'s');
       setTimeout(()=>{
         btn.style.background='linear-gradient(135deg,#00c88a,#2dd4bf)';
         txt.textContent='SAVE PRICE';

@@ -577,12 +577,7 @@ function urlRow(string $label, string $url, string $sv): string {
   </div>
 </div>
 <?php if (!$limitOkLib): ?>
-<div class="warn-box" style="margin-bottom:16px">
-  <strong>Upload limit too low</strong> — uploads bigger than <?=fmtSz($limitBytes)?> will fail.
-  The <code>.user.ini</code> can take ~5 min to apply. If it stays low, set it in
-  <strong>cPanel → MultiPHP INI Editor</strong> (select your domain): set
-  <code>upload_max_filesize = 210M</code> and <code>post_max_size = 220M</code>, then reload this page.
-</div>
+
 <?php endif; ?>
 
 <!-- ── Base domain (drives every link below) ──────────── -->
@@ -735,15 +730,12 @@ function urlRow(string $label, string $url, string $sv): string {
         <?php endif; ?>
 
         <div style="margin-bottom:16px">
-          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Kill Check URL (embed this in your lib)</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Kill check URL</div>
           <div class="code-box">
             <?=htmlspecialchars($libKillUrl)?>
             <button class="cb-copy" onclick="copyText('<?=htmlspecialchars($libKillUrl)?>','Kill URL')">Copy</button>
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">
-            Your lib sends <code>GET ?cv=YOUR_LIB_VERSION</code> to this URL on startup.
-            Server returns XOR(0xA5)+Base64 encoded JSON.
-          </div>
+          
         </div>
 
         <!-- Set kill version -->
@@ -769,7 +761,7 @@ function urlRow(string $label, string $url, string $sv): string {
           <input type="text" class="fi" id="libKillRdrInp"
                  value="<?=htmlspecialchars($libKillRdr)?>"
                  placeholder="https://t.me/YourChannel">
-          <div style="margin-top:6px;font-size:11px;color:var(--muted)">Sent as <code>redirect_url</code> so the app opens it when the lib is killed.</div>
+
         </div>
 
         <?php if ($libKillOn): ?>
@@ -817,7 +809,7 @@ function urlRow(string $label, string $url, string $sv): string {
                 <div id="apkFileSize" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
               </div>
               <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" style="width:32px;height:32px;opacity:.3;margin-bottom:8px"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
-              <div style="font-size:11px;color:var(--muted);text-transform:uppercase">Click to select APK</div>
+
               <input type="file" id="apkFileInp" name="apk_file" accept=".apk" onchange="prevApk(this)" style="display:none">
             </div>
           </div>
@@ -935,14 +927,12 @@ function urlRow(string $label, string $url, string $sv): string {
         <?php endif; ?>
 
         <div style="margin-bottom:16px">
-          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Kill Check URL (embed in your APK)</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Kill check URL</div>
           <div class="code-box">
             <?=htmlspecialchars($apkKillUrl)?>
             <button class="cb-copy" onclick="copyText('<?=htmlspecialchars($apkKillUrl)?>','APK Kill URL')">Copy</button>
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">
-            APK sends <code>GET ?cv=YOUR_APK_VERSION</code> to this URL on startup.
-          </div>
+          
         </div>
 
         <div class="fg">
@@ -1011,9 +1001,9 @@ function urlRow(string $label, string $url, string $sv): string {
       <div class="card-b">
 
         <div style="margin-bottom:16px">
-          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Mod version check URL (embed in mod lib)</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Mod version URL</div>
           <div class="code-box"><?=htmlspecialchars($modKillUrl)?><button class="cb-copy" onclick="copyText('<?=htmlspecialchars($modKillUrl)?>','Mod URL')">Copy</button></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">Mod lib sends <code>GET ?cv=ITS_VERSION</code>. Server returns XOR(0xA5)+Base64 JSON.</div>
+          
         </div>
 
         <div class="fg">

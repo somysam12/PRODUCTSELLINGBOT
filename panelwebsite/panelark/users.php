@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['action'])) {
             echo json_encode(['ok'=>true,'msg'=>'User banned'.$cascadeInfo.($blockIp?' & IP blocked.':'.')]);
             exit;
         case 'unban':
-            db()->q("UPDATE users SET status=1 WHERE id=?",[$uid2]);
+            db()->q("UPDATE users SET status=1, login_attempts=0, locked_until=NULL WHERE id=?",[$uid2]);
             // ── CASCADE: un-ban resellers + re-enable keys if this is an admin ──
             $unbanned = db()->one("SELECT username, level FROM users WHERE id=?",[$uid2]);
             if ($unbanned && (int)$unbanned->level === 2) {

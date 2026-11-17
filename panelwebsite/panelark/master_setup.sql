@@ -59,17 +59,17 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Default owner account: OWNERBOOL / VALIDBOOL@OWNER (branch column set later)
+-- Default owner account: OWNER / OWNER@1*  (branch column set later)
 -- Step 1: if an old default 'admin' owner exists, upgrade it in place to the new
 -- credentials (only when OWNERBOOL doesn't already exist) — keeps its data/balance.
 UPDATE `users`
-  SET `username`='OWNERBOOL',
-      `password`='$2y$10$VvPXF8tOhUbaw5ijkMFG4OiWOeY2MTyIYZBA2m08CHDl7wvytOBAO'
-  WHERE `username`='admin' AND `level`=1
-    AND (SELECT c FROM (SELECT COUNT(*) c FROM `users` WHERE `username`='OWNERBOOL') AS t)=0;
--- Step 2: if OWNERBOOL still doesn't exist (truly fresh install), create it.
+  SET `username`='OWNER',
+      `password`='$2y$10$FvoxNSOC0Q3/Cvrm5FVuJONr3nCsLGXf3rPbrPJRL3kIf9pZEqkoK'
+  WHERE `username` IN ('admin','OWNERBOOL') AND `level`=1
+    AND (SELECT c FROM (SELECT COUNT(*) c FROM `users` WHERE `username`='OWNER') AS t)=0;
+-- Step 2: if OWNER still doesn't exist (truly fresh install), create it.
 INSERT IGNORE INTO `users` (`username`,`password`,`level`,`balance`,`referral_limit`,`status`,`expiration_date`)
-VALUES ('OWNERBOOL','$2y$10$VvPXF8tOhUbaw5ijkMFG4OiWOeY2MTyIYZBA2m08CHDl7wvytOBAO',1,999999999.99,9999,1,'2099-12-31 23:59:59');
+VALUES ('OWNER','$2y$10$FvoxNSOC0Q3/Cvrm5FVuJONr3nCsLGXf3rPbrPJRL3kIf9pZEqkoK',1,999999999.99,9999,1,'2099-12-31 23:59:59');
 
 -- Migration: widen balance, add single-device columns
 ALTER TABLE `users` MODIFY `balance` DECIMAL(15,2) NOT NULL DEFAULT 0.00;
@@ -193,10 +193,11 @@ CREATE TABLE IF NOT EXISTS `prices` (
   UNIQUE KEY `duration` (`duration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT IGNORE INTO `prices` (`duration`,`hours`,`price`) VALUES
-('1 Day',24,0.20),('3 Days',72,0.50),('7 Days',168,0.70),
-('15 Days',360,1.20),('30 Days',720,2.50),('60 Days',1440,4.50),
-('90 Days',2160,7.00),('180 Days',4320,12.00),('365 Days',8760,20.00);
+INSERT INTO `prices` (`duration`,`hours`,`price`) VALUES
+('5 Hours',5,50.00),('1 Day',24,120.00),('3 Days',72,250.00),
+('7 Days',168,400.00),('15 Days',360,600.00),('30 Days',720,800.00),
+('60 Days',1440,1200.00),('180 Days',4320,1800.00)
+ON DUPLICATE KEY UPDATE `hours`=VALUES(`hours`), `price`=VALUES(`price`);
 
 -- ── activity_logs ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `activity_logs` (

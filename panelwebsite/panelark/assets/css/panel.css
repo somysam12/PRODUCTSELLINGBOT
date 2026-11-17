@@ -842,3 +842,131 @@ html[data-theme="dark"] .auth-theme .ic-sun { display: none; } html[data-theme="
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   #eclipse { display: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   v11 — symbiote / glass toggles · bottom dock · iOS nav tray
+═══════════════════════════════════════════════════════════ */
+
+/* ── Toggle: default is now a smooth "symbiote" switch (GPU, spring) ── */
+.tog { width: 50px; height: 28px; }
+.togsl {
+  border-radius: 28px; overflow: hidden; isolation: isolate;
+  background: var(--sunk); border: 1px solid var(--line2); box-shadow: var(--well);
+  transition: background .35s cubic-bezier(.4,0,.2,1), border-color .35s;
+}
+/* liquid fill that floods in from the left when switched on */
+.togsl::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  background: linear-gradient(120deg, var(--acc) 0%, var(--acc-l) 100%);
+  transform: scale(0); transform-origin: left center; opacity: 0;
+  transition: transform .42s cubic-bezier(.65,0,.35,1), opacity .3s;
+}
+.togsl::before {
+  width: 22px; height: 22px; left: 3px; top: 2px; z-index: 1;
+  background: radial-gradient(circle at 35% 30%, #fff, #e9e3d7);
+  box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 7px rgba(0,0,0,.18);
+  transition: transform .42s cubic-bezier(.34,1.56,.64,1), width .2s cubic-bezier(.34,1.56,.64,1), border-radius .2s;
+  will-change: transform, width;
+}
+.tog input:checked + .togsl { background: transparent; border-color: var(--acc-h); box-shadow: inset 0 1px 3px rgba(4,80,55,.3); }
+.tog input:checked + .togsl::after { transform: scale(1); opacity: 1; }
+.tog input:checked + .togsl::before { transform: translateX(22px); background: radial-gradient(circle at 35% 30%, #fff, #eafff6); box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 0 10px rgba(255,255,255,.5); }
+/* symbiote stretch while the finger/mouse is down */
+.tog input:active + .togsl::before { width: 30px; border-radius: 13px; }
+.tog input:checked:active + .togsl::before { transform: translateX(14px); }
+.tog input:focus-visible + .togsl { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+/* ── Glass variant (add class .tog-glass on the label) ── */
+.tog-glass .togsl { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(9px) saturate(1.3); -webkit-backdrop-filter: blur(9px) saturate(1.3); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 4px 14px rgba(74,60,40,.12); }
+html[data-theme="dark"] .tog-glass .togsl { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 14px rgba(0,0,0,.4); }
+.tog-glass .togsl::after { background: linear-gradient(120deg, rgba(16,185,129,.85), rgba(52,211,153,.9)); backdrop-filter: blur(4px); }
+.tog-glass .togsl::before { background: rgba(255,255,255,.75); backdrop-filter: blur(4px); box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 2px 6px rgba(0,0,0,.2); }
+.tog-glass input:checked + .togsl { border-color: rgba(255,255,255,.45); }
+@media (prefers-reduced-motion: reduce) { .togsl::before, .togsl::after { transition: none !important; } }
+
+/* ── Kill the top-left hamburger (replaced by the bottom dock) ── */
+.menu-tog { display: none !important; }
+
+/* ── Bottom DOCK — floating, current page centred, neighbours around ── */
+.dock {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 70;
+  display: none; align-items: center; gap: 6px; max-width: calc(100vw - 20px);
+  padding: 7px; border-radius: 26px;
+  background: linear-gradient(175deg, var(--ink3), var(--ink));
+  border: 1px solid var(--ink-line); box-shadow: var(--ink-sh);
+}
+.dock-rail { display: flex; align-items: center; gap: 2px; overflow: hidden; }
+.dock-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  width: 58px; min-height: 52px; flex: 0 0 auto; border-radius: 17px; cursor: pointer; text-decoration: none;
+  color: var(--ink-mut); transition: transform .28s cubic-bezier(.34,1.56,.64,1), background .25s, color .2s, width .28s;
+}
+.dock-item svg.ph { width: 23px; height: 23px; transition: transform .28s; }
+.dock-item .dlbl { font-size: 9px; font-weight: 700; letter-spacing: .1px; max-width: 54px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dock-item:not(.on) .dlbl { opacity: .0; max-height: 0; }
+.dock-item.near { color: var(--ink-tx); }
+.dock-item.on {
+  width: 74px; color: #fff;
+  background: linear-gradient(170deg, var(--acc-l), var(--acc-h));
+  box-shadow: 0 2px 0 var(--acc-d), 0 8px 18px rgba(16,185,129,.4), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.dock-item.on svg.ph { transform: translateY(-1px) scale(1.08); }
+.dock-item:active { transform: scale(.9); }
+.dock-more {
+  width: 52px; min-height: 52px; flex: 0 0 auto; border: none; cursor: pointer; border-radius: 17px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: var(--ink-mut); background: rgba(255,255,255,.06); transition: background .2s, transform .1s;
+}
+.dock-more:active { transform: scale(.9); }
+.dock-more svg.ph { width: 22px; height: 22px; }
+.dock-more .dlbl { font-size: 9px; font-weight: 700; }
+
+/* ── iOS-style nav tray (sheet) ── */
+.sheet-bg { position: fixed; inset: 0; z-index: 90; background: rgba(24,20,14,.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .3s; }
+.sheet-bg.show { opacity: 1; pointer-events: auto; }
+.nav-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 91;
+  max-height: 82vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 10px 16px calc(24px + env(safe-area-inset-bottom));
+  background: var(--sheet); border: 1px solid var(--line); border-bottom: none; border-radius: 26px 26px 0 0;
+  box-shadow: 0 -16px 48px rgba(24,20,14,.3);
+  transform: translateY(100%); transition: transform .42s cubic-bezier(.22,1,.36,1);
+}
+.nav-sheet.show { transform: none; }
+.sheet-grip { width: 44px; height: 5px; border-radius: 5px; background: var(--line3); margin: 4px auto 14px; }
+.sheet-sec { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin: 14px 4px 10px; }
+.sheet-sec:first-of-type { margin-top: 0; }
+.sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.sheet-item {
+  display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 14px 6px; border-radius: 17px; text-decoration: none;
+  color: var(--text); background: var(--card-bg); border: 1px solid var(--line); box-shadow: var(--raise-sm);
+  transition: transform .14s, box-shadow .14s; animation: sheetPop .4s cubic-bezier(.22,1,.36,1) both;
+}
+.sheet-item:active { transform: scale(.94); }
+.sheet-item .si-ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--sunk); color: var(--text2); box-shadow: var(--well); }
+.sheet-item.on .si-ic { background: linear-gradient(160deg, var(--acc-l), var(--acc-h)); color: #fff; box-shadow: 0 2px 0 var(--acc-d), 0 6px 14px rgba(16,185,129,.35); }
+.sheet-item .si-ic svg.ph { width: 23px; height: 23px; }
+.sheet-item span { font-size: 11px; font-weight: 700; text-align: center; line-height: 1.25; max-width: 100%; }
+.nav-sheet.show .sheet-item:nth-child(2) { animation-delay: .03s } .nav-sheet.show .sheet-item:nth-child(3){animation-delay:.06s} .nav-sheet.show .sheet-item:nth-child(4){animation-delay:.09s}
+@keyframes sheetPop { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce){ .nav-sheet{ transition: none } .sheet-item{ animation: none } }
+
+@media (max-width: 860px) {
+  .dock { display: flex; }
+  .mob-bottom-nav { display: none !important; }
+  .content { margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .sheet-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 380px) { .dock-item { width: 52px } .dock-item.on { width: 66px } }
+/* Settings/permission + maintenance toggles use the glass variant for variety */
+.perm-row .togsl, .srow .togsl {
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+  backdrop-filter: blur(9px) saturate(1.3); -webkit-backdrop-filter: blur(9px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 4px 14px rgba(74,60,40,.12);
+}
+html[data-theme="dark"] .perm-row .togsl, html[data-theme="dark"] .srow .togsl {
+  background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 14px rgba(0,0,0,.4);
+}
+.perm-row .tog input:checked + .togsl, .srow .tog input:checked + .togsl { border-color: rgba(255,255,255,.45); }
