@@ -9,6 +9,7 @@ $uname  = $_SESSION['uname'] ?? 'User';
 $oneDevMode = getSetting('one_device_mode','0') === '1';
 $maxCap     = max(1,(int)getSetting('max_devices_cap','10'));
 $keyPrefix  = getSetting('key_prefix','HB');
+$customKeyLevel = (int)getSetting('custom_key_level','1'); // which roles may set a custom key (1=owner only)
 
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     $error = ''; $success = [];
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         $maxDev    = $oneDevMode ? 1 : min($maxCap, max(1,(int)($_POST['max_devices']??1)));
         $qty       = max(1,min(10,(int)($_POST['qty']??1))); // max 10
         $customKey = trim($_POST['custom_key']??'');
-        $isCustom  = !empty($_POST['is_custom']) && $customKey!=='' && $qty===1;
+        $isCustom  = !empty($_POST['is_custom']) && $customKey!=='' && $qty===1 && $ulevel <= $customKeyLevel;
 
         $priceRow = db()->one("SELECT hours,price FROM prices WHERE duration=?",[$duration]);
         if (!$priceRow) { $error='Invalid duration.'; }
@@ -116,6 +117,7 @@ $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY cre
       </div>
     </section>
 
+    <?php if($ulevel <= $customKeyLevel): ?>
     <section class="gsec">
       <div class="gsec-h">
         <span class="gnum">3</span><h3>Custom key</h3><small>single key only</small>
@@ -125,6 +127,7 @@ $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY cre
         <input class="fi fi-mono" type="text" name="custom_key" aria-label="Custom key" autocomplete="off" spellcheck="false">
       </div>
     </section>
+    <?php endif; ?>
   </form>
 
   <aside class="work-side">
@@ -182,7 +185,8 @@ function updateEst(){
 }
 updateEst();
 function toggleCustom(){
-  const on=document.getElementById('custTog').checked;
+  const t=document.getElementById('custTog'); if(!t) return;
+  const on=t.checked;
   document.getElementById('custWrap').style.display=on?'block':'none';
   if(on) document.getElementById('qtyInp').value=1;
   updateEst();

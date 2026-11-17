@@ -585,30 +585,10 @@ function urlRow(string $label, string $url, string $sv): string {
 </div>
 <?php endif; ?>
 
-<!-- ── Page intro ─────────────────────────────────────── -->
-<div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:16px;padding:16px 18px;border-radius:var(--r);background:var(--acc-bg);border:1px solid var(--acc-20)">
-  <div style="width:42px;height:42px;border-radius:var(--r);background:var(--acc-bg);border:1px solid var(--acc-20);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-    <svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M242.87-151.87q-37.78 0-64.39-26.61t-26.61-64.39v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5h474.26v-74.5q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v74.5q0 37.78-26.61 64.39t-64.39 26.61H242.87ZM434.5-633.56 365-564.07q-13.43 13.68-32.09 13.42-18.65-.26-32.32-13.94-12.92-13.67-13.3-31.94-.38-18.27 13.3-31.95l147.34-147.59q6.72-6.71 14.92-9.81 8.19-3.1 17.15-3.1 8.96 0 17.15 3.1 8.2 3.1 14.92 9.81l147.58 147.59q13.44 13.44 13.06 31.83-.38 18.39-13.06 31.82-13.67 13.68-32.32 14.06-18.66.38-32.33-13.3l-69.5-69.49v265.19q0 19.15-13.17 32.33-13.18 13.17-32.33 13.17t-32.33-13.17q-13.17-13.18-13.17-32.33v-265.19Z"/></svg>
-  </div>
-  <div style="flex:1 1 200px;min-width:0">
-    <div style="font-weight:800;font-size:15px;color:var(--text)">Rebranding Control Center</div>
-    <div style="font-size:12px;color:var(--muted)">Upload &amp; version your lib and APK · arm the kill-switches · set a redirect on kill.</div>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <span class="ver-badge">Lib v<?=htmlspecialchars($libVer)?></span>
-    <span class="ver-badge">APK v<?=htmlspecialchars($apkVer)?></span>
-  </div>
-</div>
-
 <!-- ── Base domain (drives every link below) ──────────── -->
 <div class="card" style="margin-bottom:16px">
   <div class="card-h"><span class="ct"><svg class="ph" viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M480-71.87q-83.67 0-158.11-32.22-74.43-32.21-130.01-87.79-55.58-55.58-87.79-130.01Q71.87-396.33 71.87-480q0-84.43 32.22-158.49 32.21-74.05 87.79-129.63 55.58-55.58 130.01-87.79 74.44-32.22 158.11-32.22 84.43 0 158.49 32.22 74.05 32.21 129.63 87.79 55.58 55.58 87.79 129.63 32.22 74.06 32.22 158.49 0 83.67-32.22 158.11-32.21 74.43-87.79 130.01-55.58 55.58-129.63 87.79Q564.43-71.87 480-71.87Zm-.48-92.76q25.05-35.52 44.05-74.4 19-38.88 31-82.4H405.2q12 43.52 30.64 82.4t43.68 74.4Zm-102.8-16q-18.48-32.52-31.5-68.02-13.02-35.5-22.02-72.78H206.63q28.28 49.52 71.42 86.28 43.15 36.76 98.67 54.52Zm205.85 0q55.52-17.76 98.9-54.52 43.38-36.76 71.66-86.28H636.57q-9 37.28-22.27 72.78-13.26 35.5-31.73 68.02Zm-409.7-220.09H307.2q-3-20-4.5-39.26-1.5-19.26-1.5-40.02 0-21 1.5-40.14t4.5-39.14H172.87q-5 19.76-7.5 39.02t-2.5 40.26q0 20.76 2.5 40.14t7.5 39.14Zm214.33 0h185.37q3-20 4.26-39.26 1.26-19.26 1.26-40.02 0-21-1.26-40.14t-4.26-39.14H387.2q-3 20-4.5 39.14T381.2-480q0 20.76 1.5 40.02t4.5 39.26Zm265.37 0h134.08q5-19.76 7.5-39.14t2.5-40.14q0-21-2.5-40.26-2.5-19.26-7.5-39.02H652.57q2.76 20 4.14 39.14t1.38 40.14q0 20.76-1.38 40.02t-4.14 39.26Zm-16-238.08h116.56q-28.28-49.53-71.66-86.17-43.38-36.64-98.9-54.4 18.47 32.52 31.73 67.9 13.27 35.38 22.27 72.67Zm-231.37 0h149.37q-11.77-43.53-30.77-82.29-19-38.76-44.28-74.28-25.04 35.52-43.68 74.28T405.2-638.8Zm-198.57 0H323.2q9-37.29 22.02-72.67t31.5-67.9q-55.52 17.76-98.67 54.4-43.14 36.64-71.42 86.17Z"/></svg> Base Domain</span></div>
   <div class="card-b">
-    <div class="info-box" style="margin-bottom:12px">
-      Set this if you deploy the panel on a different domain/subdomain. Every link on this page and the
-      Heartbeat page (connect, kill, secure, version) rebuilds from it automatically. Leave blank to use
-      the default <code><?=htmlspecialchars(rtrim(PANEL_URL,'/'))?></code>.
-    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <input type="text" class="fi fi-mono" id="baseUrlInp" style="flex:1;min-width:220px"
              value="<?=htmlspecialchars($panelBaseSet)?>"
@@ -620,7 +600,7 @@ function urlRow(string $label, string $url, string $sv): string {
 </div>
 
 <!-- ── Tab Bar ────────────────────────────────────────── -->
-<div class="rb-tabs" id="rbTabs">
+<div class="vtabs"><div class="rb-tabs" id="rbTabs">
   <button data-tab="lib"     class="rb-tab<?=$activeTab==='lib'?' active':''?>" onclick="rbTab('lib',this)">Lib Manager</button>
   <button data-tab="libkill" class="rb-tab<?=$activeTab==='libkill'?' active danger':''?>" onclick="rbTab('libkill',this)">Lib Killer</button>
   <button data-tab="apk"     class="rb-tab<?=$activeTab==='apk'?' active':''?>" onclick="rbTab('apk',this)">APK Manager</button>
@@ -629,11 +609,12 @@ function urlRow(string $label, string $url, string $sv): string {
   <button data-tab="appconfig" class="rb-tab<?=$activeTab==='appconfig'?' active':''?>"        onclick="rbTab('appconfig',this)">App Config</button>
 </div>
 
+</div><div class="vtabs-body">
 <!-- ══════════════════════════════════════════════════════
      TAB 1 — LIB MANAGER
 ════════════════════════════════════════════════════════ -->
 <div id="rb-lib" class="rb-pane<?=$activeTab==='lib'?' active':''?>">
-  <div class="g-left">
+  <div class="g2" style="align-items:start">
 
     <!-- Upload card -->
     <div class="card">
@@ -649,11 +630,6 @@ function urlRow(string $label, string $url, string $sv): string {
         </div>
       </div>
       <div class="card-b">
-        <div class="info-box" style="margin-bottom:14px">
-          <strong>Slots 1–3</strong> = BGMI modes &nbsp;·&nbsp; <strong>Slots 4–6</strong> = Global (GL / TW / KR).
-          Upload <code>.zip</code> or <code>.so</code> to a slot — it becomes available in the app automatically.
-          Every download is <strong>key-gated</strong>: no valid key = no download.
-        </div>
 
         <!-- BGMI / GLOBAL tab toggle -->
         <div style="display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
@@ -689,11 +665,6 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card">
       <div class="card-h"><span class="ct"><?= phIcon('link') ?> Lib Endpoints &amp; Links</span></div>
       <div class="card-b">
-        <div class="info-box" style="margin-bottom:14px">
-          Direct lib download is <strong>blocked</strong>. The app must first hit
-          <code>/secure/unlock</code> with a valid key, then download from <code>/secure/lib</code>.
-          A leaked link alone <strong>cannot</strong> download the lib.
-        </div>
         <?= urlRow('Lib version.txt', $libVerTxtUrl, $sv) ?>
         <?= urlRow('Secure lib download endpoint', $secLibUrl, $sv) ?>
         <?= urlRow('Lib unlock endpoint', $secUnlockUrl, $sv) ?>
@@ -745,7 +716,7 @@ function urlRow(string $label, string $url, string $sv): string {
      TAB 2 — LIB KILLER
 ════════════════════════════════════════════════════════ -->
 <div id="rb-libkill" class="rb-pane<?=$activeTab==='libkill'?' active':''?>">
-  <div class="g-left">
+  <div class="g2" style="align-items:start">
 
     <!-- Status card -->
     <div class="card" style="border-color:<?=$libKillOn?'rgba(255,77,109,.3)':'var(--border)'?>">
@@ -761,10 +732,6 @@ function urlRow(string $label, string $url, string $sv): string {
       </div>
       <div class="card-b">
         <?php if ($libKillOn): ?>
-        <div class="warn-box" style="margin-bottom:14px">
-          <strong>Lib Killer is ACTIVE.</strong> Any lib with version &lt; <code>v<?=htmlspecialchars($libKillBw)?></code>
-          will receive <code>"kill":1</code> from the server and crash immediately on next check.
-        </div>
         <?php endif; ?>
 
         <div style="margin-bottom:16px">
@@ -814,35 +781,6 @@ function urlRow(string $label, string $url, string $sv): string {
     </div>
 
     <!-- How it works -->
-    <div class="card">
-      <div class="card-h"><span class="ct"><?= phIcon('info') ?> How Lib Killer Works</span></div>
-      <div class="card-b" style="font-size:12px;line-height:1.8;color:var(--muted)">
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">1</span>
-            <span>You compile your <code>.so</code> lib with version code <strong>4.1</strong> embedded. The lib's kill-check URL is <code>lib_version.php?cv=4.1</code></span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">2</span>
-            <span>On lib startup, it fetches the URL → gets XOR-encoded response → decodes → checks <code>kill</code> flag</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">3</span>
-            <span>You set kill-below = <strong>4.2</strong> on this panel → server sees <code>4.1 &lt; 4.2</code> → returns <code>kill:1</code></span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">4</span>
-            <span>Lib receives <code>kill:1</code> → calls <code>abort()</code> / null-dereference → <strong>permanent crash</strong> (server always returns kill:1)</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">5</span>
-            <span><strong>Anti-Frida:</strong> Lib checks <code>/proc/self/status TracerPid</code>, <code>/proc/self/maps</code> for Frida strings, and port 27042. Any detection = instant crash same as kill</span>
-          </div>
-        </div>
-        <div class="warn-box" style="margin-top:12px">
-          See the <strong>Implementation Guide</strong> (IMPLEMENT_GUIDE.md) for full C++ and Java code to add in your lib/APK.
-        </div>
-      </div>
     </div>
 
   </div>
@@ -852,7 +790,7 @@ function urlRow(string $label, string $url, string $sv): string {
      TAB 3 — APK MANAGER
 ════════════════════════════════════════════════════════ -->
 <div id="rb-apk" class="rb-pane<?=$activeTab==='apk'?' active':''?>">
-  <div class="g-left">
+  <div class="g2" style="align-items:start">
 
     <!-- Upload card -->
     <div class="card">
@@ -868,10 +806,6 @@ function urlRow(string $label, string $url, string $sv): string {
         </div>
       </div>
       <div class="card-b">
-        <div class="info-box" style="margin-bottom:16px">
-          Upload new APK build. Panel writes <code>server/apks/version.txt</code> and updates DB version.
-          Your APK checks this version to show update dialog.
-        </div>
         <form method="POST" enctype="multipart/form-data">
           <?=csrfField()?>
           <input type="hidden" name="active_tab" value="apk">
@@ -982,7 +916,7 @@ function urlRow(string $label, string $url, string $sv): string {
      TAB 4 — APK KILLER
 ════════════════════════════════════════════════════════ -->
 <div id="rb-apkkill" class="rb-pane<?=$activeTab==='apkkill'?' active':''?>">
-  <div class="g-left">
+  <div class="g2" style="align-items:start">
 
     <!-- APK Kill control -->
     <div class="card" style="border-color:<?=$apkKillOn?'rgba(255,77,109,.3)':'var(--border)'?>">
@@ -998,10 +932,6 @@ function urlRow(string $label, string $url, string $sv): string {
       </div>
       <div class="card-b">
         <?php if ($apkKillOn): ?>
-        <div class="warn-box" style="margin-bottom:14px">
-          <strong>APK Killer is ACTIVE.</strong> Target version(s): <code><?=htmlspecialchars($apkKillVer)?:'-'?></code>.
-          Affected APKs will show the kill popup and <strong>disable all functionality permanently</strong>.
-        </div>
         <?php endif; ?>
 
         <div style="margin-bottom:16px">
@@ -1060,35 +990,6 @@ function urlRow(string $label, string $url, string $sv): string {
     </div>
 
     <!-- APK Kill how-it-works -->
-    <div class="card">
-      <div class="card-h"><span class="ct"><?= phIcon('info') ?> How APK Killer Works</span></div>
-      <div class="card-b" style="font-size:12px;line-height:1.8;color:var(--muted)">
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">1</span>
-            <span>Your APK has the kill-check URL embedded (XOR obfuscated). On every app launch it calls <code>apk_kill.php?cv=VERSION</code></span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">2</span>
-            <span>APK decodes XOR+Base64 response → checks <code>kill</code> flag. If <code>kill:1</code> → shows non-dismissable popup with your custom message</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">3</span>
-            <span>All UI elements disabled, back press blocked, app becomes completely unusable</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">4</span>
-            <span><strong>No bypass possible</strong> — server always returns <code>kill:1</code> for that version. Cracked APKs can't ship a working bypass to users</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span class="step-num">5</span>
-            <span>For <strong>Force Update</strong>: when APK version is older than panel's current APK version, <code>force_update:1</code> is returned → APK shows update dialog</span>
-          </div>
-        </div>
-        <div class="warn-box" style="margin-top:12px">
-          See <strong>IMPLEMENT_GUIDE.md</strong> for complete Java/Android code to put in your APK.
-        </div>
-      </div>
     </div>
 
   </div>
@@ -1098,7 +999,7 @@ function urlRow(string $label, string $url, string $sv): string {
      TAB 5 — MOD LIB KILL (version-only, no download)
 ════════════════════════════════════════════════════════ -->
 <div id="rb-modkill" class="rb-pane<?=$activeTab==='modkill'?' active':''?>">
-  <div class="g-left">
+  <div class="g2" style="align-items:start">
     <div class="card" style="border-color:<?=$modKillOn?'rgba(255,77,109,.3)':'var(--border)'?>">
       <div class="card-h">
         <span class="ct">
@@ -1108,11 +1009,6 @@ function urlRow(string $label, string $url, string $sv): string {
         <span class="kill-badge <?=$modKillOn?'kill-on':'kill-off'?>"><span class="kill-dot"></span><?=$modKillOn?'KILL-ALL ON':'VERSION MODE'?></span>
       </div>
       <div class="card-b">
-        <div class="info-box" style="margin-bottom:14px">
-          The mod lib <strong>only fetches its version</strong> from the URL below — it is never downloaded from here.
-          <strong>Bump the version</strong> and every mod lib on an older version gets <code>kill=1</code> and crashes.
-          Set a redirect (e.g. Telegram) and killed mod libs open it before crashing.
-        </div>
 
         <div style="margin-bottom:16px">
           <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Mod version check URL (embed in mod lib)</div>
@@ -1155,7 +1051,7 @@ function urlRow(string $label, string $url, string $sv): string {
      TAB 6 — APP CONFIG
 ════════════════════════════════════════════════════════ -->
 <div id="rb-appconfig" class="rb-pane<?=$activeTab==='appconfig'?' active':''?>">
-  <div class="g-left">
+  <div class="g2" style="align-items:start">
 
     <!-- Game versions -->
     <div class="card">
@@ -1164,11 +1060,6 @@ function urlRow(string $label, string $url, string $sv): string {
         <span class="owner-only">Owner Only</span>
       </div>
       <div class="card-b">
-        <div class="info-box" style="margin-bottom:16px">
-          Choose which <strong>game version chips</strong> appear in the app's main screen (BGMI / GL / KR / TW).
-          Mode cards are controlled by slot uploads — upload a lib to show that slot's card; leave empty to hide it.
-          App fetches <code>/server/appconfig.php</code> on every launch.
-        </div>
         <?php
         $vDefs = [
             'bgmi' => ['label'=>'BGMI',   'color'=>'#4DDD6A', 'pkg'=>'com.pubg.imobile'],
@@ -1200,7 +1091,6 @@ function urlRow(string $label, string $url, string $sv): string {
     <div class="card">
       <div class="card-h"><span class="ct"><?= phIcon('note-pencil') ?> Slot Names &amp; Descriptions (shown in app)</span></div>
       <div class="card-b">
-        <div class="info-box" style="margin-bottom:14px">These names appear on the mode selection screen. Leave blank to use defaults.</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
           <?php foreach ($slotInfo as $n => $s): ?>
           <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg2)">
@@ -1221,6 +1111,7 @@ function urlRow(string $label, string $url, string $sv): string {
   </div>
 </div>
 
+</div></div>
 <!-- ── JS ─────────────────────────────────────────────── -->
 <script>
 const RB_CSRF = '<?=htmlspecialchars($csrf,ENT_QUOTES)?>';

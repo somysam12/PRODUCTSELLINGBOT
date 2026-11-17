@@ -59,6 +59,9 @@ $key   = (string)($d['k']   ?? '');
 $dev   = (string)($d['d']   ?? '');
 $nonce = (string)($d['n']   ?? '');
 $pkg   = (string)($d['pkg'] ?? '');
+// Which lib slot the app wants (1-6). Accept it from the encrypted body first,
+// then plain params, so every app build keeps working. 0 = "whatever is newest".
+$slot  = (int)($d['slot'] ?? $d['s'] ?? $_POST['slot'] ?? $_POST['s'] ?? $_GET['slot'] ?? $_GET['s'] ?? 0);
 
 // Nonce must be present (client-chosen freshness — NOT a timestamp)
 if ($key === '' || $nonce === '' || strlen($nonce) < 8 || strlen($nonce) > 128) deny();
@@ -95,7 +98,7 @@ if ((int)($k->is_used ?? 0) === 0) {
 // 7. Pick the lib file to deliver + its hash
 $libRow  = db()->one("SELECT lib_name, lib_hash FROM lib WHERE id=1 LIMIT 1");
 $libHash = $libRow->lib_hash ?? '';
-$libFile = pick_deliver_lib();   // newest allowed .so in server/libs/
+$libFile = pick_deliver_lib($slot);   // the requested slot's file (or newest)
 
 // 8. Issue the grant (unguessable, contains NO date/time/expiry)
 $grant = hb_grant($key, $nonce);
@@ -103,18 +106,29 @@ $grant = hb_grant($key, $nonce);
 logAct($k->id ?? null, $k->registrator ?? '', 'LIB_UNLOCK', "Key OK · dev:".substr($dev,0,10));
 
 out([
-    'ok'  => 1,
-    'g'   => $grant,
-    'lib' => $libFile,
-    'lh'  => $libHash,
+    'ok'   => 1,
+    'g'    => $grant,
+    'lib'  => $libFile,
+    'slot' => $slot,
+    'lh'   => $libHash,
     'a'   => bin2hex(random_bytes(5)),
     'b'   => random_int(100000, 999999),
     'c'   => bin2hex(random_bytes(4)),
 ]);
 
-// ── helper: newest .so or .zip in server/libs/ ───────────────────────
-function pick_deliver_lib(): string {
+// ── helper: the file for a specific slot, else the newest lib ─────────
+function pick_deliver_lib(int $slot = 0): string {
     $dir = dirname(__DIR__).'/server/libs/';
+    // Exact slot requested → serve ONLY that slot's file (libslot{N}.*)
+    if ($slot >= 1 && $slot <= 6) {
+        $hit = glob($dir.'libslot'.$slot.'.*') ?: [];
+        foreach ($hit as $f) {
+            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+            if (in_array($ext, ['so','zip','tar','gz','lib','dll','a','o','bin'], true)) return basename($f);
+        }
+        return '';   // slot empty → nothing to deliver (don't fall back to another slot)
+    }
+    // No slot given (legacy app) → newest lib, preferring slot 1
     $best = ''; $bestTime = -1;
     if (is_dir($dir)) {
         foreach (scandir($dir) as $f) {

@@ -277,9 +277,6 @@ $s = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round
       </span>
     </div>
     <div class="card-b">
-      <div class="alert a-info" style="margin-bottom:16px;font-size:11px">
-        Ek baar config karo — phir ye section hamesha ke liye hide ho jaayega.
-      </div>
       <form onsubmit="saveConfig(event)">
         <div class="fg">
           <label class="fl">Master Domain URL</label>

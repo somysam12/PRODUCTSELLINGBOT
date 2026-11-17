@@ -75,12 +75,6 @@ $botOn = getSetting('tg_bot_enabled','0')==='1';
   </div>
 </div>
 
-<div class="info-box" style="margin-top:16px">
-  <b>How single-device works:</b> one Telegram = one account. If a user changes phone/Telegram,
-  press <b>Reset Link</b> — that frees their account so they can log in with their username &amp;
-  password from the new Telegram. Until you reset, the old Telegram stays locked to that account.
-</div>
-
 <script>
 const csrf = document.querySelector('meta[name="csrf"]').content;
 async function resetChat(uid, name){

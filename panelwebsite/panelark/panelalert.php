@@ -114,6 +114,25 @@ if ($tgToken !== '') {
         }
         setSetting('tg_hookinfo_cache', json_encode(['t'=>time(),'connected'=>$hookConnected,'info'=>$hookInfo]));
     }
+
+    // ── Self-heal: if the bot is ON but Telegram has no (or a stale) webhook for us,
+    //    silently re-register it. Throttled to once per 10 min so it never spams. ──
+    if (!$hookConnected && getSetting('tg_bot_enabled','0')==='1') {
+        $lastHeal = (int)getSetting('tg_hook_heal_at','0');
+        if (time() - $lastHeal > 600) {
+            setSetting('tg_hook_heal_at', (string)time());
+            $secret = getSetting('tg_webhook_secret','');
+            if ($secret==='') { $secret = bin2hex(random_bytes(16)); setSetting('tg_webhook_secret',$secret); }
+            $ch = curl_init("https://api.telegram.org/bot{$tgToken}/setWebhook");
+            curl_setopt_array($ch,[CURLOPT_POST=>true,CURLOPT_POSTFIELDS=>http_build_query([
+                'url'=>$tgHookUrl,'secret_token'=>$secret,
+                'allowed_updates'=>json_encode(['message','callback_query']),'drop_pending_updates'=>'true',
+            ]),CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>10,CURLOPT_SSL_VERIFYPEER=>false]);
+            $hres = json_decode(curl_exec($ch),true); curl_close($ch);
+            if (!empty($hres['ok'])) { $hookConnected = true; $hookInfo = $tgHookUrl.' (auto-reconnected)';
+                setSetting('tg_hookinfo_cache', json_encode(['t'=>time(),'connected'=>true,'info'=>$hookInfo])); }
+        }
+    }
 }
 ?>
 <?php if($msg): ?><div class="alert a-<?=$msgType?>"><?=svgIcon('check',14)?> <?=htmlspecialchars($msg)?></div><?php endif; ?>

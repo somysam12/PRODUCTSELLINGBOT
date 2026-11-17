@@ -26,6 +26,7 @@ $key   = $_GET['k'] ?? $_POST['k'] ?? $_SERVER['HTTP_X_LICENSE_KEY'] ?? '';
 $nonce = $_GET['n'] ?? $_POST['n'] ?? $_SERVER['HTTP_X_NONCE']       ?? '';
 $grant = $_GET['g'] ?? $_POST['g'] ?? $_SERVER['HTTP_X_GRANT']       ?? '';
 $file  = $_GET['f'] ?? $_POST['f'] ?? $_SERVER['HTTP_X_LIB']         ?? '';
+$slot  = (int)($_GET['slot'] ?? $_POST['slot'] ?? $_GET['s'] ?? $_POST['s'] ?? $_SERVER['HTTP_X_SLOT'] ?? 0);
 
 $key = trim($key); $nonce = trim($nonce); $grant = trim($grant);
 $file = basename(trim($file)); // basename() prevents path traversal
@@ -48,12 +49,17 @@ if (getSetting('maintenance_mode','0') === '1') reject(503, 'Maintenance');
 // 4. Resolve the lib file
 $libDir = dirname(__DIR__).'/server/libs/';
 
+if ($file === '' && $slot >= 1 && $slot <= 6) {
+    // Specific slot requested → that slot's file only
+    foreach ((glob($libDir.'libslot'.$slot.'.*') ?: []) as $f) { $file = basename($f); break; }
+}
 if ($file === '') {
-    // No specific file requested → serve newest .so
+    // No specific file / slot → serve newest .so/.zip
     $best = ''; $bestTime = -1;
     if (is_dir($libDir)) {
         foreach (scandir($libDir) as $f) {
-            if (strtolower(pathinfo($f, PATHINFO_EXTENSION)) !== 'so') continue;
+            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+            if ($ext !== 'so' && $ext !== 'zip') continue;
             $t = filemtime($libDir.$f);
             if ($t > $bestTime) { $bestTime = $t; $best = $f; }
         }

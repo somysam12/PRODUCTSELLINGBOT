@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && verifyCsrf($_POST['csrf']??'')) {
     if ($sec==='permissions') {
         setSetting('unlimited_saldo_referral', isset($_POST['unlim_saldo'])?'1':'0');
         setSetting('reseller_can_edit_keys',   isset($_POST['reseller_edit_keys'])?'1':'0');
+        setSetting('custom_key_level',         (string)max(1,min(3,(int)($_POST['custom_key_level']??1))));
         logAct($_SESSION['uid'],$uname,'UPDATE_PERMISSIONS','');
         $msg='Permissions saved.'; $msgType='ok';
     }
@@ -212,6 +213,18 @@ $resellerEditKeys = getSetting('reseller_can_edit_keys','0')==='1';
               <div class="perm-sub">Allow resellers to edit a key's max-devices &amp; customize it (owner/admin always can).</div>
             </div>
             <label class="tog"><input type="checkbox" name="reseller_edit_keys" value="1" <?= $resellerEditKeys?'checked':'' ?>><span class="togsl"></span></label>
+          </div>
+
+          <div class="perm-row">
+            <div class="perm-txt">
+              <div class="perm-title">Who can set a custom key string</div>
+              <div class="perm-sub">On the Generate page, which roles may type their own key instead of a random one.</div>
+            </div>
+            <select class="fi" name="custom_key_level" style="width:auto;min-width:150px"><?php $ckl=(int)getSetting('custom_key_level','1'); ?>
+              <option value="1"<?= $ckl===1?' selected':'' ?>>Owner only</option>
+              <option value="2"<?= $ckl===2?' selected':'' ?>>Owner + Admin</option>
+              <option value="3"<?= $ckl===3?' selected':'' ?>>Everyone</option>
+            </select>
           </div>
 
           <button type="submit" class="btn btn-acc" style="margin-top:14px;width:100%"><?=svgIcon('check',14)?> Save Permissions</button>

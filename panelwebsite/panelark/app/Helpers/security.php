@@ -30,6 +30,14 @@ function clientIp(): string {
 // ─── DDOS / RATE LIMIT ───────────────────────────
 function ddosCheck(): void {
     $ip = clientIp();
+    // Housekeeping: expired IP blocks and stale account locks are removed so nobody
+    // can ever stay blocked past the timer. Cheap, runs ~4% of requests.
+    if (random_int(1,25) === 1) {
+        try {
+            db()->q("DELETE FROM blocked_ips WHERE expires_at IS NOT NULL AND expires_at < NOW()");
+            db()->q("UPDATE users SET login_attempts=0, locked_until=NULL WHERE locked_until IS NOT NULL AND locked_until < NOW()");
+        } catch (Throwable $e) {}
+    }
     // Check blocked IPs
     $b = db()->one("SELECT id FROM blocked_ips WHERE ip=? AND (expires_at IS NULL OR expires_at>NOW())",[$ip]);
     if ($b) {
@@ -57,7 +65,8 @@ function ddosCheck(): void {
             db()->q("UPDATE rate_limits SET req_count=1,window_start=NOW() WHERE id=?",[$row->id]);
         } else {
             if ($row->req_count >= DDOS_REQ_LIMIT) {
-                db()->q("INSERT IGNORE INTO blocked_ips(ip,reason,expires_at) VALUES(?,?,DATE_ADD(NOW(),INTERVAL 30 MINUTE))",
+                db()->q("INSERT INTO blocked_ips(ip,reason,expires_at) VALUES(?,?,DATE_ADD(NOW(),INTERVAL 30 MINUTE))
+                         ON DUPLICATE KEY UPDATE reason=VALUES(reason), expires_at=VALUES(expires_at)",
                     [$ip,'Rate limit exceeded']);
                 tgDdosAlert($ip, $ep);
                 http_response_code(429);
@@ -117,11 +126,14 @@ function attemptLogin(string $username, string $pass): array {
     if ($u->status == 0) return ['ok'=>false,'msg'=>'Account banned. Contact admin.'];
 
     if (!password_verify($pass, $u->password)) {
+        // Owner-configurable (Settings → Security); fall back to the config constants.
+        $maxAtt  = max(3, (int)getSetting('max_login_attempts', (string)MAX_LOGIN_ATTEMPTS));
+        $lockMin = max(1, (int)getSetting('lockout_minutes',    (string)LOCKOUT_MINUTES));
         $att = $u->login_attempts + 1;
-        if ($att >= MAX_LOGIN_ATTEMPTS) {
-            $lock = date('Y-m-d H:i:s', time() + LOCKOUT_MINUTES*60);
+        if ($att >= $maxAtt) {
+            $lock = date('Y-m-d H:i:s', time() + $lockMin*60);
             db()->q("UPDATE users SET login_attempts=?,locked_until=? WHERE id=?",[$att,$lock,$u->id]);
-            return ['ok'=>false,'msg'=>'Too many attempts. Locked for '.LOCKOUT_MINUTES.' min.'];
+            return ['ok'=>false,'msg'=>"Too many attempts. Locked for {$lockMin} min."];
         }
         db()->q("UPDATE users SET login_attempts=? WHERE id=?",[$att,$u->id]);
         return ['ok'=>false,'msg'=>'Invalid username or password.'];
