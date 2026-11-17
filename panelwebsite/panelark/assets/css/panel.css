@@ -844,34 +844,44 @@ html[data-theme="dark"] .auth-theme .ic-sun { display: none; } html[data-theme="
    v11 — symbiote / glass toggles · bottom dock · iOS nav tray
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Toggle: smooth "symbiote" switch — GPU, spring knob, no boxy artifacts ── */
-.tog { width: 50px; height: 28px; }
+/* ── Toggle: "venom symbiote" — ON floods the whole switch inky black, OFF spits it back ── */
+.tog { width: 50px; height: 28px; -webkit-tap-highlight-color: transparent; }
+.tog, .tog * { -webkit-tap-highlight-color: transparent; }
 .togsl {
   border-radius: 28px; overflow: hidden; isolation: isolate;
   background: var(--sunk); border: 1px solid var(--line2); box-shadow: var(--well);
-  transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+  transition: border-color .35s ease, box-shadow .35s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-/* liquid "sunset" fill — wipes in left→right via clip-path (keeps the pill round, no square edges) */
+/* black symbiote goo that creeps across and swallows the pill (clip-path = stays perfectly round) */
 .togsl::after {
   content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit;
-  background: linear-gradient(110deg, var(--acc-h) 0%, var(--acc) 45%, var(--acc-l) 100%);
+  background:
+    radial-gradient(120% 140% at 18% 20%, rgba(90,60,140,.45) 0%, transparent 45%),
+    radial-gradient(120% 140% at 85% 80%, rgba(16,185,129,.35) 0%, transparent 50%),
+    linear-gradient(120deg, #050507 0%, #17171f 55%, #050507 100%);
   clip-path: inset(0 100% 0 0 round 28px);
-  transition: clip-path .44s cubic-bezier(.65,0,.35,1);
+  transition: clip-path .5s cubic-bezier(.7,0,.25,1);
 }
 .togsl::before {
   width: 22px; height: 22px; left: 3px; top: 2px; z-index: 1;
   background: radial-gradient(circle at 35% 30%, #fff, #e9e3d7);
   box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 7px rgba(0,0,0,.18);
-  transition: transform .44s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .5s cubic-bezier(.34,1.56,.64,1), background .35s ease, box-shadow .35s ease;
   will-change: transform;
 }
-.tog input:checked + .togsl { background: transparent; border-color: var(--acc-h); box-shadow: inset 0 1px 3px rgba(4,80,55,.3); }
+/* ON — fully swallowed: black track + glossy black knob with a faint living sheen */
+.tog input:checked + .togsl { background: #050507; border-color: #000; box-shadow: inset 0 1px 3px rgba(0,0,0,.6); }
 .tog input:checked + .togsl::after { clip-path: inset(0 0 0 0 round 28px); }
-.tog input:checked + .togsl::before { transform: translateX(22px); background: radial-gradient(circle at 35% 30%, #fff, #eafff6); box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 0 10px rgba(255,255,255,.5); }
-/* gentle squash while pressed (no border-radius change = never looks square) */
-.tog input:active + .togsl::before { transform: scale(.92); }
-.tog input:checked:active + .togsl::before { transform: translateX(22px) scale(.92); }
-/* rounded focus ring (follows the pill — replaces the old square outline box) */
+.tog input:checked + .togsl::before {
+  transform: translateX(22px);
+  background: radial-gradient(circle at 36% 28%, #3a3a46, #040405 70%);
+  box-shadow: 0 1px 3px rgba(0,0,0,.6), 0 0 10px rgba(16,185,129,.4), inset 0 1px 0 rgba(255,255,255,.12);
+}
+/* gentle squash while pressed (no radius change = never looks square) */
+.tog input:active + .togsl::before { transform: scale(.9); }
+.tog input:checked:active + .togsl::before { transform: translateX(22px) scale(.9); }
+/* rounded focus ring (follows the pill — never a square box) */
 .tog input:focus-visible + .togsl { box-shadow: var(--well), 0 0 0 3px rgba(16,185,129,.35); }
 
 /* ── Glass variant (add class .tog-glass on the label) ── */
@@ -889,12 +899,19 @@ html[data-theme="dark"] .tog-glass .togsl { background: rgba(255,255,255,.08); b
 .dock {
   position: fixed; left: 50%; transform: translateX(-50%);
   bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 70;
-  display: none; align-items: center; gap: 6px; max-width: calc(100vw - 20px);
+  display: none; align-items: center; gap: 6px; width: min(calc(100vw - 20px), 400px);
   padding: 7px; border-radius: 26px;
   background: linear-gradient(175deg, var(--ink3), var(--ink));
   border: 1px solid var(--ink-line); box-shadow: var(--ink-sh);
 }
-.dock-rail { display: flex; align-items: center; gap: 2px; overflow: hidden; }
+.dock-rail {
+  display: flex; align-items: center; gap: 2px; flex: 1 1 auto; min-width: 0;
+  overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth;
+  scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none;
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+}
+.dock-rail::-webkit-scrollbar { display: none; }
+.dock-item { scroll-snap-align: center; }
 .dock-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   width: 58px; min-height: 52px; flex: 0 0 auto; border-radius: 17px; cursor: pointer; text-decoration: none;
@@ -971,3 +988,52 @@ html[data-theme="dark"] .perm-row .togsl, html[data-theme="dark"] .srow .togsl {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 14px rgba(0,0,0,.4);
 }
 .perm-row .tog input:checked + .togsl, .srow .tog input:checked + .togsl { border-color: rgba(255,255,255,.45); }
+
+/* ═══════════════════════════════════════════════════════════
+   v12 — Auth pages: skeuomorphism + glassmorphism + animation
+═══════════════════════════════════════════════════════════ */
+.auth { position: relative; overflow: hidden; }
+/* ambient drifting colour behind the glass shell */
+.auth::before, .auth::after { content: ''; position: fixed; z-index: 0; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+.auth::before { width: 46vw; height: 46vw; left: -12vw; top: -10vw; background: radial-gradient(circle, rgba(16,185,129,.28), transparent 70%); animation: authGlow1 14s ease-in-out infinite alternate; }
+.auth::after  { width: 42vw; height: 42vw; right: -14vw; bottom: -14vw; background: radial-gradient(circle, rgba(132,87,224,.22), transparent 70%); animation: authGlow2 17s ease-in-out infinite alternate; }
+@keyframes authGlow1 { from { transform: translate(0,0) } to { transform: translate(8vw,6vw) scale(1.12) } }
+@keyframes authGlow2 { from { transform: translate(0,0) } to { transform: translate(-7vw,-5vw) scale(1.1) } }
+
+.auth-shell { position: relative; z-index: 1; animation: authRise .62s cubic-bezier(.16,1,.3,1) both;
+  background: color-mix(in srgb, var(--card-bg) 82%, transparent);
+  backdrop-filter: blur(26px) saturate(1.5); -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, var(--pop); }
+@keyframes authRise { from { opacity: 0; transform: translateY(20px) scale(.985) } to { opacity: 1; transform: none } }
+
+.auth-art { background: linear-gradient(165deg, #23272f 0%, #121418 60%, #0b0d10 100%); }
+.auth-art::before { animation: authBlob 9s ease-in-out infinite alternate; }
+@keyframes authBlob { from { transform: translate(0,0) } to { transform: translate(-18px,-14px) scale(1.1) } }
+.auth-logo { animation: authLogoPop .6s .08s cubic-bezier(.34,1.56,.64,1) both; box-shadow: 0 6px 18px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.25); }
+@keyframes authLogoPop { from { opacity: 0; transform: scale(.55) rotate(-10deg) } to { opacity: 1; transform: none } }
+
+/* frosted form panel + staggered field entrance */
+.auth-main { background: color-mix(in srgb, var(--card-bg) 66%, transparent); backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3); }
+.auth-main .af, .auth-main .af-opts, .auth-main .btn-login, .auth-main .auth-foot { animation: authField .5s cubic-bezier(.16,1,.3,1) both; }
+.auth-main .af:nth-of-type(1){ animation-delay:.08s } .auth-main .af:nth-of-type(2){ animation-delay:.15s }
+.auth-main .af-opts{ animation-delay:.2s } .auth-main .btn-login{ animation-delay:.26s } .auth-main .auth-foot{ animation-delay:.32s }
+@keyframes authField { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+
+/* deeper skeuomorphic input wells */
+.af-inp, .login-inp-wrap { box-shadow: inset 0 2px 5px rgba(60,48,30,.1), inset 0 1px 0 rgba(255,255,255,.5); }
+html[data-theme="dark"] .af-inp, html[data-theme="dark"] .login-inp-wrap { box-shadow: inset 0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05); }
+
+/* glossy, tactile Sign-in button with a sliding arrow */
+.btn-login { position: relative; overflow: hidden; background: linear-gradient(180deg, var(--acc-l), var(--acc) 55%, var(--acc-h)); color: #fff;
+  box-shadow: 0 2px 0 var(--acc-d), 0 10px 22px rgba(16,185,129,.4), inset 0 1px 0 rgba(255,255,255,.4); }
+.btn-login::before { content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%; transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transition: left .6s ease; }
+.btn-login:hover::before { left: 140%; }
+.btn-login svg.ph { transition: transform .25s ease; }
+.btn-login:hover svg.ph { transform: translateX(4px); }
+.btn-login:active { box-shadow: 0 0 0 var(--acc-d), 0 4px 10px rgba(16,185,129,.3), inset 0 2px 5px rgba(4,70,50,.4); }
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell, .auth-logo, .auth-main .af, .auth-main .af-opts, .auth-main .btn-login, .auth-main .auth-foot { animation: none !important; }
+  .auth::before, .auth::after, .auth-art::before { animation: none !important; }
+}

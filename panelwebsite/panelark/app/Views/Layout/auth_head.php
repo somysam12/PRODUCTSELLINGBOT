@@ -16,8 +16,9 @@ $authTries    = defined('MAX_LOGIN_ATTEMPTS') ? MAX_LOGIN_ATTEMPTS : 5;
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1f1c17">
-<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<link rel="apple-touch-icon" href="/assets/favicon.svg">
+<?php $favicon = $panelLogo ?: '/assets/favicon.svg'; ?>
+<link rel="icon" href="<?= htmlspecialchars($favicon) ?>">
+<link rel="apple-touch-icon" href="<?= htmlspecialchars($favicon) ?>">
 <title><?= htmlspecialchars($authTitle) ?> — <?= htmlspecialchars($panelName) ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,11 +39,6 @@ $authTries    = defined('MAX_LOGIN_ATTEMPTS') ? MAX_LOGIN_ATTEMPTS : 5;
       </div>
       <h1><?= htmlspecialchars($panelName) ?></h1>
       <p><?= htmlspecialchars($panelTagline) ?></p>
-      <ul class="auth-feats">
-        <li><?= phIcon('shield-check') ?> Account locks after <?= (int)$authTries ?> failed sign-ins</li>
-        <li><?= phIcon('timer') ?> Sessions end after <?= $authMins ?> minutes</li>
-        <li><?= phIcon('device-mobile') ?> Device-bound license keys</li>
-      </ul>
       <div class="auth-ver">v<?= htmlspecialchars($panelVer) ?></div>
     </aside>
     <main class="auth-main">

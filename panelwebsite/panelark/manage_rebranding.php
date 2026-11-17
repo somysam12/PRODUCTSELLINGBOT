@@ -288,12 +288,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($_POST['aja
                     if (preg_match('/^\d+(\.\d+){0,3}$/', $newVer)) {
                         setSetting('apk_version', $newVer);
                         file_put_contents($apkDir.'version.txt', $newVer);
-                        // Also update apk_url if not set
-                        $curUrl = getSetting('apk_url','');
-                        if (empty($curUrl)) {
-                            setSetting('apk_url', panelBase()
-                                .'/server/apks/'.urlencode($nm));
-                        }
+                        // Always point the update URL at the APK we just uploaded,
+                        // whatever its filename — so uploading any-named APK + a new
+                        // version number makes older apps update to THIS file.
+                        setSetting('apk_url', panelBase().'/server/apks/'.urlencode($nm));
                     }
                     logAct($_SESSION['uid'], $_SESSION['uname']??'', 'APK_UPLOAD',
                         "File: $nm | Ver: $newVer | Size: ".round($f['size']/1024/1024,1)."MB");

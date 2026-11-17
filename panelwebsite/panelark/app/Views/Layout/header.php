@@ -61,8 +61,9 @@ $navItems = [
 <meta name="robots" content="noindex,nofollow">
 <meta name="csrf" content="<?= htmlspecialchars($csrf) ?>">
 <meta name="theme-color" content="#1f1c17">
-<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<link rel="apple-touch-icon" href="/assets/favicon.svg">
+<?php $favicon = $panelLogo ?: '/assets/favicon.svg'; ?>
+<link rel="icon" href="<?= htmlspecialchars($favicon) ?>">
+<link rel="apple-touch-icon" href="<?= htmlspecialchars($favicon) ?>">
 <title><?= htmlspecialchars($pageTitle) ?> — <?= htmlspecialchars($panelName) ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

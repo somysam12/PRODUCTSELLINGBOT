@@ -37,40 +37,57 @@ date_default_timezone_set('Asia/Kolkata');
 //   • deletes dead session files (older than the longest possible cookie life);
 //   • hard-caps the folder at 1000 sessions, deleting the oldest beyond that.
 // Everything is best-effort (@) so a locked or full folder never breaks the page.
+// Policy (owner's spec): cap at 600 session files. When the folder holds MORE
+// than 600, delete every session older than 30 minutes. Always remove truly dead
+// files. Throttled to once / 10 min and — crucially — it SKIPS entirely if it
+// can't write its throttle marker, so it can NEVER run on every request (that was
+// the source of the "site feels slow" reports). PHP's own session GC is disabled
+// below, so this cheap sweep is the single, predictable cleaner.
+define('HB_SESS_CAP', 600);
 function hbSessionGc(string $dir): void {
     if ($dir === '' || !is_dir($dir)) return;
     $flag = $dir.'/.lastgc';
     $now  = time();
     $last = @filemtime($flag);
-    if ($last && ($now - $last) < 300) return;   // throttle: once per 5 min
-    @touch($flag);
+    if ($last && ($now - $last) < 600) return;      // throttle: once / 10 min
+    if (@touch($flag) === false) return;            // can't throttle here → never run per-request
 
     $files = @glob($dir.'/sess_*');
     if (!is_array($files) || !$files) return;
 
-    $ttl   = 90000;   // ~25h — longer than the max (24h remember-me) cookie life
-    $alive = [];
-    foreach ($files as $f) {
-        $m = @filemtime($f);
-        if ($m === false) continue;
-        // Empty/abandoned session files (0 bytes, e.g. a bot/probe that got a
-        // cookie but never logged in) are swept after 30 min so they can't amass.
-        if (($now - $m) > 1800 && @filesize($f) === 0) { @unlink($f); continue; }
-        if (($now - $m) > $ttl) { @unlink($f); }   // dead session → remove
-        else { $alive[$f] = $m; }
-    }
+    $cutoff30 = $now - 1800;     // 30 minutes
+    $ttlDead  = $now - 90000;    // ~25h absolute (longer than any cookie life)
 
-    // Hard cap — keep only the 600 most recent live sessions.
-    $cap = 600;
-    if (count($alive) > $cap) {
-        asort($alive);                             // oldest first
-        $excess = count($alive) - $cap;
-        $i = 0;
-        foreach ($alive as $f => $m) {
-            if ($i++ >= $excess) break;
-            @unlink($f);
-        }
+    $mt = [];
+    foreach ($files as $f) { $m = @filemtime($f); if ($m !== false) $mt[$f] = $m; }
+
+    // 1. Always drop truly-dead sessions + 30-min-old empty orphans.
+    foreach ($mt as $f => $m) {
+        if ($m < $ttlDead) { @unlink($f); unset($mt[$f]); continue; }
+        if ($m < $cutoff30 && @filesize($f) === 0) { @unlink($f); unset($mt[$f]); }
     }
+    // 2. Over the 600 cap → delete everything older than 30 min.
+    if (count($mt) > HB_SESS_CAP) {
+        foreach ($mt as $f => $m) { if ($m < $cutoff30) { @unlink($f); unset($mt[$f]); } }
+    }
+    // 3. Still over 600 (all fresh) → trim the oldest down to the cap.
+    if (count($mt) > HB_SESS_CAP) {
+        asort($mt);
+        $excess = count($mt) - HB_SESS_CAP; $i = 0;
+        foreach ($mt as $f => $m) { if ($i++ >= $excess) break; @unlink($f); }
+    }
+}
+
+// Delete EVERY session file in $dir except the current one (panel "Clear sessions").
+function hbSessionPurge(string $dir): int {
+    if ($dir === '' || !is_dir($dir)) return 0;
+    $cur = 'sess_'.session_id();
+    $n = 0;
+    foreach ((@glob($dir.'/sess_*') ?: []) as $f) {
+        if (basename($f) === $cur) continue;        // keep the live admin session
+        if (@unlink($f)) $n++;
+    }
+    return $n;
 }
 
 // ─── SESSION ────────────────────────────────────
@@ -90,19 +107,26 @@ if ($hbMachine) {
     // shared hosting). Falls back to the default path if the dir isn't writable.
     $sessDir     = __DIR__.'/../../writable/sessions';
     $sessCustom  = false;
-    if (!is_dir($sessDir)) @mkdir($sessDir, 0755, true);
+    if (!is_dir($sessDir)) @mkdir($sessDir, 0777, true);
+    @chmod($sessDir, 0777);
     if (is_dir($sessDir) && is_writable($sessDir)) {
         session_save_path($sessDir);
         $sessCustom = true;
+    } else {
+        // Never let sessions spill into the web root — use a private temp folder.
+        $tmp = rtrim(sys_get_temp_dir(), '/').'/hbsess';
+        if (!is_dir($tmp)) @mkdir($tmp, 0777, true);
+        if (is_dir($tmp) && is_writable($tmp)) { session_save_path($tmp); $sessDir = $tmp; $sessCustom = true; }
     }
 
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_strict_mode', 1);
     ini_set('session.gc_maxlifetime',  SESSION_LIFETIME);
-    // Belt-and-suspenders: let PHP's own GC fire (~2% of requests) in case the
-    // host didn't disable it; our hbSessionGc() sweep below is the real guard.
-    ini_set('session.gc_probability', 1);
-    ini_set('session.gc_divisor',     50);
+    // Disable PHP's OWN session GC — it scans the whole folder on ~random requests
+    // (the cause of occasional slow page loads). Our throttled hbSessionGc() below
+    // is the single, predictable cleaner instead.
+    ini_set('session.gc_probability', 0);
+    ini_set('session.gc_divisor',     1000);
 
     // Default: give the session cookie a REAL lifetime (not a browser-session
     // cookie). Without this the cookie dies the moment Chrome suspends the tab
@@ -135,6 +159,7 @@ if ($hbMachine) {
     // cPanel hosts) — so files can never pile up no matter where PHP writes them.
     $effSessDir = $sessCustom ? $sessDir : (string)@session_save_path();
     if ($effSessDir === '') $effSessDir = (string)sys_get_temp_dir();
+    $GLOBALS['HB_SESS_DIR'] = $effSessDir;   // used by the panel "Clear sessions" button
     hbSessionGc($effSessDir);
 
     // Slide the cookie expiry forward on every request so an ACTIVE user never

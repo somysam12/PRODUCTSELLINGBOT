@@ -79,6 +79,14 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && !empty($_POST['ajax'])) {
         exit;
     }
 
+    if (($_POST['action'] ?? '') === 'clear_sessions') {
+        $dir = (string)($GLOBALS['HB_SESS_DIR'] ?? '');
+        $n   = function_exists('hbSessionPurge') ? hbSessionPurge($dir) : 0;
+        logAct($_SESSION['uid'],$_SESSION['uname']??'','CLEAR_SESSIONS',"$n files");
+        echo json_encode(['ok'=>true,'msg'=>"Cleared $n session file(s)."]);
+        exit;
+    }
+
     $clean = function($h){ return strtolower(preg_replace('/[^a-fA-F0-9]/','',trim($h ?? ''))); };
     $bgmi  = $clean($_POST['hash_bgmi']  ?? '');
     $sh    = $clean($_POST['hash_shaitaan'] ?? '');
@@ -109,6 +117,9 @@ $libUrlOld    = $base.'/secure/lib';      // legacy (old apps)
 $validUrl     = $base.'/validbool';
 $libKillUrl   = $base.'/server/lib_version.php';
 $apkKillUrl   = $base.'/server/apk_kill.php';
+
+$sessDirNow   = (string)($GLOBALS['HB_SESS_DIR'] ?? '');
+$sessCount    = $sessDirNow ? count(@glob($sessDirNow.'/sess_*') ?: []) : 0;
 
 $libRow       = db()->one("SELECT lib_hash FROM lib WHERE id=1 LIMIT 1");
 $bgmiHash     = $libRow->lib_hash ?? '';
@@ -168,6 +179,16 @@ function row(string $label,string $url,string $icon='link'):string{
       <div id="hbProbe" class="fi-hint" style="font-family:var(--mono)"></div>
     </section>
 
+    <!-- SESSION FILES -->
+    <section class="gsec">
+      <div class="gsec-h"><span class="gnum"><?= phIcon('clipboard-text') ?></span><h3>Session files</h3></div>
+      <div class="rowi">
+        <div class="rowi-ic"><?= phIcon('clipboard-text') ?></div>
+        <div class="rowi-x"><b><span id="sessCount"><?= (int)$sessCount ?></span> session file(s)</b><span>Auto-trimmed: 30-min-old sessions clear once over 600.</span></div>
+        <button class="btn btn-red btn-sm" onclick="clearSessions()"><?= phIcon('trash') ?> Clear now</button>
+      </div>
+    </section>
+
     <!-- SECURITY LAYERS -->
     <section class="gsec">
       <div class="gsec-h"><span class="gnum"><?= phIcon('shield-check') ?></span><h3>Active security layers</h3></div>
@@ -225,6 +246,14 @@ function row(string $label,string $url,string $icon='link'):string{
 
 <script>
 const HB_CSRF = '<?=htmlspecialchars($hbCsrf,ENT_QUOTES)?>';
+async function clearSessions(){
+  if(!confirm('Delete all stored session files? Logged-in users will stay signed in on their current device.')) return;
+  const body=new URLSearchParams({ajax:'1',csrf:HB_CSRF,action:'clear_sessions'});
+  const r=await fetch('/heartbeat.php',{method:'POST',body});
+  const d=await r.json();
+  toast(d.msg, d.ok?'s':'e');
+  if(d.ok){ const el=document.getElementById('sessCount'); if(el) el.textContent='0'; }
+}
 async function saveHbBase(){
   const b=document.getElementById('hbBase').value.trim();
   const body=new URLSearchParams({ajax:'1',csrf:HB_CSRF,action:'set_base',base_url:b});

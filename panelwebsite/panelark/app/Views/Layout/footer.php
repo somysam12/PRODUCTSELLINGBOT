@@ -16,14 +16,11 @@ $navKeys = array_keys($navFlat);
 $ci = array_search($activeNav, $navKeys, true); if ($ci === false) $ci = 0;
 $win = 2; $n = count($navKeys);
 $start = max(0, min($ci - $win, $n - (2*$win + 1))); $start = max(0, $start);
-$slice = array_slice($navKeys, $start, 2*$win + 1);
-$prevHref = ($ci > 0)      ? ($navFlat[$navKeys[$ci-1]]['href'] ?? '') : '';
-$nextHref = ($ci < $n - 1) ? ($navFlat[$navKeys[$ci+1]]['href'] ?? '') : '';
 ?>
-<nav class="dock" aria-label="Pages" data-prev="<?= htmlspecialchars($prevHref) ?>" data-next="<?= htmlspecialchars($nextHref) ?>">
-  <div class="dock-rail">
-    <?php foreach ($slice as $k): $it = $navFlat[$k]; $on = ($k === $activeNav); $near = (abs(array_search($k,$navKeys,true) - $ci) === 1); ?>
-    <a href="<?= $it['href'] ?>" class="dock-item <?= $on?'on':'' ?> <?= $near?'near':'' ?>" title="<?= $it['label'] ?>">
+<nav class="dock" aria-label="Pages">
+  <div class="dock-rail" id="dockRail">
+    <?php foreach ($navKeys as $k): $it = $navFlat[$k]; $on = ($k === $activeNav); ?>
+    <a href="<?= $it['href'] ?>" class="dock-item <?= $on?'on':'' ?>" title="<?= $it['label'] ?>">
       <?= $it['ico'] ?><span class="dlbl"><?= $it['label'] ?></span>
     </a>
     <?php endforeach; ?>
@@ -127,18 +124,11 @@ $nextHref = ($ci < $n - 1) ? ($navFlat[$navKeys[$ci+1]]['href'] ?? '') : '';
     sheet.addEventListener('touchend',function(e){ if(y0===null) return; var dy=(e.changedTouches[0].clientY-y0); sheet.style.transform=''; if(dy>90) closeNavSheet(); y0=null; });
   }
 })();
-// swipe LEFT/RIGHT on the dock → next / previous page
+// Dock is a horizontal swipe rail of ALL pages — centre the active one on load
 (function(){
-  var dock=document.querySelector('.dock'); if(!dock) return;
-  var x0=null,y0=null;
-  dock.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
-  dock.addEventListener('touchend',function(e){
-    if(x0===null) return;
-    var dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
-    if(Math.abs(dx)<45 || Math.abs(dy)>45) return;             // ignore taps / vertical
-    var href = dx<0 ? dock.getAttribute('data-next') : dock.getAttribute('data-prev');
-    if(href){ dock.style.transition='transform .18s ease'; dock.style.transform='translateX(-50%) translateX('+(dx<0?-16:16)+'px)'; setTimeout(function(){ location.href=href; }, 90); }
-  },{passive:true});
+  var rail=document.getElementById('dockRail'); if(!rail) return;
+  var on=rail.querySelector('.dock-item.on');
+  if(on){ var off=on.offsetLeft-(rail.clientWidth/2)+(on.offsetWidth/2); rail.scrollLeft=Math.max(0,off); }
 })();
 </script>
 </body>

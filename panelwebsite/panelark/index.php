@@ -54,8 +54,7 @@ require __DIR__.'/app/Views/Layout/auth_head.php';
             <button type="button" class="af-eye" onclick="authEye(this)" aria-label="Show password"><span class="e1"><?= phIcon('eye') ?></span><span class="e2" hidden><?= phIcon('eye-slash') ?></span></button>
           </div>
         </div>
-        <div class="af-opts">
-          <span class="stay-lbl"><?= phIcon('timer') ?> Signed out automatically after <?= (int)round(SESSION_LIFETIME/60) ?> min</span>
+        <div class="af-opts" style="justify-content:flex-end">
           <a href="/forgot.php" class="auth-link">Forgot password?</a>
         </div>
         <button type="submit" class="btn-login" id="loginBtn"><span id="loginTxt">Sign in</span><?= phIcon('arrow-right') ?></button>
