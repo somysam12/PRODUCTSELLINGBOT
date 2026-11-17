@@ -102,8 +102,10 @@ require_once __DIR__.'/app/Views/Layout/header.php';
 $base         = panelBase();
 $panelBaseSet = getSetting('panel_base_url','');
 $hbUrl        = $base.'/p/sw.js';
-$unlockUrl    = $base.'/secure/unlock';
-$libUrl       = $base.'/secure/lib';
+$unlockUrl    = $base.'/secure/auth';     // NEW app → lib unlock
+$libUrl       = $base.'/secure/pack';     // NEW app → lib download
+$unlockUrlOld = $base.'/secure/unlock';   // legacy (old apps)
+$libUrlOld    = $base.'/secure/lib';      // legacy (old apps)
 $validUrl     = $base.'/validbool';
 $libKillUrl   = $base.'/server/lib_version.php';
 $apkKillUrl   = $base.'/server/apk_kill.php';
@@ -151,11 +153,18 @@ function row(string $label,string $url,string $icon='link'):string{
       <div class="rowlist">
         <?= row('Heartbeat', $hbUrl, 'heartbeat') ?>
         <?= row('Key verify', $validUrl, 'key') ?>
-        <?= row('Lib unlock', $unlockUrl, 'lock') ?>
-        <?= row('Lib download', $libUrl, 'download-simple') ?>
+        <?= row('Lib unlock (new app)', $unlockUrl, 'lock') ?>
+        <?= row('Lib download (new app)', $libUrl, 'download-simple') ?>
         <?= row('Lib kill-check', $libKillUrl, 'package') ?>
         <?= row('APK kill / update', $apkKillUrl, 'android') ?>
       </div>
+      <details style="margin-top:12px">
+        <summary class="fi-hint" style="cursor:pointer">Legacy links (old apps)</summary>
+        <div class="rowlist" style="margin-top:10px">
+          <?= row('Lib unlock (old)', $unlockUrlOld, 'lock') ?>
+          <?= row('Lib download (old)', $libUrlOld, 'download-simple') ?>
+        </div>
+      </details>
       <div id="hbProbe" class="fi-hint" style="font-family:var(--mono)"></div>
     </section>
 

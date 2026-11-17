@@ -23,7 +23,10 @@ ErrorDocument 404 /404.php
   RewriteRule ^writable/ - [F,L]
   # Extensionless key-verification endpoint: /validbool → validbool.php
   RewriteRule ^validbool/?$ validbool.php [L,QSA]
-  # Extensionless secure endpoints
+  # Extensionless secure endpoints — NEW app links (serve server/libs/)
+  RewriteRule ^secure/auth/?$   secure/unlock.php [L,QSA]
+  RewriteRule ^secure/pack/?$   secure/lib.php    [L,QSA]
+  # Legacy links kept for OLD apps (serve server/libs_legacy/ when set)
   RewriteRule ^secure/unlock/?$ secure/unlock.php [L,QSA]
   RewriteRule ^secure/lib/?$    secure/lib.php    [L,QSA]
 </IfModule>

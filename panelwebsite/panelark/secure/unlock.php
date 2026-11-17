@@ -20,6 +20,7 @@
 require_once dirname(__DIR__).'/app/Config/db.php';
 require_once dirname(__DIR__).'/app/Helpers/security.php';   // getSetting(), logAct()
 require_once dirname(__DIR__).'/app/Config/secrets.php';
+require_once __DIR__.'/_channel.php';                        // hb_lib_basedir()
 
 header('Content-Type: text/javascript; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -118,7 +119,7 @@ out([
 
 // ── helper: the file for a specific slot, else the newest lib ─────────
 function pick_deliver_lib(int $slot = 0): string {
-    $dir = dirname(__DIR__).'/server/libs/';
+    $dir = hb_lib_basedir();   // active (new app) or frozen (old app) folder
     // Exact slot requested → serve ONLY that slot's file (libslot{N}.*)
     if ($slot >= 1 && $slot <= 6) {
         $hit = glob($dir.'libslot'.$slot.'.*') ?: [];

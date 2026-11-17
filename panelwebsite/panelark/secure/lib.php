@@ -14,6 +14,7 @@
 require_once dirname(__DIR__).'/app/Config/db.php';
 require_once dirname(__DIR__).'/app/Helpers/security.php';
 require_once dirname(__DIR__).'/app/Config/secrets.php';
+require_once __DIR__.'/_channel.php';                        // hb_lib_basedir()
 
 function reject(int $code, string $msg): void {
     http_response_code($code);
@@ -46,8 +47,8 @@ if (!empty($k->expired_date) && strtotime($k->expired_date) < time()) reject(403
 // 3. Maintenance
 if (getSetting('maintenance_mode','0') === '1') reject(503, 'Maintenance');
 
-// 4. Resolve the lib file
-$libDir = dirname(__DIR__).'/server/libs/';
+// 4. Resolve the lib file (active folder for new app, frozen for old app)
+$libDir = hb_lib_basedir();
 
 if ($file === '' && $slot >= 1 && $slot <= 6) {
     // Specific slot requested → that slot's file only
