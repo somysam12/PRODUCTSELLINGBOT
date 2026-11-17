@@ -54,7 +54,6 @@
     <h1>Page not found</h1>
     <p>The page you’re looking for doesn’t exist or may have moved.</p>
     <a href="/" class="btn">
-      <svg viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
       Back to panel
     </a>
   </div>

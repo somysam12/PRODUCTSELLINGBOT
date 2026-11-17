@@ -157,7 +157,7 @@ $circ  = 326.73; // 2πr, r = 52
   <div class="card">
     <div class="card-h">
       <span class="ct"><?= phIcon('key') ?> Recent keys</span>
-      <a href="/keys.php" class="btn btn-sm">View all <?= phIcon('arrow-right') ?></a>
+      <a href="/keys.php" class="btn btn-sm">View all</a>
     </div>
     <?php if (empty($recentKeys)): ?>
       <div class="empty">No keys yet — generate your first key.</div>
@@ -177,7 +177,7 @@ $circ  = 326.73; // 2πr, r = 52
   <div class="card">
     <div class="card-h">
       <span class="ct"><?= phIcon('pulse') ?> Recent activity</span>
-      <?php if ($ulevel===1): ?><a href="/logs.php" class="btn btn-sm">View all <?= phIcon('arrow-right') ?></a><?php endif; ?>
+      <?php if ($ulevel===1): ?><a href="/logs.php" class="btn btn-sm">View all</a><?php endif; ?>
     </div>
     <?php if (empty($recentLogs)): ?>
       <div class="empty">No activity yet.</div>

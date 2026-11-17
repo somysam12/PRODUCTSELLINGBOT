@@ -147,7 +147,7 @@ $genHistory= db()->all("SELECT * FROM keys_code WHERE registrator=? ORDER BY cre
     <div class="card" style="margin:0">
       <div class="card-h">
         <span class="ct"><?= phIcon('clock') ?> Recent</span>
-        <a href="/keys.php" class="btn btn-sm">All keys <?= phIcon('arrow-right') ?></a>
+        <a href="/keys.php" class="btn btn-sm">All keys</a>
       </div>
       <?php if(empty($genHistory)): ?>
         <div class="empty">No keys generated yet.</div>

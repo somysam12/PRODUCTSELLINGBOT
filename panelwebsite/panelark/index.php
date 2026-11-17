@@ -57,7 +57,7 @@ require __DIR__.'/app/Views/Layout/auth_head.php';
         <div class="af-opts" style="justify-content:flex-end">
           <a href="/forgot.php" class="auth-link">Forgot password?</a>
         </div>
-        <button type="submit" class="btn-login" id="loginBtn"><span id="loginTxt">Sign in</span><?= phIcon('arrow-right') ?></button>
+        <button type="submit" class="btn-login" id="loginBtn"><span id="loginTxt">Sign in</span></button>
       </form>
 
       <div class="auth-foot">
@@ -68,6 +68,7 @@ require __DIR__.'/app/Views/Layout/auth_head.php';
 document.getElementById('loginForm').addEventListener('submit', function(){
   var b = document.getElementById('loginBtn');
   document.getElementById('loginTxt').textContent = 'Signing in…';
+  b.classList.add('is-loading');
   setTimeout(function(){ b.disabled = true; }, 0);
 });
 </script>

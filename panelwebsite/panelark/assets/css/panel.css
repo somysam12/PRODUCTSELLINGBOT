@@ -1122,3 +1122,69 @@ html[data-theme="dark"] .af-inp, html[data-theme="dark"] .login-inp-wrap { box-s
   .auth-card, .auth-badge, .auth-card .af, .auth-card .af-opts, .auth-card .btn-login, .auth-card .auth-foot { animation: none !important; }
   .auth-card-glow, .auth .btn-login { animation: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   v14 — AUTH immersive: moving mesh bg · rotating gradient-ring card · sweep button (no arrows)
+═══════════════════════════════════════════════════════════ */
+@property --authring { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+.auth {
+  background:
+    radial-gradient(38% 48% at 14% 18%, color-mix(in srgb, var(--acc) 32%, transparent), transparent 70%),
+    radial-gradient(44% 54% at 86% 12%, rgba(132,87,224,.30), transparent 70%),
+    radial-gradient(50% 60% at 78% 92%, color-mix(in srgb, var(--acc) 24%, transparent), transparent 72%),
+    radial-gradient(46% 56% at 8% 88%, rgba(56,189,248,.22), transparent 72%),
+    var(--bg);
+}
+/* stronger drifting blobs */
+.auth::before { width: 52vw; height: 52vw; background: radial-gradient(circle, color-mix(in srgb, var(--acc) 42%, transparent), transparent 70%); opacity: .9; }
+.auth::after  { width: 48vw; height: 48vw; background: radial-gradient(circle, rgba(132,87,224,.34), transparent 70%); opacity: .9; }
+
+/* card: frosted + animated conic gradient ring, gentle float */
+.auth-card { border: none; animation: authRise .6s cubic-bezier(.16,1,.3,1) both, authFloat 7s ease-in-out 1s infinite; }
+.auth-card::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.6px; pointer-events: none; z-index: 2;
+  background: conic-gradient(from var(--authring), var(--acc), rgba(132,87,224,.95), var(--acc-l), rgba(56,189,248,.8), var(--acc));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: authRing 8s linear infinite;
+}
+@keyframes authRing { to { --authring: 360deg; } }
+@keyframes authFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.auth-card-glow { opacity: .35; }
+
+/* badge floats a touch */
+.auth-badge { animation: authLogoPop .6s .08s cubic-bezier(.34,1.56,.64,1) both, authFloat 5.5s ease-in-out 1s infinite; }
+
+/* inputs: glass + growing accent underline on focus */
+.auth-card .af-inp {
+  border-radius: 14px; position: relative; overflow: hidden;
+  background: color-mix(in srgb, var(--card-bg) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line2) 70%, transparent);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
+}
+.auth-card .af-inp::after { content: ''; position: absolute; left: 50%; bottom: 0; height: 2px; width: 0; transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--acc), var(--acc-l)); transition: width .32s cubic-bezier(.16,1,.3,1); }
+.auth-card .af-inp:focus-within::after { width: 100%; }
+.auth-card .af-inp:focus-within { border-color: var(--acc); box-shadow: inset 0 1px 3px rgba(0,0,0,.06), 0 0 0 3px rgba(16,185,129,.15); }
+
+/* ── NEW Sign-in / Create / Reset button: dark→emerald sweep, no arrow ── */
+.auth .btn-login {
+  position: relative; overflow: hidden; border: none; border-radius: 16px; padding: 16px;
+  font-size: 15.5px; font-weight: 800; letter-spacing: .4px; color: #fff; text-transform: none;
+  background: linear-gradient(120deg, #092019 0%, #0f5f47 28%, var(--acc) 52%, #0f5f47 76%, #092019 100%);
+  background-size: 230% 100%; background-position: 0% 50%;
+  box-shadow: 0 8px 22px rgba(16,185,129,.42), inset 0 1px 0 rgba(255,255,255,.32), inset 0 -2px 6px rgba(0,0,0,.28);
+  transition: background-position .55s ease, transform .12s ease, box-shadow .22s ease;
+  animation: none;
+}
+.auth .btn-login:hover { background-position: 100% 50%; transform: translateY(-2px); box-shadow: 0 13px 32px rgba(16,185,129,.52), inset 0 1px 0 rgba(255,255,255,.4); }
+.auth .btn-login:active { transform: translateY(1px) scale(.99); box-shadow: 0 4px 12px rgba(16,185,129,.35), inset 0 2px 6px rgba(4,60,44,.5); }
+/* shimmer while submitting */
+.auth .btn-login.is-loading { pointer-events: none; opacity: .92; }
+.auth .btn-login.is-loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent); background-size: 220% 100%; animation: btnShimmer 1s linear infinite; }
+@keyframes btnShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-card, .auth-badge, .auth-card::after, .btn-login.is-loading::after { animation: none !important; }
+}
