@@ -60,6 +60,7 @@ $key   = (string)($d['k']   ?? '');
 $dev   = (string)($d['d']   ?? '');
 $nonce = (string)($d['n']   ?? '');
 $pkg   = (string)($d['pkg'] ?? '');
+$sig   = strtolower(preg_replace('/[^a-fA-F0-9]/','', (string)($d['sig'] ?? ''))); // APK cert SHA-256
 // Which lib slot the app wants (1-6). Accept it from the encrypted body first,
 // then plain params, so every app build keeps working. 0 = "whatever is newest".
 $slot  = (int)($d['slot'] ?? $d['s'] ?? $_POST['slot'] ?? $_POST['s'] ?? $_GET['slot'] ?? $_GET['s'] ?? 0);
@@ -75,6 +76,11 @@ $k = db()->one("SELECT * FROM keys_code WHERE user_key=? LIMIT 1", [$key]);
 if (!$k)                                                              deny(); // unknown key
 if ((int)$k->status !== 1)                                            deny(); // blocked/disabled
 if (!empty($k->expired_date) && strtotime($k->expired_date) < time())deny(); // expired
+
+// 4b. APK cert hash — cracked/re-signed APK cannot download lib
+if ($sig !== '' && !empty($k->apk_sig_hash) && !hash_equals((string)$k->apk_sig_hash, $sig)) {
+    deny(); // cert mismatch — block lib download for cracked APK
+}
 
 // Activate on first use — start the validity clock now if it hasn't started.
 if (empty($k->expired_date) && (int)($k->duration ?? 0) > 0) {

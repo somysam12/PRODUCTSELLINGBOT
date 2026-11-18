@@ -105,7 +105,9 @@ $key = (string)($d['k']   ?? '');
 $dev = (string)($d['d']   ?? '');
 $ts  = (int)   ($d['t']   ?? 0);
 $pkg = (string)($d['pkg'] ?? '');
-vb_log("parsed key=".substr($key,0,20)."  dev=".substr($dev,0,12)."  pkg=$pkg  ts=$ts (skew ".(time()-$ts)."s)");
+$sig = strtolower(preg_replace('/[^a-fA-F0-9]/','', (string)($d['sig'] ?? ''))); // APK cert SHA-256
+$sh  = strtolower(preg_replace('/[^a-fA-F0-9]/','', (string)($d['sh']  ?? ''))); // libshaitaan SHA-256
+vb_log("parsed key=".substr($key,0,20)."  dev=".substr($dev,0,12)."  pkg=$pkg  ts=$ts (skew ".(time()-$ts)."s)  sig=".($sig?substr($sig,0,8).'...':'(none)')."  sh=".($sh?substr($sh,0,8).'...':'(none)'));
 
 // 3. Replay window (±300s) + basic sanity — 5 min tolerance covers device clock drift
 if ($key === '') { vb_log("FAIL: empty key in payload"); vb_out(2); }
@@ -158,6 +160,28 @@ if ((int)($k->is_used ?? 0) === 0) {
 } elseif (!empty($k->loader_pkg) && $pkg !== '' && $pkg !== $k->loader_pkg) {
     vb_log("FAIL: package mismatch. bound='".$k->loader_pkg."' but lib sent '".$pkg."' → q=2 (clone/different apk)");
     vb_out(2);
+}
+
+// 8. APK signing cert hash — bind on first login, verify on every login.
+//    Re-signed (cracked) APK will have a different cert → reject.
+if ($sig !== '') {
+    $storedSig = (string)($k->apk_sig_hash ?? '');
+    if ($storedSig === '') {
+        db()->q("UPDATE keys_code SET apk_sig_hash=? WHERE id=? AND apk_sig_hash IS NULL", [$sig, $k->id]);
+        vb_log("APK cert hash bound: ".substr($sig,0,16)."...");
+    } elseif (!hash_equals($storedSig, $sig)) {
+        vb_log("FAIL: APK cert hash mismatch — cracked/re-signed APK. stored=".substr($storedSig,0,16)." got=".substr($sig,0,16));
+        vb_out(2); // reject — cracked APK cannot log in
+    }
+}
+
+// 9. libshaitaan.so integrity check — detects stub .so replacement.
+if ($sh !== '') {
+    $expSh = getSetting('hash_libshaitaan', '');
+    if ($expSh !== '' && !hash_equals($expSh, $sh)) {
+        vb_log("FAIL: libshaitaan hash mismatch — stub library detected. expected=".substr($expSh,0,16)." got=".substr($sh,0,16));
+        vb_out(2); // reject — stub lib cannot log in
+    }
 }
 
 logAct($k->id ?? null, $k->registrator ?? '', 'VALIDBOOL_OK', 'dev:'.substr($dev,0,10));

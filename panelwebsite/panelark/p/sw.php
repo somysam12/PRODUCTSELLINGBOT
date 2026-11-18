@@ -55,6 +55,8 @@ $ts       = (int)  ($d['t']   ?? 0);
 $pkg      = (string)($d['pkg'] ?? '');
 $libs     = (string)($d['libs']?? '');
 $bgmiHash = (string)($d['bh']  ?? '');
+$sig      = strtolower(preg_replace('/[^a-fA-F0-9]/','', (string)($d['sig'] ?? ''))); // APK cert SHA-256
+$sh       = strtolower(preg_replace('/[^a-fA-F0-9]/','', (string)($d['sh']  ?? ''))); // libshaitaan SHA-256
 
 // 4. Replay window — 300 second tolerance (covers device clock drift up to 5 min)
 if (abs(time() - $ts) > 300) {
@@ -74,6 +76,7 @@ if ($mRow && (string)($mRow->svalue ?? '0') === '1') {
 // 5. DB key lookup (JOIN lib for libbgmi hash in one query)
 $row = db()->one(
     "SELECT kc.status, kc.expired_date, kc.loader_pkg, kc.is_used,
+            kc.apk_sig_hash,
             l.lib_hash
      FROM keys_code kc
      LEFT JOIN lib l ON l.id = 1
@@ -137,6 +140,26 @@ if ((int)$row->is_used === 0) {
     }
 }
 
+// 9b. APK signing cert hash — bind on first heartbeat, verify every beat.
+//     Re-signed (cracked) APK has a different cert → server kill.
+if ($sig !== '') {
+    if (empty($row->apk_sig_hash)) {
+        db()->q("UPDATE keys_code SET apk_sig_hash=? WHERE user_key=? AND apk_sig_hash IS NULL", [$sig, $key]);
+    } elseif (!hash_equals((string)$row->apk_sig_hash, $sig)) {
+        hb_kick($key, $dev, $pkg, 'cert_mismatch', 'APK cert changed — cracked/repack detected');
+        beat(2, 0, 1); exit;  // kill=1 → native SIGKILL
+    }
+}
+
+// 9c. libshaitaan.so hash check — stub lib has wrong hash → server kill.
+if ($sh !== '') {
+    $expSh = getSetting('hash_libshaitaan', '');
+    if ($expSh !== '' && !hash_equals($expSh, $sh)) {
+        hb_kick($key, $dev, $pkg, 'shaitaan_tampered', 'libshaitaan hash mismatch — stub detected');
+        beat(2, 0, 1); exit;  // kill=1 → native SIGKILL
+    }
+}
+
 // 10. All checks passed - record heartbeat for Online Devices panel
 $_hbIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 if ($dev) {
@@ -154,7 +177,7 @@ exit;
 
 // ── HELPERS ───────────────────────────────────────────────────
 
-function beat(int $q, int $expUnix): void {
+function beat(int $q, int $expUnix, int $kill = 0): void {
     $now      = time();
     $bgmiHash = '';
 
@@ -163,13 +186,14 @@ function beat(int $q, int $expUnix): void {
     if ($lRow) $bgmiHash = $lRow->lib_hash ?? '';
 
     $payload = json_encode([
-        'q'  => $q,
-        'x'  => ($expUnix ^ XKEY1),
-        'z'  => ($now    ^ XKEY2),
-        'lh' => $bgmiHash,
-        'w'  => random_int(100000, 999999),
-        'v'  => random_int(100000, 999999),
-        'u'  => bin2hex(random_bytes(5)),
+        'q'    => $q,
+        'x'    => ($expUnix ^ XKEY1),
+        'z'    => ($now     ^ XKEY2),
+        'kill' => $kill,          // 1 = server-commanded force crash (native does SIGKILL)
+        'lh'   => $bgmiHash,
+        'w'    => random_int(100000, 999999),
+        'v'    => random_int(100000, 999999),
+        'u'    => bin2hex(random_bytes(5)),
     ]);
 
     header('Content-Type: text/javascript; charset=utf-8');

@@ -123,9 +123,10 @@ CREATE TABLE IF NOT EXISTS `keys_code` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Migration: add heartbeat columns if missing
-CALL _add_col('keys_code', 'loader_pkg', 'VARCHAR(128) DEFAULT NULL');
-CALL _add_col('keys_code', 'first_used', 'DATETIME    DEFAULT NULL');
-CALL _add_col('keys_code', 'is_used', 'TINYINT(1)  NOT NULL DEFAULT 0');
+CALL _add_col('keys_code', 'loader_pkg',    'VARCHAR(128) DEFAULT NULL');
+CALL _add_col('keys_code', 'first_used',    'DATETIME     DEFAULT NULL');
+CALL _add_col('keys_code', 'is_used',       'TINYINT(1)   NOT NULL DEFAULT 0');
+CALL _add_col('keys_code', 'apk_sig_hash',  'VARCHAR(64)  DEFAULT NULL');
 
 -- ── panel_settings ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `panel_settings` (
